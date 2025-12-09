@@ -88,6 +88,6 @@ export function getNextOrderId() {
     return `ORD-700${nextOrderId++}`;
 }
 
-export function getOrderById(orderId: string): Order | undefined {
+export async function getOrderById(orderId: string): Promise<Order | undefined> {
     return orders.find(o => o.id === orderId);
 }
