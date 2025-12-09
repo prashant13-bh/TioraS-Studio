@@ -79,6 +79,7 @@ export default async function Home() {
                 align: 'start',
                 loop: true,
               }}
+              autoplay
               className="w-full"
             >
               <CarouselContent>
