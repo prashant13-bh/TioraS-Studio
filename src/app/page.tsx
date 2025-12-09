@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import Starfield from '@/components/starfield';
@@ -15,9 +17,22 @@ import { ArrowRight, Bot, Palette, Zap } from 'lucide-react';
 import ProductCard from '@/components/product-card';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { useEffect, useState } from 'react';
+import type { Product } from '@/lib/types';
+import Autoplay from "embla-carousel-autoplay"
 
-export default async function Home() {
-  const { products: featuredProducts } = await getProducts({ limit: 6 });
+
+export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    async function loadProducts() {
+        const { products } = await getProducts({ limit: 6 });
+        setFeaturedProducts(products);
+    }
+    loadProducts();
+  }, [])
+
 
   const benefits = [
     {
@@ -79,7 +94,11 @@ export default async function Home() {
                 align: 'start',
                 loop: true,
               }}
-              autoplay
+              plugins={[
+                Autoplay({
+                  delay: 2000,
+                }),
+              ]}
               className="w-full"
             >
               <CarouselContent>
