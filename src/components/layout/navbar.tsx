@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { TiorasLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
+import { CartSheet } from './cart-sheet';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -36,6 +37,7 @@ export function Navbar() {
           <Button variant="ghost" asChild className="hidden text-sm font-medium text-gray-300 transition-colors hover:text-white md:inline-flex">
             <Link href="/admin">Admin</Link>
           </Button>
+          <CartSheet />
           <MobileNav navLinks={navLinks} />
         </div>
       </div>

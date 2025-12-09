@@ -54,7 +54,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
         <section className="relative w-full overflow-hidden" style={{height: '95vh'}}>
@@ -84,7 +84,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-bold border-2 border-gray-600 bg-transparent text-white hover:bg-gray-800 hover:text-white">
-                <Link href="/collections">View Collection</Link>
+                <Link href="/collections">Explore Catalog</Link>
               </Button>
             </div>
           </div>
