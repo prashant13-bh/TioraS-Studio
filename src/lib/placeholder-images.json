@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "A stylish man in a modern urban environment at night.",
+      "imageUrl": "https://images.unsplash.com/photo-1620834767726-61b1986287ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYW4lMjBmYXNoaW9ufGVufDB8fHx8MTc2NTIwNjQ3OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man fashion"
+    },
+    {
+      "id": "collection-1",
+      "description": "Minimalist clothing rack with neutral-toned t-shirts and hoodies.",
+      "imageUrl": "https://images.unsplash.com/photo-1596356453261-0d265ae2520a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjbG90aGluZyUyMGNvbGxlY3Rpb258ZW58MHx8fHwxNzY1Mjg5MTcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "clothing collection"
+    },
+    {
+      "id": "collection-2",
+      "description": "Close up of high-quality fabric texture.",
+      "imageUrl": "https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmYWJyaWMlMjB0ZXh0dXJlfGVufDB8fHx8MTc2NTE3NDQ3NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fabric texture"
+    },
+    {
+      "id": "collection-3",
+      "description": "Man wearing a stylish jacket in a city.",
+      "imageUrl": "https://images.unsplash.com/photo-1675877879221-871aa9f7c314?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYW4lMjBqYWNrZXR8ZW58MHx8fHwxNzY1Mjg5MTcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man jacket"
+    },
+    {
+      "id": "about-us",
+      "description": "A designer's workshop with sketches and fabric samples.",
+      "imageUrl": "https://images.unsplash.com/photo-1576153192621-7a3be10b356e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkZXNpZ24lMjB3b3Jrc2hvcHxlbnwwfHx8fDE3NjUyNDM3MzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "design workshop"
+    }
+  ]
 }

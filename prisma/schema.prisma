@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String
+  price       Float
+  category    String // "T-Shirt" | "Hoodie" | "Jacket" | "Accessories"
+  sizes       String // JSON: ["S", "M", "L", "XL", "XXL"]
+  colors      String // JSON: ["Black", "White", "Navy"]
+  image       String // Image URL
+  isNew       Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Design {
+  id        String   @id @default(uuid())
+  name      String
+  prompt    String?
+  product   String // Product type (e.g., "Hoodie")
+  imageUrl  String // Generated image URL
+  status    String   @default("Draft") // "Draft" | "Reviewing" | "Approved" | "Rejected"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String? // Guest tracking (optional)
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  orderNumber  String      @unique // e.g., "ORD-7001"
+  total        Float
+  status       String      @default("Pending") // "Pending" | "Processing" | "Shipped" | "Delivered"
+  shippingAddr String // JSON string of address object
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  userId       String? // Guest tracking (optional)
+  items        OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  size      String
+  color     String
+  price     Float // Snapshot price at purchase
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
