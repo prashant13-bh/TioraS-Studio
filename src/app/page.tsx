@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -56,7 +57,7 @@ export default function Home() {
     <>
       <Navbar />
       <main className="flex-1">
-        <section className="relative h-screen w-full overflow-hidden">
+        <section className="relative w-full overflow-hidden" style={{height: '95vh'}}>
           <Starfield
             starCount={2000}
             starColor={[245, 158, 11]}
@@ -84,7 +85,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="featured-products" className="flex min-h-screen w-full flex-col justify-center bg-background py-16 md:py-24">
+        <section id="featured-products" className="flex w-full flex-col justify-center bg-background py-16 md:py-24" style={{minHeight: '95vh'}}>
           <div className="container mx-auto px-4">
             <h2 className="mb-12 text-center font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
               Featured Products
@@ -116,7 +117,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="benefits" className="flex min-h-screen w-full flex-col justify-center bg-card py-16 md:py-24">
+        <section id="benefits" className="flex w-full flex-col justify-center bg-card py-16 md:py-24" style={{minHeight: '95vh'}}>
           <div className="container mx-auto px-4">
             <h2 className="mb-12 text-center font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
               Why Choose TioraS?
