@@ -11,14 +11,14 @@ export const metadata = {
       <>
         <Navbar />
         <main className="flex-1">
-          <div className="container mx-auto max-w-4xl px-4 py-16">
+          <div className="container mx-auto max-w-4xl px-4 py-8 md:py-16">
             <header className="mb-8 text-center">
-              <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+              <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
                 Terms of Service
               </h1>
               <p className="mt-2 text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
             </header>
-            <div className="prose prose-lg dark:prose-invert mx-auto">
+            <div className="prose prose-base md:prose-lg dark:prose-invert mx-auto">
               <h2>1. Agreement to Terms</h2>
               <p>
                 By using our website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.

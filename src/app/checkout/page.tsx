@@ -81,7 +81,7 @@ export default function CheckoutPage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <header className="mb-8 text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+            <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
               Checkout
             </h1>
           </header>
@@ -204,13 +204,14 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   {items.map((item) => (
                     <div key={item.id + item.selectedSize + item.selectedColor} className="flex items-center gap-4">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={64}
-                        height={80}
-                        className="rounded-md object-cover"
-                      />
+                      <div className="relative h-20 w-16 flex-shrink-0">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="rounded-md object-cover"
+                        />
+                      </div>
                       <div className="flex-1">
                         <p className="font-semibold">{item.name}</p>
                         <p className="text-sm text-muted-foreground">
@@ -222,15 +223,15 @@ export default function CheckoutPage() {
                   ))}
                 </div>
                 <div className="mt-6 border-t pt-4 space-y-2">
-                  <div className="flex justify-between text-lg">
+                  <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>₹{total.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg">
+                  <div className="flex justify-between">
                     <span>Shipping</span>
                     <span>FREE</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold">
+                  <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span>₹{total.toFixed(2)}</span>
                   </div>

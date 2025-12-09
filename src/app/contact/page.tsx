@@ -18,17 +18,17 @@ export default function ContactPage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <header className="mb-8 text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+            <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
               Contact Us
             </h1>
-            <p className="mt-2 text-lg text-muted-foreground">
+            <p className="mt-2 text-md md:text-lg text-muted-foreground">
               We&apos;re here to help. Reach out with any questions or feedback.
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
             <div>
-                <h2 className="font-headline text-2xl font-bold mb-4">Send us a Message</h2>
+                <h2 className="font-headline text-xl md:text-2xl font-bold mb-4">Send us a Message</h2>
                 <form className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
@@ -52,7 +52,7 @@ export default function ContactPage() {
                 </form>
             </div>
             <div className="space-y-8">
-                 <h2 className="font-headline text-2xl font-bold">Contact Information</h2>
+                 <h2 className="font-headline text-xl md:text-2xl font-bold">Contact Information</h2>
                 <div className='space-y-4'>
                     <div className="flex items-start gap-4">
                         <div className="mt-1 flex-shrink-0">
@@ -60,8 +60,8 @@ export default function ContactPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold">Email</h3>
-                            <p className="text-muted-foreground">For support and inquiries.</p>
-                            <a href="mailto:support@tioras.com" className="text-primary hover:underline">support@tioras.com</a>
+                            <p className="text-sm text-muted-foreground">For support and inquiries.</p>
+                            <a href="mailto:support@tioras.com" className="text-primary hover:underline break-all">support@tioras.com</a>
                         </div>
                     </div>
                      <div className="flex items-start gap-4">
@@ -70,7 +70,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold">Phone</h3>
-                            <p className="text-muted-foreground">Mon-Fri, 9am-5pm IST.</p>
+                            <p className="text-sm text-muted-foreground">Mon-Fri, 9am-5pm IST.</p>
                             <a href="tel:+919876543210" className="text-primary hover:underline">+91 987 654 3210</a>
                         </div>
                     </div>

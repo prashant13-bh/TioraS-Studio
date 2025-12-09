@@ -20,17 +20,17 @@ export default function CollectionsPage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <header className="mb-8 text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+            <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
               Curated Collections
             </h1>
-            <p className="mt-2 text-lg text-muted-foreground">
+            <p className="mt-2 text-md md:text-lg text-muted-foreground max-w-2xl mx-auto">
               Limited edition drops and our most exclusive designs.
             </p>
           </header>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Card className="group relative col-span-1 sm:col-span-2">
-              <div className="relative h-80 w-full overflow-hidden rounded-lg">
+              <div className="relative h-64 sm:h-80 w-full overflow-hidden rounded-lg">
                 <Image
                   src="https://picsum.photos/seed/201/1200/400"
                   alt="Urban Explorer Collection"
@@ -40,9 +40,9 @@ export default function CollectionsPage() {
                 />
                  <div className="absolute inset-0 bg-black/50" />
               </div>
-               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white">
-                    <h2 className="font-headline text-4xl font-bold">Urban Explorer</h2>
-                    <p className="mt-2 text-lg">Technical fabrics for the modern city.</p>
+               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white text-center">
+                    <h2 className="font-headline text-3xl md:text-4xl font-bold">Urban Explorer</h2>
+                    <p className="mt-2 text-md md:text-lg">Technical fabrics for the modern city.</p>
                     <Button asChild className="mt-4" variant="secondary"><Link href="/catalog?category=Jacket">Shop Now</Link></Button>
                 </div>
             </Card>
@@ -76,8 +76,8 @@ export default function CollectionsPage() {
                 />
                  <div className="absolute inset-0 bg-black/50" />
               </div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white">
-                    <h2 className="font-headline text-2xl font-bold">Minimalist</h2>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-white text-center">
+                    <h2 className="font-headline text-xl md:text-2xl font-bold">Minimalist</h2>
                      <Button asChild className="mt-4" variant="secondary"><Link href="/catalog?category=T-Shirt">Shop Tees</Link></Button>
                 </div>
             </Card>

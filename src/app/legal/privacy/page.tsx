@@ -11,14 +11,14 @@ export const metadata = {
       <>
         <Navbar />
         <main className="flex-1">
-          <div className="container mx-auto max-w-4xl px-4 py-16">
+          <div className="container mx-auto max-w-4xl px-4 py-8 md:py-16">
             <header className="mb-8 text-center">
-              <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+              <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
                 Privacy Policy
               </h1>
               <p className="mt-2 text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
             </header>
-            <div className="prose prose-lg dark:prose-invert mx-auto">
+            <div className="prose prose-base md:prose-lg dark:prose-invert mx-auto">
               <h2>Introduction</h2>
               <p>
                 Welcome to TioraS. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect any information that you give us when you use this website.

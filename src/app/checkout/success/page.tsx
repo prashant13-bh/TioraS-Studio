@@ -15,12 +15,12 @@ export default function CheckoutSuccessPage({
       <Navbar />
       <main className="flex-1">
         <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-8">
-          <Card className="w-full max-w-lg text-center">
+          <Card className="w-full max-w-md text-center">
             <CardHeader>
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
                 <CheckCircle className="size-10 text-green-600 dark:text-green-400" />
               </div>
-              <CardTitle className="mt-4 font-headline text-3xl">
+              <CardTitle className="mt-4 font-headline text-2xl md:text-3xl">
                 Order Placed Successfully!
               </CardTitle>
             </CardHeader>
@@ -29,12 +29,12 @@ export default function CheckoutSuccessPage({
                 Thank you for your purchase. A confirmation email has been sent.
               </p>
               {searchParams.orderId && (
-                <p className="mt-4 text-lg">
+                <p className="mt-4 text-md md:text-lg">
                   Your Order ID is:{' '}
-                  <span className="font-bold text-primary">{searchParams.orderId}</span>
+                  <span className="font-bold text-primary break-all">{searchParams.orderId}</span>
                 </p>
               )}
-              <div className="mt-8 flex justify-center gap-4">
+              <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                 <Button asChild>
                   <Link href="/catalog">Continue Shopping</Link>
                 </Button>

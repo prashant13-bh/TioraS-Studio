@@ -82,11 +82,11 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between border-t pt-8 sm:flex-row">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             &copy; {new Date().getFullYear()} TioraS. All rights reserved.
           </p>
-          <div className="mt-4 flex gap-4 sm:mt-0">
+          <div className="flex gap-4">
             {socialLinks.map((link, index) => (
               <Link key={index} href={link.href} className="text-muted-foreground hover:text-primary">
                 {link.icon}

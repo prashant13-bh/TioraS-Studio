@@ -86,9 +86,9 @@ export function DesignForm() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <form ref={formRef} action={formAction} className="space-y-6">
             <div>
               <Label htmlFor="productType" className="font-semibold">Product Type</Label>
@@ -124,15 +124,15 @@ export function DesignForm() {
         </CardContent>
       </Card>
 
-      <Card className="flex flex-col items-center justify-center bg-muted/30 p-6">
+      <Card className="flex flex-col items-center justify-center bg-muted/30 p-6 min-h-[300px] md:min-h-0">
         {state.imageUrl ? (
           <div className="flex w-full flex-col items-center gap-4">
-            <div className="relative aspect-square w-full max-w-md overflow-hidden rounded-lg shadow-lg">
+            <div className="relative aspect-square w-full max-w-sm md:max-w-md overflow-hidden rounded-lg shadow-lg">
                 <Image
                     src={state.imageUrl}
                     alt={state.prompt || 'Generated AI design'}
                     fill
-                    sizes="50vw"
+                    sizes="(max-width: 768px) 90vw, 50vw"
                     className="object-cover"
                 />
             </div>
@@ -141,18 +141,18 @@ export function DesignForm() {
                 placeholder="Enter a name for your design"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full max-w-md"
+                className="w-full max-w-sm md:max-w-md"
             />
-            <div className='flex gap-2'>
-                <Button onClick={handleSave} variant="secondary"><Save className="mr-2 size-4" /> Save</Button>
-                <Button onClick={handleDownload}><Download className="mr-2 size-4" /> Download</Button>
+            <div className='flex flex-col sm:flex-row gap-2 w-full max-w-sm md:max-w-md'>
+                <Button onClick={handleSave} variant="secondary" className="w-full"><Save className="mr-2 size-4" /> Save</Button>
+                <Button onClick={handleDownload} className="w-full"><Download className="mr-2 size-4" /> Download</Button>
             </div>
           </div>
         ) : (
-          <div className="text-center text-muted-foreground">
-            <Bot className="mx-auto mb-4 size-16" />
-            <h3 className="font-headline text-xl font-semibold">Your design will appear here</h3>
-            <p className="mt-1">
+          <div className="text-center text-muted-foreground px-4">
+            <Bot className="mx-auto mb-4 size-12 md:size-16" />
+            <h3 className="font-headline text-lg md:text-xl font-semibold">Your design will appear here</h3>
+            <p className="mt-1 text-sm md:text-base">
               Enter a prompt and click &quot;Generate Design&quot; to begin.
             </p>
           </div>
