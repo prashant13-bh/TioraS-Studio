@@ -8,7 +8,7 @@
       "category": "T-Shirt",
       "sizes": "[\"S\", \"M\", \"L\", \"XL\", \"XXL\"]",
       "colors": "[\"#000000\", \"#FFFFFF\", \"#1E3A8A\"]",
-      "image": "https://picsum.photos/seed/1/600/800",
+      "image": "https://images.unsplash.com/photo-1759572095384-1a7e646d0d4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx0LXNoaXJ0JTIwY2xvdGhpbmd8ZW58MHx8fHwxNzY1MjkxODYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": true,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
@@ -21,7 +21,7 @@
       "category": "Hoodie",
       "sizes": "[\"S\", \"M\", \"L\", \"XL\"]",
       "colors": "[\"#111827\", \"#4B5563\", \"#9CA3AF\"]",
-      "image": "https://picsum.photos/seed/2/600/800",
+      "image": "https://images.unsplash.com/photo-1641377060957-313a7a1e85a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxob29kaWUlMjBjbG90aGluZ3xlbnwwfHx8fDE3NjUyOTE4NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": true,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
@@ -34,7 +34,7 @@
       "category": "Jacket",
       "sizes": "[\"M\", \"L\", \"XL\"]",
       "colors": "[\"#000000\", \"#374151\"]",
-      "image": "https://picsum.photos/seed/3/600/800",
+      "image": "https://images.unsplash.com/photo-1727516299214-c4d54704b045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxqYWNrZXQlMjBjbG90aGluZ3xlbnwwfHx8fDE3NjUyOTE4NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": false,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
@@ -47,7 +47,7 @@
       "category": "Cap",
       "sizes": "[\"One Size\"]",
       "colors": "[\"#FFFFFF\", \"#000000\"]",
-      "image": "https://picsum.photos/seed/4/600/800",
+      "image": "https://images.unsplash.com/photo-1610428028105-8438c01c9569?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYXAlMjBjbG90aGluZ3xlbnwwfHx8fDE3NjUyOTE4NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": true,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
@@ -60,7 +60,7 @@
       "category": "Jacket",
       "sizes": "[\"S\", \"M\", \"L\", \"XL\"]",
       "colors": "[\"#1F2937\", \"#4B5563\"]",
-      "image": "https://picsum.photos/seed/5/600/800",
+      "image": "https://images.unsplash.com/photo-1727515192207-3dc860bfd773?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8amFja2V0JTIwY2xvdGhpbmd8ZW58MHx8fHwxNzY1MjkxODYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": false,
       "createdAt": "2024-01-01T-12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
@@ -73,7 +73,7 @@
       "category": "T-Shirt",
       "sizes": "[\"S\", \"M\", \"L\", \"XL\", \"XXL\"]",
       "colors": "[\"#FFFFFF\", \"#111827\", \"#6B7280\"]",
-      "image": "https://picsum.photos/seed/6/600/800",
+      "image": "https://images.unsplash.com/photo-1696086152513-c74dc1d4b135?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0LXNoaXJ0JTIwY2xvdGhpbmd8ZW58MHx8fHwxNzY1MjkxODYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "isNew": false,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
