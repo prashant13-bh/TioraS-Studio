@@ -74,8 +74,7 @@ export default function Home() {
                 <span className="text-yellow-400" style={{textShadow: '0 0 15px rgba(250, 204, 21, 0.7)'}}>IMAGINATION</span>
             </h1>
             <p className="mt-4 max-w-md sm:max-w-2xl text-md sm:text-lg text-gray-300 md:text-xl">
-              The premium print-on-demand platform for gentlemen.
-              Design custom apparel with TioraS AI.
+              Where artificial intelligence meets artisan craftsmanship. Design your legacy.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" className="font-bold bg-yellow-400 text-black hover:bg-yellow-500">
@@ -84,7 +83,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-bold border-2 border-gray-600 bg-transparent text-white hover:bg-gray-800 hover:text-white">
-                <Link href="/collections">Explore Catalog</Link>
+                <Link href="/collections">View Collection</Link>
               </Button>
             </div>
           </div>
@@ -102,7 +101,7 @@ export default function Home() {
               }}
               plugins={[
                 Autoplay({
-                  delay: 2000,
+                  delay: 5000,
                 }),
               ]}
               className="w-full"

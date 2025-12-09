@@ -56,7 +56,7 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => handleStatusUpdate('Shipped')}
-          disabled={isPending || currentStatus === 'Shipped' || currentStatus === 'Delivered'}
+          disabled={isPending || ['Shipped', 'Delivered'].includes(currentStatus)}
         >
           <Truck className="mr-2 h-4 w-4" />
           Mark as Shipped

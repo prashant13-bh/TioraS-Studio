@@ -36,7 +36,7 @@ export async function createOrderAction(
   items: CartItem[],
   total: number,
   shippingAddr: ShippingAddress
-) {
+): Promise<{ success: boolean; message?: string; orderId?: string }> {
   const validation = createOrderSchema.safeParse({
     items,
     total,
@@ -49,7 +49,7 @@ export async function createOrderAction(
   }
 
   try {
-    const orderNumber = getNextOrderId();
+    const orderNumber = await getNextOrderId();
     const now = new Date().toISOString();
     
     const createdOrder: Order = {
@@ -78,7 +78,7 @@ export async function createOrderAction(
         }))
     };
     
-    addOrder(createdOrder);
+    await addOrder(createdOrder);
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');

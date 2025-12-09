@@ -40,7 +40,7 @@ export function CartSheet() {
             <ScrollArea className="flex-1 pr-4">
               <div className="my-4 divide-y divide-border">
                 {items.map((item) => (
-                  <div key={item.id + item.selectedSize + item.selectedColor} className="flex items-center gap-4 py-4">
+                  <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} className="flex items-center gap-4 py-4">
                     <Image
                       src={item.image}
                       alt={item.name}
