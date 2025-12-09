@@ -76,15 +76,15 @@ export async function updateDesignStatus(designId: string, status: 'Approved' | 
 
 
 // These functions are added to simulate the database
-export function addOrder(order: Order) {
+export async function addOrder(order: Order) {
     orders.push(order);
 }
 
-export function addDesign(design: Design) {
+export async function addDesign(design: Design) {
     designs.push(design);
 }
 
-export function getNextOrderId() {
+export async function getNextOrderId() {
     return `ORD-700${nextOrderId++}`;
 }
 
