@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -9,7 +10,6 @@ import {
   Bell,
   Menu,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -27,7 +27,7 @@ import { TiorasLogo } from '@/components/icons';
 
 const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
-  { href: '/admin/orders', icon: Package, label: 'Orders', badge: 6 },
+  { href: '/admin/orders', icon: Package, label: 'Orders' },
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
