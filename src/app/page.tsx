@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col flex-1">
+      <main className="flex-1">
         <section className="relative h-[80vh] w-full overflow-hidden">
           <Starfield
             starCount={2000}
@@ -136,7 +136,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </div>
+      </main>
       <Footer />
     </>
   );

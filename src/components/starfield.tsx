@@ -79,10 +79,8 @@ const Starfield: React.FC<StarfieldProps> = ({
 
         if (px >= 0 && px < canvas.width && py >= 0 && py < canvas.height) {
           const size = ((1 - star.z / canvas.width) * 5);
-          context.beginPath();
-          context.arc(px, py, size / 2, 0, Math.PI * 2);
           context.fillStyle = `rgba(${r},${g},${b},${1 - star.z/canvas.width})`;
-          context.fill();
+          context.fillRect(px, py, size, size);
         }
       });
       animationFrameId = requestAnimationFrame(render);
