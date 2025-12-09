@@ -46,7 +46,7 @@ const generateCustomDesignFlow = ai.defineFlow(
   async input => {
     const {media} = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: `Generate a design for a ${input.productType} with the following description: ${input.prompt}`,
+      prompt: `A clean, isolated vector design for a ${input.productType} featuring: ${input.prompt}. The design should be on a solid white background, suitable for printing on apparel. The style should be modern, professional, and high-quality. Do not include the apparel item itself in the image, only the design graphic.`,
     });
 
     return {imageUrl: media.url!};
