@@ -19,7 +19,7 @@ const Starfield: React.FC<StarfieldProps> = ({
   speedFactor = 0.05,
   backgroundColor = 'black',
   starColor = [255, 255, 255],
-  starCount = 5000,
+  starCount = 2000,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stars = useRef<Star[]>([]);
@@ -78,7 +78,7 @@ const Starfield: React.FC<StarfieldProps> = ({
         const py = star.y * k + centerY;
 
         if (px >= 0 && px < canvas.width && py >= 0 && py < canvas.height) {
-          const size = ((1 - star.z / canvas.width) * 5);
+          const size = ((1 - star.z / canvas.width) * 2);
           context.fillStyle = `rgba(${r},${g},${b},${1 - star.z/canvas.width})`;
           context.fillRect(px, py, size, size);
         }
