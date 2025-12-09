@@ -74,6 +74,22 @@ export async function updateDesignStatus(designId: string, status: 'Approved' | 
     }
 }
 
+export async function updateOrderStatus(orderId: string, status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered') {
+    try {
+        const orderIndex = orders.findIndex(o => o.id === orderId);
+        if (orderIndex > -1) {
+            orders[orderIndex].status = status;
+            revalidatePath('/admin/orders');
+            revalidatePath('/admin');
+            return { success: true, message: `Order status updated to ${status}` };
+        }
+        return { success: false, message: 'Order not found.' };
+    } catch (error) {
+        console.error(`Failed to update order ${orderId} status:`, error);
+        return { success: false, message: 'Database update failed.' };
+    }
+}
+
 
 // These functions are added to simulate the database
 export async function addOrder(order: Order) {

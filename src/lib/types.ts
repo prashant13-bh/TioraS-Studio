@@ -50,7 +50,7 @@ export type Order = {
     id: string;
     orderNumber: string;
     total: number;
-    status: string;
+    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     shippingAddr: ShippingAddress;
     createdAt: string;
     updatedAt: string;

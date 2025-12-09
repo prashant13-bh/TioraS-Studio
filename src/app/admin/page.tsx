@@ -17,6 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Package, Users, Activity } from 'lucide-react';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
   const data = await getAdminDashboardData();
@@ -104,7 +105,7 @@ export default async function AdminDashboardPage() {
             </TableHeader>
             <TableBody>
               {data.recentOrders.map((order) => (
-                <TableRow key={order.id}>
+                <TableRow key={order.id} className="hover:bg-muted/50">
                   <TableCell>
                     <div className="font-medium">{order.shippingAddr.name}</div>
                     <div className="hidden text-sm text-muted-foreground md:inline">

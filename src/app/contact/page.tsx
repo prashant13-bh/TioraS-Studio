@@ -26,25 +26,25 @@ export default function ContactPage() {
             </p>
           </header>
 
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
             <div>
                 <h2 className="font-headline text-xl md:text-2xl font-bold mb-4">Send us a Message</h2>
                 <form className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
                             <Input id="name" placeholder="Your Name" />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input id="email" type="email" placeholder="your@email.com" />
                         </div>
                     </div>
-                    <div>
+                    <div className="space-y-2">
                         <Label htmlFor="subject">Subject</Label>
                         <Input id="subject" placeholder="Question about an order" />
                     </div>
-                    <div>
+                    <div className="space-y-2">
                         <Label htmlFor="message">Message</Label>
                         <Textarea id="message" placeholder="Your message..." rows={5} />
                     </div>
