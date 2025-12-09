@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview A flow that generates custom clothing designs using Google Gemini Pro.
+ * @fileOverview A flow that generates custom clothing designs.
  *
  * - generateCustomDesign - A function that handles the design generation process.
  * - GenerateCustomDesignInput - The input type for the generateCustomDesign function.
@@ -30,13 +30,6 @@ export async function generateCustomDesign(
   return generateCustomDesignFlow(input);
 }
 
-const generateCustomDesignPrompt = ai.definePrompt({
-  name: 'generateCustomDesignPrompt',
-  input: {schema: GenerateCustomDesignInputSchema},
-  output: {schema: GenerateCustomDesignOutputSchema},
-  prompt: `Generate a design for a {{{productType}}} with the following description: {{{prompt}}}. Return the URL of the generated image.`,
-});
-
 const generateCustomDesignFlow = ai.defineFlow(
   {
     name: 'generateCustomDesignFlow',
@@ -49,6 +42,10 @@ const generateCustomDesignFlow = ai.defineFlow(
       prompt: `A clean, isolated vector design for a ${input.productType} featuring: ${input.prompt}. The design should be on a solid white background, suitable for printing on apparel. The style should be modern, professional, and high-quality. Do not include the apparel item itself in the image, only the design graphic.`,
     });
 
-    return {imageUrl: media.url!};
+    if (!media.url) {
+        throw new Error("Image generation failed to return a URL.");
+    }
+
+    return {imageUrl: media.url};
   }
 );
