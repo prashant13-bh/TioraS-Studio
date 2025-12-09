@@ -96,7 +96,7 @@ export default function AdminLayout({
               <nav className="grid gap-2 text-lg font-medium">
                 <Link
                   href="/"
-                  className="flex items-center gap-2 text-lg font-semibold mb-4"
+                  className="mb-4 flex items-center gap-2 text-lg font-semibold"
                   onClick={() => setIsMobileNavOpen(false)}
                 >
                   <TiorasLogo className="h-6 w-6 text-primary" />
@@ -114,6 +114,21 @@ export default function AdminLayout({
                   </Link>
                 ))}
               </nav>
+              <div className="mt-auto">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Go to Storefront</CardTitle>
+                    <CardDescription>
+                      View the live site as your customers see it.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button size="sm" className="w-full" asChild>
+                      <Link href="/">View Store</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </SheetContent>
           </Sheet>
 

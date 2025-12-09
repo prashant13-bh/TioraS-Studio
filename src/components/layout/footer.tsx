@@ -31,8 +31,8 @@ export function Footer() {
   return (
     <footer className="border-t bg-card text-card-foreground">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
+          <div className="md:col-span-4 lg:col-span-2">
             <Link href="/" className="mb-4 inline-flex items-center gap-2">
               <TiorasLogo className="size-8 text-primary" />
               <span className="font-headline text-2xl font-bold">TioraS</span>
@@ -45,7 +45,7 @@ export function Footer() {
               <Button type="submit">Subscribe</Button>
             </form>
           </div>
-          <div>
+          <div className="col-span-1">
             <h3 className="mb-4 font-headline font-semibold">Shop</h3>
             <ul className="space-y-2">
               {footerLinks.shop.map((link) => (
@@ -57,7 +57,7 @@ export function Footer() {
               ))}
             </ul>
           </div>
-          <div>
+          <div className="col-span-1">
             <h3 className="mb-4 font-headline font-semibold">Company</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
@@ -69,7 +69,7 @@ export function Footer() {
               ))}
             </ul>
           </div>
-          <div>
+          <div className="col-span-1">
             <h3 className="mb-4 font-headline font-semibold">Legal</h3>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
@@ -83,7 +83,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-          <p className="text-sm text-muted-foreground text-center sm:text-left">
+          <p className="text-center text-sm text-muted-foreground sm:text-left">
             &copy; {new Date().getFullYear()} TioraS. All rights reserved.
           </p>
           <div className="flex gap-4">

@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
       <Navbar />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          <Breadcrumb className="mb-8">
+          <Breadcrumb className="mb-4 md:mb-8">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
@@ -81,12 +81,12 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 data-ai-hint={`${product.category.toLowerCase()} clothing`}
               />
               {product.isNew && (
-                <Badge className="absolute left-4 top-4 bg-primary font-bold">New Arrival</Badge>
+                <Badge className="absolute left-4 top-4 font-bold bg-primary">New Arrival</Badge>
               )}
             </div>
 
             <div className="flex flex-col">
-              <h1 className="font-headline text-4xl font-bold tracking-tighter">{product.name}</h1>
+              <h1 className="font-headline text-3xl font-bold tracking-tighter md:text-4xl">{product.name}</h1>
               <p className="mt-2 text-2xl font-semibold text-foreground">₹{product.price.toFixed(2)}</p>
               <p className="mt-4 text-muted-foreground">{product.description}</p>
               

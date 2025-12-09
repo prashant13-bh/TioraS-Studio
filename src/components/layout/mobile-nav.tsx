@@ -31,7 +31,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
         <SheetHeader>
           <Link href="/" className="mb-8 inline-flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <TiorasLogo className="size-8 text-primary" />
-            <span className="font-headline text-2xl font-bold">TioraS</span>
+            <span className="font-headline text-2xl font-bold">TioraS.</span>
           </Link>
         </SheetHeader>
         <nav className="flex flex-col gap-4">
@@ -45,6 +45,13 @@ export function MobileNav({ navLinks }: MobileNavProps) {
               {link.title}
             </Link>
           ))}
+           <Link
+            href="/dashboard"
+            className="text-lg font-medium text-foreground hover:text-primary"
+            onClick={() => setIsOpen(false)}
+          >
+            My Dashboard
+          </Link>
           <Link
             href="/admin"
             className="text-lg font-medium text-foreground hover:text-primary"

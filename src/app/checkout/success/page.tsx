@@ -29,7 +29,7 @@ export default function CheckoutSuccessPage({
                 Thank you for your purchase. A confirmation email has been sent.
               </p>
               {searchParams.orderId && (
-                <p className="mt-4 text-md md:text-lg">
+                <p className="mt-4 text-sm md:text-lg">
                   Your Order ID is:{' '}
                   <span className="font-bold text-primary break-all">{searchParams.orderId}</span>
                 </p>
