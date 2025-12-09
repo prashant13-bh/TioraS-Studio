@@ -65,8 +65,8 @@ export default function Home() {
             backgroundColor="black"
           />
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-white p-4">
-            <h1 className="font-headline text-4xl sm:text-5xl font-bold tracking-tighter md:text-7xl lg:text-8xl">
-              TioraS AI Menswear
+            <h1 className="font-headline text-4xl sm:text-5xl font-bold tracking-tighter md:text-7xl lg:text-8xl text-primary">
+              WEAR YOUR IMAGINATION
             </h1>
             <p className="mt-4 max-w-md sm:max-w-2xl text-md sm:text-lg text-gray-300 md:text-xl">
               Where artificial intelligence meets artisan craftsmanship. Design your
