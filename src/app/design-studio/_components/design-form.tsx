@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { generateDesignAction, saveDesignAction } from '@/app/actions/design-actions';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ function SubmitButton() {
 }
 
 export function DesignForm() {
-  const [state, formAction] = useFormState(generateDesignAction, initialState);
+  const [state, formAction] = useActionState(generateDesignAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [name, setName] = useState('');
