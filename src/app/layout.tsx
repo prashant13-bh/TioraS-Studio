@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
 import { CartProvider } from '@/lib/cart-context';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -34,15 +32,13 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body
         className={cn(
-          'min-h-screen bg-background font-body antialiased',
+          'min-h-screen bg-black font-body antialiased',
           inter.variable,
           spaceGrotesk.variable
         )}
       >
         <CartProvider>
-          <div className="relative flex min-h-screen flex-col">
             {children}
-          </div>
           <Toaster />
         </CartProvider>
       </body>
