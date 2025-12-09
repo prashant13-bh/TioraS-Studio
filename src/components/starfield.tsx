@@ -23,7 +23,6 @@ const Starfield: React.FC<StarfieldProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stars = useRef<Star[]>([]);
-  const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -34,20 +33,23 @@ const Starfield: React.FC<StarfieldProps> = ({
 
     const resizeObserver = new ResizeObserver(() => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.height = canvas.parentElement?.offsetHeight || window.innerHeight;
       stars.current = Array.from({ length: starCount }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: (Math.random() - 0.5) * canvas.width,
+        y: (Math.random() - 0.5) * canvas.height,
         z: Math.random() * canvas.width,
       }));
     });
-    resizeObserver.observe(canvas);
+    if (canvas.parentElement) {
+        resizeObserver.observe(canvas.parentElement);
+    }
+    
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = canvas.parentElement?.offsetHeight || window.innerHeight;
 
     stars.current = Array.from({ length: starCount }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      x: (Math.random() - 0.5) * canvas.width,
+      y: (Math.random() - 0.5) * canvas.height,
       z: Math.random() * canvas.width,
     }));
 
@@ -58,20 +60,16 @@ const Starfield: React.FC<StarfieldProps> = ({
       context.fillRect(0, 0, canvas.width, canvas.height);
 
       const [r, g, b] = starColor;
-      context.fillStyle = `rgba(${r},${g},${b},.7)`;
-
+      
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-
-      const mouseX = mouse.current.x;
-      const mouseY = mouse.current.y;
       
       stars.current.forEach(star => {
         star.z -= speedFactor;
 
         if (star.z <= 0) {
-          star.x = Math.random() * canvas.width;
-          star.y = Math.random() * canvas.height;
+          star.x = (Math.random() - 0.5) * canvas.width;
+          star.y = (Math.random() - 0.5) * canvas.height;
           star.z = canvas.width;
         }
 
@@ -81,7 +79,10 @@ const Starfield: React.FC<StarfieldProps> = ({
 
         if (px >= 0 && px < canvas.width && py >= 0 && py < canvas.height) {
           const size = ((1 - star.z / canvas.width) * 5);
-          context.fillRect(px, py, size, size);
+          context.beginPath();
+          context.arc(px, py, size / 2, 0, Math.PI * 2);
+          context.fillStyle = `rgba(${r},${g},${b},${1 - star.z/canvas.width})`;
+          context.fill();
         }
       });
       animationFrameId = requestAnimationFrame(render);
@@ -89,22 +90,15 @@ const Starfield: React.FC<StarfieldProps> = ({
 
     render();
 
-    const handleMouseMove = (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.current.x = (e.clientX - rect.left) - canvas.width / 2;
-        mouse.current.y = (e.clientY - rect.top) - canvas.height / 2;
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-
     return () => {
       cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (canvas.parentElement) {
+        resizeObserver.unobserve(canvas.parentElement);
+      }
     };
   }, [speedFactor, backgroundColor, starColor, starCount]);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" />;
 };
 
 export default Starfield;
