@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { generateDesignAction, saveDesignAction } from '@/app/actions/design-actions';
 import { Button } from '@/components/ui/button';
