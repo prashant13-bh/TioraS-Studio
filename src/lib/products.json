@@ -1,0 +1,108 @@
+{
+  "products": [
+    {
+      "id": "prod_1",
+      "name": "Tioras Signature Tee",
+      "description": "The quintessential T-shirt. Crafted from ultra-soft pima cotton for a luxury feel and a classic fit. Your canvas for expression.",
+      "price": 2499,
+      "category": "T-Shirt",
+      "sizes": "[\"S\", \"M\", \"L\", \"XL\", \"XXL\"]",
+      "colors": "[\"#000000\", \"#FFFFFF\", \"#1E3A8A\"]",
+      "image": "https://picsum.photos/seed/1/600/800",
+      "isNew": true,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_2",
+      "name": "Aether Hoodie",
+      "description": "A mid-weight hoodie made with our custom fleece-back jersey. Incredibly soft, with a structured drape that holds its shape.",
+      "price": 6999,
+      "category": "Hoodie",
+      "sizes": "[\"S\", \"M\", \"L\", \"XL\"]",
+      "colors": "[\"#111827\", \"#4B5563\", \"#9CA3AF\"]",
+      "image": "https://picsum.photos/seed/2/600/800",
+      "isNew": true,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_3",
+      "name": "Nova Bomber Jacket",
+      "description": "A modern take on the classic bomber. Water-resistant nylon shell with a lightweight insulation for versatile, all-weather wear.",
+      "price": 12999,
+      "category": "Jacket",
+      "sizes": "[\"M\", \"L\", \"XL\"]",
+      "colors": "[\"#000000\", \"#374151\"]",
+      "image": "https://picsum.photos/seed/3/600/800",
+      "isNew": false,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_4",
+      "name": "Zenith Performance Cap",
+      "description": "Lightweight, breathable, and water-repellent. The Zenith cap is designed for motion, with a sleek profile and adjustable strap.",
+      "price": 1999,
+      "category": "Cap",
+      "sizes": "[\"One Size\"]",
+      "colors": "[\"#FFFFFF\", \"#000000\"]",
+      "image": "https://picsum.photos/seed/4/600/800",
+      "isNew": true,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_5",
+      "name": "Apex Utility Jacket",
+      "description": "Built for the urban explorer. A durable, multi-pocket jacket with a relaxed fit and a weather-resistant finish.",
+      "price": 9999,
+      "category": "Jacket",
+      "sizes": "[\"S\", \"M\", \"L\", \"XL\"]",
+      "colors": "[\"#1F2937\", \"#4B5563\"]",
+      "image": "https://picsum.photos/seed/5/600/800",
+      "isNew": false,
+      "createdAt": "2024-01-01T-12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_6",
+      "name": "Origin Long Sleeve",
+      "description": "A versatile layering piece. Made from a breathable, moisture-wicking waffle knit that provides warmth without weight.",
+      "price": 3499,
+      "category": "T-Shirt",
+      "sizes": "[\"S\", \"M\", \"L\", \"XL\", \"XXL\"]",
+      "colors": "[\"#FFFFFF\", \"#111827\", \"#6B7280\"]",
+      "image": "https://picsum.photos/seed/6/600/800",
+      "isNew": false,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "prod_7",
+      "name": "Element Tech Hoodie",
+      "description": "Engineered for performance. This hoodie features a four-way stretch fabric that is both insulating and breathable.",
+      "price": 8999,
+      "category": "Hoodie",
+      "sizes": "[\"S\", \"M\", \"L\"]",
+      "colors": "[\"#1F2937\", \"#9CA3AF\"]",
+      "image": "https://picsum.photos/seed/7/600/800",
+      "isNew": true,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.0Z"
+    },
+    {
+      "id": "prod_8",
+      "name": "Classic Logo Cap",
+      "description": "An everyday essential. The classic six-panel cap made from durable cotton twill, featuring an embroidered Tioras logo.",
+      "price": 1799,
+      "category": "Cap",
+      "sizes": "[\"One Size\"]",
+      "colors": "[\"#000000\", \"#F3F4F6\", \"#BE123C\"]",
+      "image": "https://picsum.photos/seed/8/600/800",
+      "isNew": false,
+      "createdAt": "2024-01-01T12:00:00.000Z",
+      "updatedAt": "2024-01-01T12:00:00.000Z"
+    }
+  ]
+}

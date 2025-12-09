@@ -1,8 +1,16 @@
-import type { Product as PrismaProduct, Order as PrismaOrder, OrderItem as PrismaOrderItem, Design as PrismaDesign } from '@prisma/client';
 
-export type Product = Omit<PrismaProduct, 'sizes' | 'colors'> & {
+export type Product = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
   sizes: string[];
   colors: string[];
+  image: string;
+  isNew: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CartItem = {
@@ -25,16 +33,41 @@ export type ShippingAddress = {
   phone: string;
 };
 
-export type OrderItem = PrismaOrderItem & {
-  product: Product;
+export type OrderItem = {
+    id: string;
+    orderId: string;
+    productId: string;
+    quantity: number;
+    size: string;
+    color: string;
+    price: number;
+    createdAt: string;
+    updatedAt: string;
+    product: Product;
 };
 
-export type Order = Omit<PrismaOrder, 'shippingAddr'> & {
-  items: OrderItem[];
-  shippingAddr: ShippingAddress;
+export type Order = {
+    id: string;
+    orderNumber: string;
+    total: number;
+    status: string;
+    shippingAddr: ShippingAddress;
+    createdAt: string;
+    updatedAt: string;
+    items: OrderItem[];
 };
 
-export type Design = PrismaDesign;
+export type Design = {
+    id: string;
+    name: string;
+    prompt: string;
+    product: string;
+    imageUrl: string;
+    status: 'Draft' | 'Approved' | 'Rejected';
+    createdAt: string;
+    updatedAt: string;
+};
+
 
 export type Category = 'All' | 'T-Shirt' | 'Hoodie' | 'Jacket' | 'Cap';
 

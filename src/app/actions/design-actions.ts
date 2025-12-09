@@ -2,8 +2,9 @@
 
 import { z } from 'zod';
 import { generateCustomDesign as generateCustomDesignFlow } from '@/ai/flows/generate-custom-designs';
-import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { addDesign } from './admin-actions';
+import type { Design } from '@/lib/types';
 
 const generateSchema = z.object({
   prompt: z.string().min(3, 'Prompt must be at least 3 characters long.'),
@@ -74,15 +75,18 @@ export async function saveDesignAction(
     }
 
     try {
-        await prisma.design.create({
-            data: {
-                name,
-                prompt,
-                product: productType,
-                imageUrl,
-                status: 'Draft',
-            },
-        });
+        const newDesign: Design = {
+            id: `des_${Date.now()}`,
+            name,
+            prompt,
+            product: productType,
+            imageUrl,
+            status: 'Draft',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        addDesign(newDesign);
+
         revalidatePath('/admin/reviews');
         revalidatePath('/dashboard');
         return { success: true, message: 'Design saved successfully!' };

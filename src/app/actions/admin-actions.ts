@@ -1,55 +1,27 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import type { AdminDashboardData, Design, Order } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
+// MOCK DATA - In a real app, this would come from a database
+let orders: Order[] = [];
+let designs: Design[] = [];
+let nextOrderId = 1;
+
+
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
-    const totalRevenue = await prisma.order.aggregate({
-      _sum: {
-        total: true,
-      },
-    });
-
-    const totalOrders = await prisma.order.count();
-    const pendingOrders = await prisma.order.count({
-      where: { status: 'Pending' },
-    });
+    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(o => o.status === 'Pending').length;
 
     // Mock active users as it's not implemented
     const activeUsers = 1;
 
-    const recentOrdersData = await prisma.order.findMany({
-      take: 5,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    const recentOrders: Order[] = recentOrdersData.map(order => ({
-      ...order,
-      shippingAddr: JSON.parse(order.shippingAddr),
-      items: order.items.map(item => ({
-        ...item,
-        product: {
-          ...item.product,
-          sizes: JSON.parse(item.product.sizes),
-          colors: JSON.parse(item.product.colors),
-        }
-      }))
-    }));
-
+    const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
     return {
-      totalRevenue: totalRevenue._sum.total || 0,
+      totalRevenue: totalRevenue || 0,
       totalOrders,
       pendingOrders,
       activeUsers,
@@ -70,32 +42,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 
 export async function getAllOrders(): Promise<Order[]> {
   try {
-    const ordersData = await prisma.order.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-     return ordersData.map(order => ({
-      ...order,
-      shippingAddr: JSON.parse(order.shippingAddr),
-      items: order.items.map(item => ({
-        ...item,
-        product: {
-          ...item.product,
-          sizes: JSON.parse(item.product.sizes),
-          colors: JSON.parse(item.product.colors),
-        }
-      }))
-    }));
-
+    return [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error('Failed to fetch all orders:', error);
     return [];
@@ -104,12 +51,7 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function getAllDesigns(): Promise<Design[]> {
     try {
-        const designs = await prisma.design.findMany({
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-        return designs;
+        return [...designs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {
         console.error('Failed to fetch designs:', error);
         return [];
@@ -119,14 +61,33 @@ export async function getAllDesigns(): Promise<Design[]> {
 
 export async function updateDesignStatus(designId: string, status: 'Approved' | 'Rejected') {
     try {
-        await prisma.design.update({
-            where: { id: designId },
-            data: { status },
-        });
-        revalidatePath('/admin/reviews');
-        return { success: true };
+        const designIndex = designs.findIndex(d => d.id === designId);
+        if (designIndex > -1) {
+            designs[designIndex].status = status;
+            revalidatePath('/admin/reviews');
+            return { success: true };
+        }
+        return { success: false, message: 'Design not found.' };
     } catch (error) {
         console.error(`Failed to update design ${designId} status:`, error);
         return { success: false, message: 'Database update failed.' };
     }
+}
+
+
+// These functions are added to simulate the database
+export function addOrder(order: Order) {
+    orders.push(order);
+}
+
+export function addDesign(design: Design) {
+    designs.push(design);
+}
+
+export function getNextOrderId() {
+    return `ORD-700${nextOrderId++}`;
+}
+
+export function getOrderById(orderId: string): Order | undefined {
+    return orders.find(o => o.id === orderId);
 }

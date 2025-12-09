@@ -1,9 +1,10 @@
 'use server';
 
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import type { CartItem, ShippingAddress } from '@/lib/types';
+import type { CartItem, ShippingAddress, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import { addOrder, getNextOrderId } from './admin-actions';
+import { getProductById } from './product-actions';
 
 const orderItemSchema = z.object({
   id: z.string(),
@@ -11,6 +12,8 @@ const orderItemSchema = z.object({
   selectedSize: z.string(),
   selectedColor: z.string(),
   price: z.number(),
+  name: z.string(),
+  image: z.string(),
 });
 
 const shippingAddressSchema = z.object({
@@ -29,21 +32,6 @@ const createOrderSchema = z.object({
   shippingAddr: shippingAddressSchema,
 });
 
-async function getNextOrderNumber() {
-  const lastOrder = await prisma.order.findFirst({
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  if (lastOrder && lastOrder.orderNumber) {
-    const lastNum = parseInt(lastOrder.orderNumber.split('-')[1]);
-    return `ORD-${lastNum + 1}`;
-  }
-
-  return 'ORD-7001';
-}
-
 export async function createOrderAction(
   items: CartItem[],
   total: number,
@@ -61,24 +49,36 @@ export async function createOrderAction(
   }
 
   try {
-    const orderNumber = await getNextOrderNumber();
+    const orderNumber = getNextOrderId();
+    const now = new Date().toISOString();
     
-    const createdOrder = await prisma.order.create({
-      data: {
+    const createdOrder: Order = {
+        id: `ord_${Date.now()}`,
         orderNumber,
         total,
-        shippingAddr: JSON.stringify(shippingAddr),
-        items: {
-          create: items.map((item) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            size: item.selectedSize,
-            color: item.selectedColor,
-            price: item.price,
-          })),
-        },
-      },
-    });
+        shippingAddr: shippingAddr,
+        status: 'Pending',
+        createdAt: now,
+        updatedAt: now,
+        items: await Promise.all(items.map(async (item) => {
+            const product = await getProductById(item.id);
+            if (!product) throw new Error(`Product with id ${item.id} not found`);
+            return {
+                id: `item_${Date.now()}_${item.id}`,
+                orderId: '', // will be set when order is created
+                productId: item.id,
+                quantity: item.quantity,
+                size: item.selectedSize,
+                color: item.selectedColor,
+                price: item.price,
+                createdAt: now,
+                updatedAt: now,
+                product: product,
+            };
+        }))
+    };
+    
+    addOrder(createdOrder);
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');
