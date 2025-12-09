@@ -69,7 +69,7 @@ export default function Home() {
                 <Sparkles className="size-4 text-yellow-400" />
                 New: AI-Powered Embroidery Generation
             </div>
-            <h1 className="font-headline text-4xl sm:text-5xl font-extrabold tracking-tighter md:text-7xl lg:text-8xl">
+            <h1 className="font-headline text-5xl sm:text-6xl font-extrabold tracking-tighter md:text-8xl lg:text-9xl">
                 <span className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">WEAR YOUR</span><br />
                 <span className="text-yellow-400" style={{textShadow: '0 0 15px rgba(250, 204, 21, 0.7)'}}>IMAGINATION</span>
             </h1>
