@@ -1,26 +1,18 @@
 
-import Image from 'next/image';
+
 import Link from 'next/link';
-import Starfield from '@/components/starfield';
 import { Button } from '@/components/ui/button';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { getProducts } from '@/app/actions/product-actions';
 import { ArrowRight, Bot, Palette, Sparkles, Zap } from 'lucide-react';
-import ProductCard from '@/components/product-card';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
-import Autoplay from "embla-carousel-autoplay"
+import { ProductCarousel } from '@/components/product-carousel';
+import Starfield from '@/components/starfield';
 
 
 export default async function Home() {
-  const { products: featuredProducts } = await getProducts({ limit: 8 });
+  const { products: featuredProducts } = await getProducts({ limit: 12 });
 
   const benefits = [
     {
@@ -81,30 +73,7 @@ export default async function Home() {
             <h2 className="mb-12 text-center font-headline text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
               Featured Products
             </h2>
-            <Carousel
-              opts={{
-                align: 'start',
-                loop: true,
-              }}
-              plugins={[
-                Autoplay({
-                  delay: 5000,
-                }),
-              ]}
-              className="w-full"
-            >
-              <CarouselContent>
-                {featuredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
-                    <div className="p-1">
-                      <ProductCard product={product} />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="ml-12 hidden sm:flex" />
-              <CarouselNext className="mr-12 hidden sm:flex" />
-            </Carousel>
+            <ProductCarousel products={featuredProducts} />
           </div>
         </section>
 
