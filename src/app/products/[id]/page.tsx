@@ -1,4 +1,5 @@
 
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,6 +17,7 @@ import ProductCard from '@/components/product-card';
 import { AddToCartForm } from './_components/add-to-cart-form';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { ProductImageGallery } from './_components/product-image-gallery';
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = await getProductById(params.id);
@@ -70,23 +72,15 @@ export default async function ProductPage({ params }: { params: { id: string } }
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-5 md:gap-12">
-            <div className="md:col-span-3 relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-lg">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 60vw"
-                priority
-                data-ai-hint={`${product.category.toLowerCase()} clothing`}
-              />
-              {product.isNew && (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
+            <div className="md:col-span-1">
+               <ProductImageGallery product={product} />
+               {product.isNew && (
                 <Badge className="absolute left-4 top-4 font-bold bg-primary">New Arrival</Badge>
               )}
             </div>
 
-            <div className="md:col-span-2 flex flex-col">
+            <div className="md:col-span-1 flex flex-col">
               <h1 className="font-headline text-2xl font-bold tracking-tighter md:text-3xl lg:text-4xl">{product.name}</h1>
               <p className="mt-2 text-xl font-semibold text-foreground md:text-2xl">₹{product.price.toFixed(2)}</p>
               <p className="mt-4 text-muted-foreground">{product.description}</p>

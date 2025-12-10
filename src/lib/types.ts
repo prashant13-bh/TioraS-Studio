@@ -7,7 +7,7 @@ export type Product = {
   category: string;
   sizes: string[];
   colors: string[];
-  image: string;
+  images: string[];
   isNew: boolean;
   createdAt: string;
   updatedAt: string;

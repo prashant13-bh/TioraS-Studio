@@ -27,7 +27,7 @@ export function AddToCartForm({ product }: { product: Product }) {
     addToCart({
       id: product.id,
       name: product.name,
-      image: product.image,
+      image: product.images[0],
       price: product.price,
       selectedSize,
       selectedColor,

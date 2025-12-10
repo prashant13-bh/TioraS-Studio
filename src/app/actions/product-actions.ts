@@ -1,3 +1,4 @@
+
 'use server';
 
 import type { Product } from '@/lib/types';
@@ -14,7 +15,8 @@ export async function getProducts({
     let products: Product[] = productsData.products.map(p => ({
         ...p,
         sizes: JSON.parse(p.sizes as any),
-        colors: JSON.parse(p.colors as any)
+        colors: JSON.parse(p.colors as any),
+        images: JSON.parse(p.images as any),
     }));
 
     if (category && category !== 'All') {
@@ -44,6 +46,7 @@ export async function getProductById(id: string): Promise<Product | null> {
       ...product,
       sizes: JSON.parse(product.sizes as any),
       colors: JSON.parse(product.colors as any),
+      images: JSON.parse(product.images as any),
     };
   } catch (error) {
     console.error(`Failed to fetch product with id ${id}:`, error);
