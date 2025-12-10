@@ -69,14 +69,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
-            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-lg">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-5 lg:gap-12">
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-lg md:col-span-3">
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, 60vw"
                 priority
                 data-ai-hint={`${product.category.toLowerCase()} clothing`}
               />
@@ -85,9 +85,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
               )}
             </div>
 
-            <div className="flex flex-col">
-              <h1 className="font-headline text-3xl font-bold tracking-tighter md:text-4xl">{product.name}</h1>
-              <p className="mt-2 text-2xl font-semibold text-foreground">₹{product.price.toFixed(2)}</p>
+            <div className="flex flex-col md:col-span-2">
+              <h1 className="font-headline text-2xl font-bold tracking-tighter md:text-3xl lg:text-4xl">{product.name}</h1>
+              <p className="mt-2 text-xl font-semibold text-foreground md:text-2xl">₹{product.price.toFixed(2)}</p>
               <p className="mt-4 text-muted-foreground">{product.description}</p>
               
               <div className="mt-auto pt-8">
@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
           {filteredRelatedProducts.length > 0 && (
             <div className="mt-16 md:mt-24">
-              <h2 className="mb-8 text-center font-headline text-3xl font-bold tracking-tighter">Related Products</h2>
+              <h2 className="mb-8 text-center font-headline text-2xl font-bold tracking-tighter md:text-3xl">Related Products</h2>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {filteredRelatedProducts.map((relatedProduct) => (
                   <ProductCard key={relatedProduct.id} product={relatedProduct} />
