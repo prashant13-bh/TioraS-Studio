@@ -60,7 +60,7 @@ export function DesignForm() {
         variant: 'destructive',
       });
     }
-  }, [state, toast]);
+  }, [state.message, state.imageUrl, state.errors, toast]);
   
   const handleSave = async () => {
     if (state.imageUrl && state.prompt && state.productType) {

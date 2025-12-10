@@ -70,7 +70,7 @@ export default async function AdminOrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {format(new Date(order.createdAt), 'dd/MM/yyyy')}
+                    {format(new Date(order.createdAt), 'MM/dd/yyyy')}
                   </TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
@@ -80,7 +80,7 @@ export default async function AdminOrdersPage() {
                   </TableCell>
                   <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>
-                    <OrderActions orderId={order.id} currentStatus={order.status as any} />
+                    <OrderActions orderId={order.id} currentStatus={order.status} />
                   </TableCell>
                 </TableRow>
               ))}
