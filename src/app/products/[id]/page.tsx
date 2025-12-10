@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -69,14 +70,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-5 lg:gap-12">
-            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-lg md:col-span-3">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg shadow-lg">
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 60vw"
+                sizes="(max-width: 768px) 100vw, 50vw"
                 priority
                 data-ai-hint={`${product.category.toLowerCase()} clothing`}
               />
@@ -85,7 +86,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
               )}
             </div>
 
-            <div className="flex flex-col md:col-span-2">
+            <div className="flex flex-col">
               <h1 className="font-headline text-2xl font-bold tracking-tighter md:text-3xl lg:text-4xl">{product.name}</h1>
               <p className="mt-2 text-xl font-semibold text-foreground md:text-2xl">₹{product.price.toFixed(2)}</p>
               <p className="mt-4 text-muted-foreground">{product.description}</p>
