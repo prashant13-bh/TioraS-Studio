@@ -28,7 +28,7 @@ export default function Home() {
 
   useEffect(() => {
     async function loadProducts() {
-        const { products } = await getProducts({ limit: 6 });
+        const { products } = await getProducts({ limit: 8 });
         setFeaturedProducts(products);
     }
     loadProducts();
@@ -57,7 +57,7 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
-        <section className="relative w-full overflow-hidden" style={{height: 'calc(100vh - 4rem)'}}>
+        <section className="relative w-full overflow-hidden" style={{height: 'calc(100vh - 8rem)'}}>
           <Starfield
             starCount={2000}
             starColor={[255, 255, 255]}
@@ -69,7 +69,7 @@ export default function Home() {
                 <Sparkles className="size-4 text-yellow-400" />
                 New: AI-Powered Embroidery Generation
             </div>
-            <h1 className="font-headline text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-8xl lg:text-9xl">
+            <h1 className="font-headline text-5xl font-extrabold tracking-tighter sm:text-7xl md:text-8xl lg:text-9xl">
                 <span className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">WEAR YOUR</span><br />
                 <span className="text-yellow-400" style={{textShadow: '0 0 15px rgba(250, 204, 21, 0.7)'}}>IMAGINATION</span>
             </h1>
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="featured-products" className="flex w-full flex-col justify-center bg-background py-16 md:py-24" style={{minHeight: 'calc(100vh - 4rem)'}}>
+        <section id="featured-products" className="flex w-full flex-col justify-center bg-background py-16 md:py-24" style={{minHeight: 'calc(100vh - 8rem)'}}>
           <div className="container mx-auto px-4">
             <h2 className="mb-12 text-center font-headline text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
               Featured Products
@@ -108,7 +108,7 @@ export default function Home() {
             >
               <CarouselContent>
                 {featuredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="sm:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                     <div className="p-1">
                       <ProductCard product={product} />
                     </div>
@@ -121,7 +121,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="benefits" className="flex w-full flex-col justify-center bg-card py-16 md:py-24" style={{minHeight: 'calc(100vh - 4rem)'}}>
+        <section id="benefits" className="flex w-full flex-col justify-center bg-card py-16 md:py-24" style={{minHeight: 'calc(100vh - 8rem)'}}>
           <div className="container mx-auto px-4">
             <h2 className="mb-12 text-center font-headline text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
               Why Choose TioraS?

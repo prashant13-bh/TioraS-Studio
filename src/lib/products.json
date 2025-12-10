@@ -86,7 +86,7 @@
       "category": "Hoodie",
       "sizes": "[\"S\", \"M\", \"L\"]",
       "colors": "[\"#1F2937\", \"#9CA3AF\"]",
-      "image": "https://picsum.photos/seed/7/600/800",
+      "image": "https://images.unsplash.com/photo-1556156024-8a50f000c862?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "isNew": true,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.0Z"
@@ -99,7 +99,7 @@
       "category": "Cap",
       "sizes": "[\"One Size\"]",
       "colors": "[\"#000000\", \"#F3F4F6\", \"#BE123C\"]",
-      "image": "https://picsum.photos/seed/8/600/800",
+      "image": "https://images.unsplash.com/photo-1521369909019-b9f843525513?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "isNew": false,
       "createdAt": "2024-01-01T12:00:00.000Z",
       "updatedAt": "2024-01-01T12:00:00.000Z"
