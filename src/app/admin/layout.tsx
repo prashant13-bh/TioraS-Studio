@@ -33,7 +33,7 @@ const navItems = [
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
-const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
+export const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export default function AdminLayout({
   children,

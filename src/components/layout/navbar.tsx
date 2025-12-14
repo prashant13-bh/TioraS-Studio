@@ -9,6 +9,7 @@ import { User, LogOut, Shield } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
+import { ADMIN_EMAILS } from '@/app/admin/layout';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -16,8 +17,6 @@ const navLinks = [
   { title: 'Collections', href: '/collections' },
   { title: 'Our Story', href: '/about' },
 ];
-
-const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export function Navbar() {
   const { user, loading } = useUser();

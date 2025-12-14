@@ -15,12 +15,11 @@ import { TiorasLogo } from '@/components/icons';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
+import { ADMIN_EMAILS } from '@/app/admin/layout';
 
 interface MobileNavProps {
   navLinks: { title: string; href: string }[];
 }
-
-const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export function MobileNav({ navLinks }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);

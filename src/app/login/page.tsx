@@ -21,8 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
-const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
+import { ADMIN_EMAILS } from '../admin/layout';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
