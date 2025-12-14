@@ -28,6 +28,13 @@ export const metadata = {
 export default async function AdminUsersPage() {
     const users: UserProfile[] = await getAllUsers();
   
+    const getProviderName = (providerId?: string) => {
+        if (!providerId) return 'Email/Pass';
+        if (providerId.includes('google')) return 'Google';
+        if (providerId.includes('phone')) return 'Phone';
+        return providerId;
+    }
+
     return (
       <Card>
         <CardHeader>
@@ -66,7 +73,7 @@ export default async function AdminUsersPage() {
                       {user.createdAt ? format(new Date(user.createdAt), 'MM/dd/yyyy') : 'N/A'}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                        {user.providerId && <Badge variant="outline">{user.providerId}</Badge>}
+                        <Badge variant="outline">{getProviderName(user.providerId)}</Badge>
                     </TableCell>
                     <TableCell>
                       {/* Placeholder for future actions */}
