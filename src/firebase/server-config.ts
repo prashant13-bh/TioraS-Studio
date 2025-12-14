@@ -5,16 +5,17 @@ import { firebaseConfig } from './config';
 
 let adminApp: App;
 
-if (getApps().length === 0) {
+if (!getApps().length) {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    adminApp = initializeApp({ credential: cert(serviceAccount) });
-  } else {
-    // This is a fallback for environments where the service account isn't set,
-    // but the app might be running in a Google Cloud environment where credentials
-    // are automatically discovered.
     adminApp = initializeApp({
-       projectId: firebaseConfig.projectId,
+      credential: cert(serviceAccount),
+    });
+  } else {
+    // This fallback is for environments like Google Cloud Run where credentials are auto-discovered.
+    // It's less reliable for local development without specific setup.
+    adminApp = initializeApp({
+      projectId: firebaseConfig.projectId,
     });
   }
 } else {
