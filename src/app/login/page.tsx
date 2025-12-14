@@ -1,3 +1,4 @@
+
 'use client';
 
 import { GoogleIcon, TiorasLogo } from '@/components/icons';
@@ -21,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,7 +33,7 @@ export default function LoginPage() {
   const { toast } = useToast();
 
   const handleRedirect = (user: any) => {
-    if (user?.email === ADMIN_EMAIL) {
+    if (user?.email && ADMIN_EMAILS.includes(user.email)) {
       router.push('/admin');
     } else {
       router.push('/dashboard');

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -19,7 +20,7 @@ interface MobileNavProps {
   navLinks: { title: string; href: string }[];
 }
 
-const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export function MobileNav({ navLinks }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
     }
   };
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

@@ -33,7 +33,7 @@ const navItems = [
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
-const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export default function AdminLayout({
   children,
@@ -45,12 +45,12 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
+    if (!loading && (!user || !user.email || !ADMIN_EMAILS.includes(user.email))) {
       router.replace('/');
     }
   }, [user, loading, router]);
 
-  if (loading || !user || user.email !== ADMIN_EMAIL) {
+  if (loading || !user || !user.email || !ADMIN_EMAILS.includes(user.email)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p>Loading...</p>

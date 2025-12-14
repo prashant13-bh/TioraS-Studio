@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -16,7 +17,7 @@ const navLinks = [
   { title: 'Our Story', href: '/about' },
 ];
 
-const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+const ADMIN_EMAILS = ['tyoras9686@gmail.com', 'ph293815@gmail.com'];
 
 export function Navbar() {
   const { user, loading } = useUser();
@@ -30,7 +31,7 @@ export function Navbar() {
     }
   };
   
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
