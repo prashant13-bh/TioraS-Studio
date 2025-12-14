@@ -106,48 +106,6 @@ export default function AdminLayout({
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-               <nav className="grid gap-6 text-lg font-medium">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-2 text-lg font-semibold"
-                    onClick={() => setIsMobileNavOpen(false)}
-                  >
-                    <TiorasLogo className="size-6 text-primary" />
-                    <span className="sr-only">TioraS Admin</span>
-                  </Link>
-                  {navItems.map(({ href, icon: Icon, label }) => (
-                    <Link
-                      key={label}
-                      href={href}
-                      className="text-muted-foreground hover:text-foreground"
-                       onClick={() => setIsMobileNavOpen(false)}
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </nav>
-            </SheetContent>
-          </Sheet>
-          <div className="w-full flex-1 text-right">
-             <Button variant="ghost" size="icon">
-                <Bell className="size-5" />
-                <span className="sr-only">Toggle notifications</span>
-             </Button>
-          </div>
-        </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
           {children}
         </main>
