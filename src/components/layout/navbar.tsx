@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 import { CartSheet } from './cart-sheet';
-import { User, LogOut, Shield } from 'lucide-react';
+import { User, LogOut, Shield, Bell } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
@@ -80,6 +80,10 @@ export function Navbar() {
               </>
             ))}
 
+          <Button variant="ghost" size="icon">
+            <Bell className="size-5" />
+            <span className="sr-only">Notifications</span>
+          </Button>
           <CartSheet />
           <MobileNav navLinks={navLinks} />
         </div>
