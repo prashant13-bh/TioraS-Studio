@@ -1,4 +1,5 @@
 
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,6 +8,8 @@ import Image from 'next/image';
 import { getUserDashboardData } from '@/app/actions/user-actions';
 import { format } from 'date-fns';
 import { getMockDashboardData } from '@/lib/mock-data';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth/server-auth';
 
 export const metadata = {
   title: 'My Dashboard | TioraS',
@@ -14,8 +17,12 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-    // Reverted to mock data to fix bug
-    const { savedDesigns, orderHistory } = getMockDashboardData();
+    const user = await getCurrentUser();
+    if (!user) {
+        redirect('/login?redirect=/dashboard');
+    }
+    
+    const { savedDesigns, orderHistory } = await getUserDashboardData();
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -40,7 +47,7 @@ export default async function DashboardPage() {
           My Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-            Welcome back! Here are your designs and recent orders.
+            Welcome back, {user.name || 'designer'}! Here are your creations and recent orders.
         </p>
       </header>
       
@@ -102,7 +109,7 @@ export default async function DashboardPage() {
                             {orderHistory.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                                <TableCell>{format(new Date(order.date), 'PPP')}</TableCell>
+                                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
                                 <TableCell>
                                 <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                                 </TableCell>
