@@ -42,7 +42,9 @@ export type OrderItem = {
     size: string;
     color: string;
     price: number;
-    product: Product;
+    // Denormalized fields for easier display
+    name: string;
+    image: string;
 };
 
 export type Order = {

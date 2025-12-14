@@ -74,16 +74,10 @@ export async function createOrderAction(
 
     await newOrderRef.set(orderData);
 
-    // In a real app, you would fetch product details from the DB
-    // For now, we continue to use the cart item details
-    // Firestore doesn't directly store the nested 'items' array on the Order doc
-    // in this model. The UI will fetch them from the subcollection.
-    // However, for admin panel quick views or other purposes, it could be useful
-    // to denormalize some item data if needed, but we will rely on subcollections.
-    
     const orderItemsBatch = firestore.batch();
     items.forEach(item => {
-        const orderItemRef = newOrderRef.collection('orderItems').doc(); // Auto-generate ID for each item
+        const orderItemRef = newOrderRef.collection('orderItems').doc();
+        // Simplified OrderItem, referencing product by ID instead of nesting the object
         const orderItem: Omit<OrderItem, 'id'> = {
             orderId: newOrderRef.id,
             productId: item.id,
@@ -91,18 +85,8 @@ export async function createOrderAction(
             size: item.selectedSize,
             color: item.selectedColor,
             price: item.price, // Price at time of purchase
-            product: { 
-                ...item, 
-                id: item.id,
-                description: '', 
-                category: '', 
-                sizes: [], 
-                colors: [], 
-                images: [item.image], 
-                isNew: false, 
-                createdAt: now, 
-                updatedAt: now 
-            }
+            name: item.name, // Denormalize for easier display
+            image: item.image, // Denormalize for easier display
         };
         orderItemsBatch.set(orderItemRef, orderItem);
     });
