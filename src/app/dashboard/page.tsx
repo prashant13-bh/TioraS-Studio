@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { getUserDashboardData } from '@/app/actions/user-actions';
 import { format } from 'date-fns';
-import { getMockDashboardData } from '@/lib/mock-data';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/server-auth';
 
