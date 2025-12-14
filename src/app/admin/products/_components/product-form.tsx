@@ -138,7 +138,7 @@ export function ProductForm({ product }: ProductFormProps) {
                         <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                            <Textarea placeholder="Describe the product..." {...field} />
+                            <Textarea rows={5} placeholder="Describe the product details, materials, and fit." {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -151,9 +151,9 @@ export function ProductForm({ product }: ProductFormProps) {
                         <FormItem>
                         <FormLabel>Image URLs</FormLabel>
                         <FormControl>
-                            <Textarea placeholder="Enter comma-separated image URLs" {...field} />
+                            <Textarea rows={5} placeholder="Enter one image URL per line." {...field} />
                         </FormControl>
-                        <FormDescription>The first image will be the main display image.</FormDescription>
+                        <FormDescription>The first image in the list will be the main display image for the product.</FormDescription>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -246,7 +246,7 @@ export function ProductForm({ product }: ProductFormProps) {
                     />
             </div>
         </div>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} size="lg">
           {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
           {product ? 'Save Changes' : 'Create Product'}
         </Button>
