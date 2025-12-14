@@ -1,3 +1,4 @@
+
 'use client';
 
 import { TiorasLogo } from '@/components/icons';
@@ -17,11 +18,11 @@ import { useState } from 'react';
 import { useAuth } from '@/firebase';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const { auth } = useAuth();
+  const { auth, isLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -74,12 +75,13 @@ export default function ForgotPasswordPage() {
               placeholder="m@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading || isSubmitting}
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full" onClick={handlePasswordReset} disabled={isSubmitting}>
-            {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+          <Button className="w-full" onClick={handlePasswordReset} disabled={isLoading || isSubmitting}>
+            {isSubmitting ? <><Loader2 className="mr-2 size-4 animate-spin"/> Sending...</> : 'Send Reset Link'}
           </Button>
           <Button variant="outline" className="w-full" asChild>
             <Link href="/login">

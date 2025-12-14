@@ -15,11 +15,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Eye, EyeOff, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { ADMIN_EMAILS } from '../admin/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,9 +29,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { auth } = useAuth();
+  const { auth, isLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRedirect = (user: any) => {
     if (user?.email && ADMIN_EMAILS.includes(user.email)) {
@@ -50,6 +51,7 @@ export default function LoginPage() {
       });
       return;
     }
+    setIsSubmitting(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast({ title: 'Success', description: "You've been signed in." });
@@ -60,6 +62,8 @@ export default function LoginPage() {
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -72,6 +76,7 @@ export default function LoginPage() {
       });
       return;
     }
+    setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -83,6 +88,8 @@ export default function LoginPage() {
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -114,6 +121,7 @@ export default function LoginPage() {
                   placeholder="m@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading || isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -132,6 +140,7 @@ export default function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading || isSubmitting}
                   />
                   <Button
                     type="button"
@@ -151,8 +160,8 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-              <Button className="w-full" onClick={handleLogin}>
-                Sign In
+              <Button className="w-full" onClick={handleLogin} disabled={isLoading || isSubmitting}>
+                {isSubmitting ? <><Loader2 className="mr-2 size-4 animate-spin"/> Signing in...</> : 'Sign In'}
               </Button>
             </TabsContent>
             <TabsContent value="phone">
@@ -164,7 +173,8 @@ export default function LoginPage() {
             <Separator />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
             <GoogleIcon className="mr-2 size-5" />
             Sign In with Google
           </Button>

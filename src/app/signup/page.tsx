@@ -19,7 +19,7 @@ import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Eye, EyeOff, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
@@ -29,9 +29,10 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { auth } = useAuth();
+  const { auth, isLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRedirect = () => {
     router.push('/dashboard');
@@ -46,6 +47,7 @@ export default function SignupPage() {
       });
       return;
     }
+    setIsSubmitting(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
@@ -59,6 +61,8 @@ export default function SignupPage() {
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -71,6 +75,7 @@ export default function SignupPage() {
       });
       return;
     }
+    setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -82,6 +87,8 @@ export default function SignupPage() {
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -113,6 +120,7 @@ export default function SignupPage() {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    disabled={isLoading || isSubmitting}
                     />
                 </div>
                 <div className="space-y-2">
@@ -123,6 +131,7 @@ export default function SignupPage() {
                     placeholder="m@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading || isSubmitting}
                     />
                 </div>
                 <div className="space-y-2">
@@ -133,6 +142,7 @@ export default function SignupPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading || isSubmitting}
                     />
                     <Button
                         type="button"
@@ -152,8 +162,8 @@ export default function SignupPage() {
                     </Button>
                     </div>
                 </div>
-                <Button className="w-full" onClick={handleSignUp}>
-                    Sign Up
+                <Button className="w-full" onClick={handleSignUp} disabled={isLoading || isSubmitting}>
+                  {isSubmitting ? <><Loader2 className="mr-2 size-4 animate-spin"/> Signing up...</> : 'Sign Up'}
                 </Button>
             </TabsContent>
              <TabsContent value="phone">
@@ -165,7 +175,8 @@ export default function SignupPage() {
             <Separator />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
+             {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
             <GoogleIcon className="mr-2 size-5" />
             Sign Up with Google
           </Button>
@@ -187,7 +198,7 @@ export default function SignupPage() {
             </Link>
           </p>
         </CardFooter>
-      </Card>
+      </div>
       <div id="recaptcha-container"></div>
     </div>
   );
