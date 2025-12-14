@@ -3,7 +3,7 @@
 
 import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
-import { getFirebaseAdmin } from '@/firebase/server-config';
+import { customAlphabet } from 'nanoid';
 
 // MOCK DATA - In a real app, this would come from a database
 let designs: Design[] = [
@@ -12,22 +12,27 @@ let designs: Design[] = [
     { id: 'des_3', name: 'Abstract Geometry', prompt: 'a minimalist design with geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Rejected', createdAt: '2024-07-26T09:00:00Z', updatedAt: '2024-07-26T09:00:00Z' },
 ];
 
+let orders: Order[] = [
+    { id: 'ord_7001', userId: 'user_1', orderNumber: 'ORD-7001', total: 12999.00, status: 'Delivered', shippingAddr: { name: 'Alice Johnson', email: 'alice@example.com', address: '123 Tech Avenue', city: 'Deville', state: 'CA', zip: '90210', phone: '111-222-3333'}, createdAt: '2024-07-28T10:00:00Z', updatedAt: '2024-07-28T10:00:00Z', items: [], itemCount: 1 },
+    { id: 'ord_7002', userId: 'user_2', orderNumber: 'ORD-7002', total: 6999.00, status: 'Shipped', shippingAddr: { name: 'Bob Williams', email: 'bob@example.com', address: '456 Code Lane', city: 'Binary Beach', state: 'FL', zip: '33101', phone: '444-555-6666'}, createdAt: '2024-07-29T11:30:00Z', updatedAt: '2024-07-29T11:30:00Z', items: [], itemCount: 1 },
+    { id: 'ord_7003', userId: 'user_1', orderNumber: 'ORD-7003', total: 2499.00, status: 'Processing', shippingAddr: { name: 'Alice Johnson', email: 'alice@example.com', address: '123 Tech Avenue', city: 'Deville', state: 'CA', zip: '90210', phone: '111-222-3333'}, createdAt: '2024-07-30T14:00:00Z', updatedAt: '2024-07-30T14:00:00Z', items: [], itemCount: 1 },
+    { id: 'ord_7004', userId: 'user_3', orderNumber: 'ORD-7004', total: 1999.00, status: 'Pending', shippingAddr: { name: 'Charlie Brown', email: 'charlie@example.com', address: '789 Logic Blvd', city: 'Data Point', state: 'TX', zip: '75001', phone: '777-888-9999'}, createdAt: '2024-07-31T09:00:00Z', updatedAt: '2024-07-31T09:00:00Z', items: [], itemCount: 1 },
+    { id: 'ord_7005', userId: 'user_2', orderNumber: 'ORD-7005', total: 8998.00, status: 'Pending', shippingAddr: { name: 'Bob Williams', email: 'bob@example.com', address: '456 Code Lane', city: 'Binary Beach', state: 'FL', zip: '33101', phone: '444-555-6666'}, createdAt: '2024-07-31T16:20:00Z', updatedAt: '2024-07-31T16:20:00Z', items: [], itemCount: 2 },
+];
+
+
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
-    const { firestore } = getFirebaseAdmin();
+    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => order.status === 'Pending').length;
     
-    // Fetch all orders
-    const allOrders: Order[] = await getAllOrders();
-    
-    const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
-    const totalOrders = allOrders.length;
-    const pendingOrders = allOrders.filter(order => order.status === 'Pending').length;
-    
-    // Fetch active users count
-    const usersSnapshot = await firestore.collection('users').get();
-    const activeUsers = usersSnapshot.size;
+    // Using a Set to count unique userIds
+    const activeUsers = new Set(orders.map(order => order.userId)).size;
 
-    const recentOrders = allOrders.slice(0, 5); // getAllOrders already sorts by date
+    const recentOrders = [...orders]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
 
     return {
       totalRevenue,
@@ -37,8 +42,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       recentOrders,
     };
   } catch (error) {
-    console.error('Failed to fetch admin dashboard data from Firestore:', error);
-    // Return a default state on error to prevent crashing the page
+    console.error('Failed to fetch admin dashboard data from mock data:', error);
     return {
       totalRevenue: 0,
       totalOrders: 0,
@@ -51,28 +55,9 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 
 export async function getAllOrders(): Promise<Order[]> {
   try {
-    const { firestore } = getFirebaseAdmin();
-    const allOrders: Order[] = [];
-    
-    const usersSnapshot = await firestore.collection('users').get();
-    
-    for (const userDoc of usersSnapshot.docs) {
-      const ordersSnapshot = await userDoc.ref.collection('orders').get();
-      ordersSnapshot.forEach(orderDoc => {
-        const orderData = orderDoc.data();
-        allOrders.push({
-          ...orderData,
-          id: orderDoc.id,
-          items: orderData.items || [],
-          itemCount: orderData.items?.length || 0,
-        } as Order);
-      });
-    }
-
-    return allOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
+    return [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
-    console.error('Failed to fetch all orders from Firestore:', error);
+    console.error('Failed to fetch all orders from mock data:', error);
     return [];
   }
 }
@@ -104,12 +89,14 @@ export async function updateDesignStatus(designId: string, status: 'Approved' | 
 
 export async function updateOrderStatus(orderId: string, status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered') {
     try {
-       // This needs to be updated to work with the new data structure.
-       // For now, we return a success to avoid breaking the UI.
-       console.log(`Simulating update for order ${orderId} to status ${status}`);
-       revalidatePath('/admin/orders');
-       revalidatePath('/admin');
-       return { success: true, message: `Order status updated to ${status}` };
+        const orderIndex = orders.findIndex(o => o.id === orderId);
+        if (orderIndex > -1) {
+            orders[orderIndex].status = status;
+            revalidatePath('/admin/orders');
+            revalidatePath('/admin');
+            return { success: true, message: `Order status updated to ${status}` };
+        }
+        return { success: false, message: 'Order not found.' };
     } catch (error) {
         console.error(`Failed to update order ${orderId} status:`, error);
         return { success: false, message: 'Database update failed.' };
@@ -122,7 +109,21 @@ export async function addDesign(design: Design) {
     designs.push(design);
 }
 
+const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
+
+export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>) {
+    const now = new Date().toISOString();
+    const newOrder: Order = {
+        ...order,
+        id: `ord_${Date.now()}`,
+        orderNumber: `ORD-${nanoid()}`,
+        createdAt: now,
+        updatedAt: now,
+    };
+    orders.push(newOrder);
+    return newOrder;
+}
+
 export async function getOrderById(orderId: string): Promise<Order | undefined> {
-    const allOrders = await getAllOrders();
-    return allOrders.find(o => o.id === orderId);
+    return orders.find(o => o.id === orderId);
 }
