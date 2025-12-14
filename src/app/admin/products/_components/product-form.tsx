@@ -32,6 +32,7 @@ import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import React from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -40,7 +41,7 @@ const formSchema = z.object({
   category: z.enum(['T-Shirt', 'Hoodie', 'Jacket', 'Cap']),
   sizes: z.string().min(1, 'Please enter comma-separated sizes.'),
   colors: z.string().min(1, 'Please enter comma-separated hex color codes.'),
-  images: z.array(z.object({ url: z.string().url('Please enter a valid URL.') })),
+  images: z.array(z.object({ url: z.string().url('Please enter a valid URL.') })).min(1, 'Add at least one image URL.'),
   isNew: z.boolean(),
 });
 
@@ -234,7 +235,7 @@ export function ProductForm({ product }: ProductFormProps) {
                             </DialogContent>
                         </Dialog>
                     </div>
-                    <FormMessage>{form.formState.errors.images?.root?.message}</FormMessage>
+                    <FormMessage>{form.formState.errors.images?.root?.message || form.formState.errors.images?.message}</FormMessage>
                  </div>
             </div>
             <div className="space-y-8">
