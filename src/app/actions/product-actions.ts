@@ -134,3 +134,16 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
         return { success: false, message: 'Failed to update product.' };
     }
 }
+
+export async function deleteProduct(id: string) {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        await firestore.collection('products').doc(id).delete();
+        revalidatePath('/admin/products');
+        revalidatePath('/catalog');
+        return { success: true, message: 'Product deleted successfully.' };
+    } catch (error) {
+        console.error(`Failed to delete product ${id}:`, error);
+        return { success: false, message: 'Failed to delete product.' };
+    }
+}

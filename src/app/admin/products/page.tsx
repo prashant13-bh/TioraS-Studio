@@ -23,9 +23,11 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import { DeleteProductDialog } from './_components/delete-product-dialog';
 
 export const metadata = {
     title: 'Products | TioraS Admin',
@@ -105,7 +107,8 @@ export default async function AdminProductsPage() {
                         <DropdownMenuItem asChild>
                             <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DeleteProductDialog productId={product.id} productName={product.name} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
