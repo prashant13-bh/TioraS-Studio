@@ -125,6 +125,10 @@
           "type": "string",
           "description": "Name of the design."
         },
+        "prompt": {
+          "type": "string",
+          "description": "The text prompt used to generate the design."
+        },
         "product": {
           "type": "string",
           "description": "Product type associated with the design (e.g., Hoodie)."
@@ -156,6 +160,7 @@
       "required": [
         "id",
         "name",
+        "prompt",
         "product",
         "imageUrl",
         "status",
