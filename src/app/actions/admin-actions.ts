@@ -20,8 +20,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     const totalOrders = allOrdersSnapshot.size;
     const totalRevenue = allOrdersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
 
-    const pendingOrdersSnapshot = await ordersCollection.where('status', '==', 'Pending').get();
-    const pendingOrders = pendingOrdersSnapshot.size;
+    const pendingOrders = allOrdersSnapshot.docs.filter(doc => doc.data().status === 'Pending').length;
 
     const usersSnapshot = await firestore.collection('users').count().get();
     const activeUsers = usersSnapshot.data().count;
