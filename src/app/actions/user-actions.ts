@@ -3,15 +3,15 @@
 
 import { getFirebaseAdmin } from '@/firebase/server-config';
 import type { Design, Order } from '@/lib/types';
-import { cookies } from 'next/headers';
 import { getCurrentUser } from '@/lib/auth/server-auth';
 
 
 export async function getUserDashboardData() {
     const user = await getCurrentUser();
     if (!user) {
-        // This should be handled by the page, which will redirect.
-        return { savedDesigns: [], orderHistory: [] };
+        // This should not happen if the page is protecting the route correctly,
+        // but as a safeguard, we throw an error.
+        throw new Error('Authentication required to fetch dashboard data.');
     }
 
     try {
