@@ -9,6 +9,7 @@ import {
   Palette,
   Bell,
   Menu,
+  Shirt,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,7 @@ import { useRouter } from 'next/navigation';
 const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
   { href: '/admin/orders', icon: Package, label: 'Orders' },
+  { href: '/admin/products', icon: Shirt, label: 'Products' },
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
