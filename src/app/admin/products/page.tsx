@@ -1,4 +1,3 @@
-
 import { getProducts } from '@/app/actions/product-actions';
 import {
   Card,

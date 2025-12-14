@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -298,7 +297,7 @@ export function ProductForm({ product }: ProductFormProps) {
                         <FormControl>
                             <Input placeholder="#000000, #FFFFFF" {...field} />
                         </FormControl>
-                        <FormDescription>Comma-separated hex codes.</FormDescription>
+                        <FormDescription>Comma-separated hex codes.</FormMessage>
                         <FormMessage />
                         </FormItem>
                     )}
