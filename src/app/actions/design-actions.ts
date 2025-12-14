@@ -81,7 +81,7 @@ export async function saveDesignAction(
     try {
         const { firestore } = getFirebaseAdmin();
         const designRef = firestore.collection('users').doc(userId).collection('designs').doc();
-        const now = new Date().toISOString();
+        const now = new Date();
 
         const newDesign: Omit<Design, 'id'> = {
             name,
@@ -89,8 +89,8 @@ export async function saveDesignAction(
             product: productType,
             imageUrl,
             status: 'Draft',
-            createdAt: now,
-            updatedAt: now,
+            createdAt: now.toISOString(),
+            updatedAt: now.toISOString(),
             userId,
         };
         

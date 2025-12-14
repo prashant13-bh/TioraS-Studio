@@ -69,6 +69,7 @@ export type Design = {
     status: 'Draft' | 'Approved' | 'Rejected';
     createdAt: string;
     updatedAt: string;
+    userId: string;
 };
 
 

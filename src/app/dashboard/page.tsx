@@ -1,17 +1,19 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { getMockDashboardData } from '@/lib/mock-data';
+import { getUserDashboardData } from '@/app/actions/user-actions';
+import { format } from 'date-fns';
 
 export const metadata = {
   title: 'My Dashboard | TioraS',
   description: 'Manage your designs and view your order history.',
 };
 
-export default function DashboardPage() {
-    const { savedDesigns, orderHistory } = getMockDashboardData();
+export default async function DashboardPage() {
+    const { savedDesigns, orderHistory } = await getUserDashboardData();
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -20,8 +22,12 @@ export default function DashboardPage() {
       case 'Delivered':
         return 'outline';
       case 'Pending':
+      case 'Processing':
+        return 'secondary';
+      case 'Cancelled':
+          return 'destructive';
       default:
-        return 'destructive';
+        return 'secondary';
     }
   };
 
@@ -38,8 +44,8 @@ export default function DashboardPage() {
       
       <Tabs defaultValue="designs">
         <TabsList>
-          <TabsTrigger value="designs">Saved Designs</TabsTrigger>
-          <TabsTrigger value="orders">Order History</TabsTrigger>
+          <TabsTrigger value="designs">Saved Designs ({savedDesigns.length})</TabsTrigger>
+          <TabsTrigger value="orders">Order History ({orderHistory.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="designs">
           <Card>
@@ -63,7 +69,12 @@ export default function DashboardPage() {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-muted-foreground">You haven&apos;t saved any designs yet.</p>
+                    <div className="flex h-48 flex-col items-center justify-center text-center">
+                        <h2 className="text-xl font-semibold">No Designs Yet</h2>
+                        <p className="mt-2 text-muted-foreground">
+                            Head to the AI Studio to create your first design.
+                        </p>
+                    </div>
                 )}
             </CardContent>
           </Card>
@@ -89,7 +100,7 @@ export default function DashboardPage() {
                             {orderHistory.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                                <TableCell>{order.date}</TableCell>
+                                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
                                 <TableCell>
                                 <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                                 </TableCell>
@@ -99,7 +110,12 @@ export default function DashboardPage() {
                         </TableBody>
                     </Table>
                 ) : (
-                     <p className="text-muted-foreground">You haven&apos;t placed any orders yet.</p>
+                    <div className="flex h-48 flex-col items-center justify-center text-center">
+                        <h2 className="text-xl font-semibold">No Orders Yet</h2>
+                        <p className="mt-2 text-muted-foreground">
+                            You haven&apos;t placed any orders yet.
+                        </p>
+                    </div>
                 )}
             </CardContent>
           </Card>
