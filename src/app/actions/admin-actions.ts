@@ -141,7 +141,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
     try {
         const { firestore } = getFirebaseAdmin();
-        let query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
+        const query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
         
         const designsSnapshot = await query.get();
 
