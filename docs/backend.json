@@ -1,0 +1,384 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the TioraS platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product available for sale on the TioraS platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the product."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the product (e.g., T-Shirt, Hoodie, Jacket, Accessories)."
+        },
+        "sizes": {
+          "type": "string",
+          "description": "JSON string representing available sizes for the product (e.g., [\"S\", \"M\", \"L\", \"XL\", \"XXL\"])."
+        },
+        "colors": {
+          "type": "string",
+          "description": "JSON string representing available colors for the product (e.g., [\"Black\", \"White\", \"Navy\"])."
+        },
+        "image": {
+          "type": "string",
+          "description": "URL of the product image.",
+          "format": "uri"
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Indicates whether the product is a new arrival."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the product was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the product was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "category",
+        "sizes",
+        "colors",
+        "image",
+        "isNew",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Design": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Design",
+      "type": "object",
+      "description": "Represents a user-generated or admin-created clothing design.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the design entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the design."
+        },
+        "product": {
+          "type": "string",
+          "description": "Product type associated with the design (e.g., Hoodie)."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the generated image for the design.",
+          "format": "uri"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the design (Draft, Reviewing, Approved, Rejected)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the design was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the design was last updated.",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Design)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "product",
+        "imageUrl",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents a customer order placed on the TioraS platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order entity."
+        },
+        "orderNumber": {
+          "type": "string",
+          "description": "Unique order number (e.g., ORD-7001)."
+        },
+        "total": {
+          "type": "number",
+          "description": "Total amount for the order."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the order (Pending, Processing, Shipped, Delivered)."
+        },
+        "shippingAddr": {
+          "type": "string",
+          "description": "JSON string representing the shipping address for the order."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the order was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the order was last updated.",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        }
+      },
+      "required": [
+        "id",
+        "orderNumber",
+        "total",
+        "status",
+        "shippingAddr",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents an individual item within an order.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order item entity."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of the product in the order item."
+        },
+        "size": {
+          "type": "string",
+          "description": "Size of the product in the order item."
+        },
+        "color": {
+          "type": "string",
+          "description": "Color of the product in the order item."
+        },
+        "price": {
+          "type": "number",
+          "description": "Snapshot price of the product at the time of purchase."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
+        }
+      },
+      "required": [
+        "id",
+        "quantity",
+        "size",
+        "color",
+        "price",
+        "orderId",
+        "productId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  Accessible only by the user themselves or an admin.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information. Publicly readable.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/designs/{designId}",
+        "definition": {
+          "entityName": "Design",
+          "schema": {
+            "$ref": "#/backend/entities/Design"
+          },
+          "description": "Stores user-created designs. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "designId",
+              "description": "The unique identifier for the design."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores user orders. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores individual items within an order.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "roles_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Documents in this collection grant admin access to the user. Existence of document grants admin access.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the TioraS e-commerce platform, focusing on AI-generated designs and product sales. It prioritizes authorization independence and efficient data retrieval.\n\n**Authorization Independence:**\n\n*   **Designs:** Designs are stored under `/users/{userId}/designs/{designId}`. The `Design` documents contain a `userId` field, which is denormalized authorization data. This enables security rules to validate ownership based on the path and the `userId` field within the document itself, without requiring `get()` calls to a parent `users` document.\n*   **Orders:** Orders are stored under `/users/{userId}/orders/{orderId}`. The `Order` documents contain a `userId` field. This enables security rules to validate ownership without requiring `get()` calls.\n\n**Structural Segregation:**\n\n*   Designs are segregated based on user ID to ensure only the owner or admins can manage them. The Design review process would have a separate admin approval collection to ensure proper authorization rules.\n*   Orders are segregated by User.\n\n**Access Modeling:**\n\n*   Private data (designs, orders) is modeled using path-based ownership under `/users/{userId}`.\n*   Admin functions (e.g. approving designs) would require a `/roles_admin/{uid}` collection for DBAC.\n\n**QAPs (Rules are not Filters):**\n\n*   The structure uses path-based ownership (`/users/{userId}/designs/{designId}`) which allows secure `list` operations for a specific user's designs. The security rules can efficiently filter by the `userId` embedded in the path, ensuring users can only access their own designs.\n\n**Invariants:**\n\n*   Timestamps (`createdAt`, `updatedAt`) can be enforced using security rules to prevent modification.\n*   Ownership of designs and orders is maintained by the `userId` field and path-based structure."
+  }
+}

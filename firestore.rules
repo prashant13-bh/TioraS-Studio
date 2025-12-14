@@ -1,0 +1,184 @@
+/**
+ * This ruleset enforces a security model for the TioraS e-commerce platform.
+ * It combines a strict user-ownership model for personal data with a role-based
+ * access control (RBAC) system for administrators.
+ *
+ * Core Philosophy:
+ * - Users have complete control over their own data (profiles, designs, orders).
+ * - Publicly available data (like products) is readable by anyone but can only
+ *   be managed by designated administrators.
+ * - Administrative privileges are granted by the existence of a document in a
+ *   dedicated 'roles_admin' collection.
+ * - The default security posture is to deny access. Permissions are granted
+ *   explicitly.
+ *
+ * Data Structure:
+ * - User-specific data (designs, orders) is nested within a user's document
+ *   tree under `/users/{userId}/...`. This allows for straightforward,
+ *   path-based security rules.
+ * - Global, public data like `/products` is stored at the top level.
+ * - Admin roles are managed in a top-level `/roles_admin` collection for
+ *   efficient, database-wide access checks.
+ *
+ * Key Security Decisions:
+ * - Listing all users is strictly disallowed to protect user privacy.
+ * - Destructive operations (update, delete) always verify that the document
+ *   being modified already exists to prevent unintended side effects.
+ * - For prototyping flexibility, data schemas are not strictly enforced. However,
+ *   fields critical for authorization (like 'userId' on a design document)
+ *   are validated on creation and made immutable on update.
+ *
+ * Denormalization for Authorization:
+ * - User-generated content like 'designs' and 'orders' contains a denormalized
+ *   'userId' field. This allows security rules to verify ownership directly from
+ *   the document without performing costly lookups on parent documents.
+ * - The `/roles_admin/{userId}` collection is a form of denormalization, allowing
+ *   a fast `exists()` check to determine if a user is an admin, rather than
+ *   checking a field on a user profile.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Checks if a document for the current user exists in the 'roles_admin' collection.
+     * This grants database-wide administrative privileges.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Checks for ownership on an existing resource.
+     * Used for update and delete operations to ensure the document exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // -------------------------------------------------------------------------
+    // User Profiles (/users)
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents.
+     * @path /users/{userId}
+     * @allow A user (auth.uid='user123') creating their own profile document (create) at /users/user123.
+     * @deny An anonymous user trying to read a profile (get) or a signed-in user ('userABC') trying to update another user's profile ('userXYZ').
+     * @principle Restricts access to a user's own data tree and enforces self-creation.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing all users for privacy.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isOwner(userId) && resource != null && request.resource.data.id == resource.data.id;
+      allow delete: if false; // Deletion should be handled by a trusted backend process.
+    }
+
+    // -------------------------------------------------------------------------
+    // Products (/products)
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Manages product information. Products are public for all to see.
+     * @path /products/{productId}
+     * @allow Any user, signed-in or anonymous, can read product data (get, list).
+     * @deny A non-administrative user attempting to create or delete a product.
+     * @principle Implements a public-read collection with admin-only writes.
+     */
+    match /products/{productId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Admin Roles (/roles_admin)
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Manages admin role grants. Existence of a doc here makes a user an admin.
+     * @path /roles_admin/{userId}
+     * @allow An existing admin reading or creating a role for another user.
+     * @deny A non-admin user trying to read, list, or create roles.
+     * @principle Restricts management of the role system to only those already in the role.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    // -------------------------------------------------------------------------
+    // User-Owned Subcollections (/users/{userId}/...)
+    // -------------------------------------------------------------------------
+    
+    /**
+     * @description Manages user-created clothing designs.
+     * @path /users/{userId}/designs/{designId}
+     * @allow A user (auth.uid='user123') creating a design (create) under their own path /users/user123/designs/designABC.
+     * @deny A user ('userABC') trying to list or read designs under another user's path ('/users/userXYZ/designs').
+     * @principle Enforces document ownership and validates the denormalized 'userId' for relational integrity.
+     */
+    match /users/{userId}/designs/{designId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages user orders.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow A user (auth.uid='user123') reading their own order history (list) at /users/user123/orders.
+     * @deny A user ('userABC') trying to read or modify an order belonging to another user ('userXYZ').
+     * @principle Enforces document ownership for a user's private data and validates relational integrity.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Manages the specific items within an order.
+       * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+       * @allow A user (auth.uid='user123') reading the items (get, list) within their own order.
+       * @deny A user trying to access order items from an order that does not belong to them.
+       * @principle Access is inherited from the parent document's ownership, enforced via the path.
+       */
+      match /orderItems/{orderItemId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
+        allow update: if isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+  }
+}
