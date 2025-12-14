@@ -1,3 +1,4 @@
+
 import { getAdminDashboardData } from '@/app/actions/admin-actions';
 import {
   Card,
@@ -17,7 +18,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Package, Users, Activity } from 'lucide-react';
 import { format } from 'date-fns';
-import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
   const data = await getAdminDashboardData();
@@ -83,7 +83,7 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">+{data.activeUsers}</div>
             <p className="text-xs text-muted-foreground">
-              Currently on the platform (mocked)
+              Total registered users
             </p>
           </CardContent>
         </Card>

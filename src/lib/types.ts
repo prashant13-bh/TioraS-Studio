@@ -1,4 +1,5 @@
 
+
 export type Product = {
   id: string;
   name: string;
@@ -48,6 +49,7 @@ export type OrderItem = {
 
 export type Order = {
     id: string;
+    userId: string;
     orderNumber: string;
     total: number;
     status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
@@ -75,6 +77,6 @@ export type AdminDashboardData = {
   totalRevenue: number;
   totalOrders: number;
   pendingOrders: number;
-  activeUsers: number; // For now, we'll mock this.
+  activeUsers: number;
   recentOrders: Order[];
 };
