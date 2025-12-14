@@ -2,15 +2,15 @@
 'use server';
 
 import { getFirebaseAdmin } from '@/firebase/server-config';
-import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
+import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
 
 // MOCK DATA - In a real app, this would come from a database
 let designs: Design[] = [
-    { id: 'des_1', name: 'Cosmic Wolf', prompt: 'a wolf howling at a cosmic moon', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/301/400/400', status: 'Draft', createdAt: '2024-07-28T10:00:00Z', updatedAt: '2024-07-28T10:00:00Z' },
-    { id: 'des_2', name: 'Sunset City', prompt: 'a vibrant sunset over a futuristic city', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/302/400/400', status: 'Approved', createdAt: '2024-07-27T15:30:00Z', updatedAt: '2024-07-27T15:30:00Z' },
-    { id: 'des_3', name: 'Abstract Geometry', prompt: 'a minimalist design with geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Rejected', createdAt: '2024-07-26T09:00:00Z', updatedAt: '2024-07-26T09:00:00Z' },
+    { id: 'des_1', name: 'Cosmic Wolf', prompt: 'a wolf howling at a cosmic moon', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/301/400/400', status: 'Draft', createdAt: '2024-07-28T10:00:00Z', updatedAt: '2024-07-28T10:00:00Z', userId: 'user1' },
+    { id: 'des_2', name: 'Sunset City', prompt: 'a vibrant sunset over a futuristic city', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/302/400/400', status: 'Approved', createdAt: '2024-07-27T15:30:00Z', updatedAt: '2024-07-27T15:30:00Z', userId: 'user2' },
+    { id: 'des_3', name: 'Abstract Geometry', prompt: 'a minimalist design with geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Rejected', createdAt: '2024-07-26T09:00:00Z', updatedAt: '2024-07-26T09:00:00Z', userId: 'user1' },
 ];
 
 
@@ -79,6 +79,31 @@ export async function getAllOrders(): Promise<Order[]> {
     return [];
   }
 }
+
+export async function getAllUsers(): Promise<UserProfile[]> {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        const usersSnapshot = await firestore.collection('users').orderBy('createdAt', 'desc').get();
+
+        if (usersSnapshot.empty) {
+            return [];
+        }
+        
+        const users: UserProfile[] = usersSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+            } as UserProfile;
+        });
+
+        return users;
+    } catch (error) {
+        console.error('Failed to fetch all users from Firestore:', error);
+        return [];
+    }
+}
+
 
 export async function getAllDesigns(): Promise<Design[]> {
     try {

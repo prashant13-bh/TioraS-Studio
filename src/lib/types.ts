@@ -82,3 +82,12 @@ export type AdminDashboardData = {
   activeUsers: number;
   recentOrders: Order[];
 };
+
+export type UserProfile = {
+  id: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
+  providerId: string;
+  createdAt: string;
+};
