@@ -1,4 +1,7 @@
 
+
+'use client';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,21 +9,39 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { getUserDashboardData } from '@/app/actions/user-actions';
 import { format } from 'date-fns';
-import { redirect } from 'next/navigation';
-import { getCurrentUser, UserWithRole } from '@/lib/auth/server-auth';
+import { redirect, useRouter } from 'next/navigation';
+import { useUser } from '@/firebase';
+import { useEffect, useState } from 'react';
+import type { Design, Order } from '@/lib/types';
 
-export const metadata = {
-  title: 'My Dashboard | TioraS',
-  description: 'Manage your designs and view your order history.',
-};
 
-export default async function DashboardPage() {
-    const user = await getCurrentUser();
-    if (!user) {
-        redirect('/login?redirect=/dashboard');
-    }
-    
-    const { savedDesigns, orderHistory } = await getUserDashboardData();
+export default function DashboardPage() {
+    const { user, loading } = useUser();
+    const router = useRouter();
+    const [dashboardData, setDashboardData] = useState<{savedDesigns: Design[], orderHistory: Order[]}>({ savedDesigns: [], orderHistory: [] });
+    const [isDataLoading, setIsDataLoading] = useState(true);
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login?redirect=/dashboard');
+        } else if (user) {
+            getUserDashboardData().then(data => {
+                setDashboardData(data);
+                setIsDataLoading(false);
+            });
+        }
+    }, [user, loading, router]);
+
+
+  if (loading || isDataLoading) {
+      return <div className="container mx-auto px-4 py-8 text-center">Loading your dashboard...</div>
+  }
+  
+  if (!user) {
+      return null; // Redirect is handling this case
+  }
+
+  const { savedDesigns, orderHistory } = dashboardData;
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -38,7 +59,7 @@ export default async function DashboardPage() {
     }
   };
   
-  const displayName = user.name || user.email?.split('@')[0] || 'designer';
+  const displayName = user.displayName || user.email?.split('@')[0] || 'designer';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -106,10 +127,10 @@ export default async function DashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {orderHistory.map((order) => (
+                            {orderHistory.map((order: any) => ( // Using any for mock data compatibility
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
+                                <TableCell>{format(new Date(order.createdAt || order.date), 'PPP')}</TableCell>
                                 <TableCell>
                                 <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                                 </TableCell>

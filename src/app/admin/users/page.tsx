@@ -1,4 +1,5 @@
 
+
 import {
     Card,
     CardContent,
@@ -20,7 +21,6 @@ import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { UserActions } from './_components/user-actions';
-import { getCurrentUser } from '@/lib/auth/server-auth';
   
 export const metadata = {
     title: 'Users | TioraS Admin',
@@ -28,10 +28,10 @@ export const metadata = {
 };
 
 export default async function AdminUsersPage() {
-    const [users, currentUser] = await Promise.all([
-      getAllUsers(),
-      getCurrentUser()
-    ]);
+    const users = await getAllUsers();
+    
+    // Using a mock current user ID for the actions component
+    const mockCurrentUserId = 'admin_user_id';
   
     const getProviderName = (providerId?: string) => {
         if (!providerId) return 'Email/Pass';
@@ -89,7 +89,7 @@ export default async function AdminUsersPage() {
                         )}
                     </TableCell>
                     <TableCell>
-                      <UserActions user={user} currentUserId={currentUser?.uid} />
+                      <UserActions user={user} currentUserId={mockCurrentUserId} />
                     </TableCell>
                   </TableRow>
                 ))}
