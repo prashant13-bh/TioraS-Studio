@@ -7,9 +7,7 @@ import {
   Home,
   Package,
   Palette,
-  Menu,
   Shirt,
-  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,11 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { TiorasLogo } from '@/components/icons';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -42,7 +35,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { user, loading } = useUser();
   const router = useRouter();
 
@@ -62,8 +54,6 @@ export default function AdminLayout({
     );
   }
 
-  // After loading, if the user is not an admin, they would have been redirected.
-  // This part of the component will only render for verified admins.
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
