@@ -3,8 +3,6 @@ import ProductCard from '@/components/product-card';
 import { ProductFilters } from '@/components/product-filters';
 import type { Category } from '@/lib/types';
 import { Suspense } from 'react';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
 
 export const metadata = {
     title: 'Catalog | TioraS',
@@ -22,40 +20,34 @@ export default async function CatalogPage({
   const { products } = await getProducts({ category });
 
   return (
-    <>
-      <Navbar />
-      <main className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <header className="mb-8 text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
-              Our Collection
-            </h1>
-            <p className="mt-2 text-lg text-muted-foreground">
-              Discover meticulously crafted pieces for the modern man.
-            </p>
-          </header>
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8 text-center">
+        <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
+          Our Collection
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          Discover meticulously crafted pieces for the modern man.
+        </p>
+      </header>
 
-          <Suspense>
-            <ProductFilters currentCategory={category} />
-          </Suspense>
+      <Suspense>
+        <ProductFilters currentCategory={category} />
+      </Suspense>
 
-          {products.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-64 flex-col items-center justify-center text-center">
-              <h2 className="text-2xl font-semibold">No Products Found</h2>
-              <p className="mt-2 text-muted-foreground">
-                There are no products available in the &quot;{category}&quot; category.
-              </p>
-            </div>
-          )}
+      {products.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
-      </main>
-      <Footer />
-    </>
+      ) : (
+        <div className="flex h-64 flex-col items-center justify-center text-center">
+          <h2 className="text-2xl font-semibold">No Products Found</h2>
+          <p className="mt-2 text-muted-foreground">
+            There are no products available in the &quot;{category}&quot; category.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

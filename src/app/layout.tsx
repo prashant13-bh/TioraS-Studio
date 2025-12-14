@@ -5,6 +5,9 @@ import { cn } from '@/lib/utils';
 import { CartProvider } from '@/lib/cart-context';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { Navbar } from '@/components/layout/navbar';
+import { Footer } from '@/components/layout/footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -40,7 +43,12 @@ export default function RootLayout({
       >
         <FirebaseClientProvider>
           <CartProvider>
-              {children}
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <FirebaseErrorListener />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
             <Toaster />
           </CartProvider>
         </FirebaseClientProvider>
