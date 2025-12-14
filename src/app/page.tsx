@@ -2,17 +2,16 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { getProducts } from '@/app/actions/product-actions';
 import { ArrowRight, Bot, Palette, Sparkles, Zap } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
-import { ProductCarousel } from '@/components/product-carousel';
 import Starfield from '@/components/starfield';
+import ProductCard from '@/components/product-card';
 
 
 export default async function Home() {
-  const { products: featuredProducts } = await getProducts({ limit: 12 });
+  const { products } = await getProducts({});
 
   const benefits = [
     {
@@ -73,7 +72,11 @@ export default async function Home() {
             <h2 className="mb-12 text-center font-headline text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
               Featured Products
             </h2>
-            <ProductCarousel products={featuredProducts} />
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {products.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                ))}
+            </div>
           </div>
         </section>
 
@@ -84,15 +87,13 @@ export default async function Home() {
             </h2>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {benefits.map((benefit, index) => (
-                <Card key={index} className="transform border-2 border-transparent bg-background text-center transition-transform duration-300 hover:scale-105 hover:border-primary hover:shadow-lg">
-                  <CardContent className="p-8">
-                    <div className="mb-4 flex justify-center">{benefit.icon}</div>
+                <div key={index} className="transform border-2 border-transparent bg-background text-center transition-transform duration-300 hover:scale-105 hover:border-primary hover:shadow-lg rounded-lg p-8">
+                  <div className="mb-4 flex justify-center">{benefit.icon}</div>
                     <h3 className="mb-2 font-headline text-xl font-bold md:text-2xl">
                       {benefit.title}
                     </h3>
                     <p className="text-muted-foreground">{benefit.description}</p>
-                  </CardContent>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
