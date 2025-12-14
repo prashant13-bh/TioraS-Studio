@@ -1,49 +1,46 @@
 
 'use server';
 
-import { getFirebaseAdmin } from '@/firebase/server-config';
 import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
 import { subDays, format, startOfDay } from 'date-fns';
-import type { firestore as admin } from 'firebase-admin';
+import { getMockDashboardData } from '@/lib/mock-data';
+
+// MOCK DATA IMPLEMENTATION
+let mockOrders: Order[] = [
+    { id: 'ord_1', userId: 'user_1', orderNumber: 'ORD-7005', total: 8998.00, status: 'Delivered', itemCount: 2, shippingAddr: { name: 'Jane Doe', email: 'jane@example.com', address: '456 Park Ave', city: 'Delhi', state: 'Delhi', zip: '110001', phone: '9876543210' }, createdAt: subDays(new Date(), 2).toISOString(), updatedAt: subDays(new Date(), 2).toISOString() },
+    { id: 'ord_2', userId: 'user_2', orderNumber: 'ORD-7004', total: 4999.00, status: 'Shipped', itemCount: 1, shippingAddr: { name: 'John Smith', email: 'john@example.com', address: '789 Broadway', city: 'Mumbai', state: 'Maharashtra', zip: '400001', phone: '9876543210' }, createdAt: subDays(new Date(), 5).toISOString(), updatedAt: subDays(new Date(), 3).toISOString() },
+    { id: 'ord_3', userId: 'user_1', orderNumber: 'ORD-7003', total: 2499.00, status: 'Pending', itemCount: 1, shippingAddr: { name: 'Jane Doe', email: 'jane@example.com', address: '456 Park Ave', city: 'Delhi', state: 'Delhi', zip: '110001', phone: '9876543210' }, createdAt: subDays(new Date(), 1).toISOString(), updatedAt: subDays(new Date(), 1).toISOString() },
+];
+let mockUsers: UserProfile[] = [
+    { id: 'user_1', displayName: 'Jane Doe', email: 'jane@example.com', photoURL: 'https://i.pravatar.cc/150?u=jane', createdAt: new Date().toISOString(), isAdmin: true },
+    { id: 'user_2', displayName: 'John Smith', email: 'john@example.com', photoURL: 'https://i.pravatar.cc/150?u=john', createdAt: new Date().toISOString(), isAdmin: false },
+];
+let mockDesigns: Design[] = [
+    { id: 'des_1', userId: 'user_1', name: 'Cosmic Wolf', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/301/400/400', status: 'Approved', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), prompt: 'a cosmic wolf howling' },
+    { id: 'des_2', userId: 'user_2', name: 'Sunset City', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/302/400/400', status: 'Rejected', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), prompt: 'a vibrant sunset over a city' },
+    { id: 'des_3', userId: 'user_2', name: 'Geometry', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), prompt: 'abstract geometric patterns' },
+];
+
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  try {
-    const { firestore } = getFirebaseAdmin();
-    
-    // Fetch all orders using a collection group query
-    const ordersSnapshot = await firestore.collectionGroup('orders').get();
-    const allOrders: Order[] = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+    const totalRevenue = mockOrders.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = mockOrders.length;
+    const pendingOrders = mockOrders.filter(order => order.status === 'Pending').length;
+    const activeUsers = mockUsers.length;
 
-    const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
-    const totalOrders = allOrders.length;
-    const pendingOrders = allOrders.filter(order => order.status === 'Pending').length;
+    const recentOrders = [...mockOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
-    let activeUsers = 0;
-    try {
-        const usersSnapshot = await firestore.collection('users').get();
-        activeUsers = usersSnapshot.size;
-    } catch (userError) {
-        console.warn("Could not fetch users, displaying 0 active users.", userError);
-        // If users collection doesn't exist or there's an error, we default to 0
-    }
-
-    // Sort orders by creation date to get the most recent ones
-    const recentOrders = allOrders
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
-
-    // Calculate sales data for the last 7 days
     const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
     const salesByDay = last7Days.map(day => ({
         name: format(day, 'MMM d'),
         total: 0,
     })).reverse();
 
-    const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
+     const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
 
-    allOrders.forEach(order => {
+    mockOrders.forEach(order => {
         const orderDate = new Date(order.createdAt);
         if (orderDate >= sevenDaysAgo) {
             const dayStr = format(orderDate, 'MMM d');
@@ -62,174 +59,82 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       recentOrders,
       salesByDay,
     };
-  } catch (error) {
-    console.error('Failed to fetch admin dashboard data from Firestore:', error);
-    // Return a default state in case of error
-    return {
-      totalRevenue: 0,
-      totalOrders: 0,
-      pendingOrders: 0,
-      activeUsers: 0,
-      recentOrders: [],
-      salesByDay: [],
-    };
-  }
 }
 
 export async function getAllOrders({ query }: { query?: string }): Promise<Order[]> {
-  try {
-    const { firestore } = getFirebaseAdmin();
-    const ordersSnapshot = await firestore.collectionGroup('orders').orderBy('createdAt', 'desc').get();
-    
-    if (ordersSnapshot.empty) {
-      return [];
-    }
-
-    let allOrders: Order[] = ordersSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        itemCount: data.itemCount || (data.items ? data.items.length : 0),
-      } as Order;
-    });
-
-    if (query) {
-        const lowercasedQuery = query.toLowerCase();
-        allOrders = allOrders.filter(order => 
-            order.shippingAddr.name.toLowerCase().includes(lowercasedQuery) ||
-            order.shippingAddr.email.toLowerCase().includes(lowercasedQuery) ||
-            order.orderNumber.toLowerCase().includes(lowercasedQuery)
-        );
-    }
-
-    return allOrders;
-  } catch (error) {
-    console.error('Failed to fetch all orders from Firestore:', error);
-    return [];
+  if (query) {
+    const lowercasedQuery = query.toLowerCase();
+    return mockOrders.filter(order => 
+        order.shippingAddr.name.toLowerCase().includes(lowercasedQuery) ||
+        order.shippingAddr.email.toLowerCase().includes(lowercasedQuery) ||
+        order.orderNumber.toLowerCase().includes(lowercasedQuery)
+    );
   }
+  return [...mockOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        const usersSnapshot = await firestore.collection('users').orderBy('createdAt', 'desc').get();
-        const adminRolesSnapshot = await firestore.collection('roles_admin').get();
-        const adminIds = new Set(adminRolesSnapshot.docs.map(doc => doc.id));
-
-        if (usersSnapshot.empty) {
-            return [];
-        }
-        
-        const users: UserProfile[] = usersSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                isAdmin: adminIds.has(doc.id),
-            } as UserProfile;
-        });
-
-        return users;
-    } catch (error) {
-        console.error('Failed to fetch all users from Firestore:', error);
-        return [];
-    }
+    return [...mockUsers].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 
 export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        const query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
-        
-        const designsSnapshot = await query.get();
-
-        if (designsSnapshot.empty) {
-            return [];
-        }
-
-        let designs: Design[] = designsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as Design));
-
-        if (status && status !== 'All') {
-            designs = designs.filter(design => design.status === status);
-        }
-
-        return designs;
-
-    } catch (error) {
-        console.error('Failed to fetch designs from Firestore:', error);
-        return [];
+    const sortedDesigns = [...mockDesigns].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (status && status !== 'All') {
+        return sortedDesigns.filter(design => design.status === status);
     }
+    return sortedDesigns;
 }
 
 
 export async function updateDesignStatus(designId: string, userId: string, status: 'Approved' | 'Rejected') {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        const designRef = firestore.collection('users').doc(userId).collection('designs').doc(designId);
-
-        await designRef.update({ status: status, updatedAt: new Date().toISOString() });
-
+    const designIndex = mockDesigns.findIndex(d => d.id === designId);
+    if (designIndex > -1) {
+        mockDesigns[designIndex].status = status;
         revalidatePath('/admin/reviews');
         return { success: true };
-    } catch (error) {
-        console.error(`Failed to update design ${designId} status:`, error);
-        return { success: false, message: 'Database update failed.' };
     }
+    return { success: false, message: 'Design not found.' };
 }
 
 export async function updateOrderStatus(orderId: string, userId: string, status: Order['status']) {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        const orderRef = firestore.collection('users').doc(userId).collection('orders').doc(orderId);
-
-        await orderRef.update({ status: status });
-
+    const orderIndex = mockOrders.findIndex(o => o.id === orderId);
+     if (orderIndex > -1) {
+        mockOrders[orderIndex].status = status;
         revalidatePath('/admin/orders');
         revalidatePath(`/admin/orders/${orderId}`);
         revalidatePath('/admin');
         return { success: true, message: `Order status updated to ${status}` };
-    } catch (error) {
-        console.error(`Failed to update order ${orderId} status:`, error);
-        return { success: false, message: 'Database update failed.' };
     }
+    return { success: false, message: 'Order not found.' };
 }
 
 
 export async function grantAdminRole(userId: string) {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        await firestore.collection('roles_admin').doc(userId).set({ isAdmin: true });
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    if (userIndex > -1) {
+        mockUsers[userIndex].isAdmin = true;
         revalidatePath('/admin/users');
         return { success: true, message: 'Admin role granted.' };
-    } catch (error) {
-        console.error(`Failed to grant admin role to ${userId}:`, error);
-        return { success: false, message: 'Failed to grant admin role.' };
     }
+    return { success: false, message: 'User not found.' };
 }
 
 export async function revokeAdminRole(userId: string) {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        await firestore.collection('roles_admin').doc(userId).delete();
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    if (userIndex > -1) {
+        mockUsers[userIndex].isAdmin = false;
         revalidatePath('/admin/users');
         return { success: true, message: 'Admin role revoked.' };
-    } catch (error) {
-        console.error(`Failed to revoke admin role for ${userId}:`, error);
-        return { success: false, message: 'Failed to revoke admin role.' };
     }
-}
-
-// These functions are added to simulate the database
-export async function addDesign(design: Design) {
-    // This is a mock function and should be replaced with Firestore logic
+    return { success: false, message: 'User not found.' };
 }
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
+
+export async function addDesign(design: Design) {
+    mockDesigns.unshift(design);
+}
 
 export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>) {
     const now = new Date().toISOString();
@@ -240,32 +145,19 @@ export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'create
         createdAt: now,
         updatedAt: now,
     };
-    // This was for mock data, should be implemented with Firestore
+    mockOrders.unshift(newOrder);
     return newOrder;
 }
 
 export async function getOrderById(orderId: string, userId: string): Promise<(Order & {items: OrderItem[]}) | null> {
-    try {
-        const { firestore } = getFirebaseAdmin();
-        const orderRef = firestore.collection('users').doc(userId).collection('orders').doc(orderId);
-        
-        const orderDoc = await orderRef.get();
+    const order = mockOrders.find(o => o.id === orderId && o.userId === userId);
+    if (!order) return null;
+    
+    // Simulate finding order items
+    const items: OrderItem[] = [
+        { id: 'item_1', orderId: orderId, productId: 'prod_1', quantity: 1, size: 'M', color: '#000000', price: 2499, name: 'Tioras Signature Tee', image: 'https://picsum.photos/seed/1/600/800' },
+        { id: 'item_2', orderId: orderId, productId: 'prod_2', quantity: 1, size: 'L', color: '#FFFFFF', price: 6499, name: 'Tioras Hoodie', image: 'https://picsum.photos/seed/2/600/800' },
+    ];
 
-        if (!orderDoc.exists) {
-            return null;
-        }
-
-        const itemsSnapshot = await orderRef.collection('orderItems').get();
-        const items: OrderItem[] = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OrderItem));
-
-        return {
-            id: orderDoc.id,
-            ...(orderDoc.data() as Omit<Order, 'id'>),
-            items,
-        };
-
-    } catch (error) {
-        console.error('Failed to get order by id:', error);
-        return null;
-    }
+    return { ...order, items };
 }

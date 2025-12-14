@@ -5,7 +5,7 @@ import { z } from 'zod';
 import type { CartItem, ShippingAddress, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
-import { getFirebaseAdmin } from '@/firebase/server-config';
+import { addOrder } from './admin-actions'; // Using mock admin action
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
 
@@ -55,49 +55,22 @@ export async function createOrderAction(
   }
 
   try {
-    const { firestore } = getFirebaseAdmin();
-    const orderNumber = `ORD-${nanoid()}`;
-    const now = new Date().toISOString();
-    
-    const newOrderRef = firestore.collection('users').doc(userId).collection('orders').doc();
-    
-    const orderData: Omit<Order, 'id' | 'items'> = {
-        orderNumber,
-        total,
-        shippingAddr,
-        status: 'Pending',
-        createdAt: now,
-        updatedAt: now,
+    const newOrderData = {
         userId: userId,
+        total: total,
+        shippingAddr: shippingAddr,
+        status: 'Pending' as const,
         itemCount: items.reduce((acc, item) => acc + item.quantity, 0),
     };
 
-    await newOrderRef.set(orderData);
-
-    const orderItemsBatch = firestore.batch();
-    items.forEach(item => {
-        const orderItemRef = newOrderRef.collection('orderItems').doc();
-        // Simplified OrderItem, referencing product by ID instead of nesting the object
-        const orderItem: Omit<OrderItem, 'id'> = {
-            orderId: newOrderRef.id,
-            productId: item.id,
-            quantity: item.quantity,
-            size: item.selectedSize,
-            color: item.selectedColor,
-            price: item.price, // Price at time of purchase
-            name: item.name, // Denormalize for easier display
-            image: item.image, // Denormalize for easier display
-        };
-        orderItemsBatch.set(orderItemRef, orderItem);
-    });
-
-    await orderItemsBatch.commit();
+    // Using the mock `addOrder` function
+    const newOrder = await addOrder(newOrderData);
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');
     revalidatePath('/dashboard');
 
-    return { success: true, orderId: newOrderRef.id };
+    return { success: true, orderId: newOrder.id };
   } catch (error) {
     console.error('Failed to create order:', error);
     return { success: false, message: 'Could not create order in database.' };

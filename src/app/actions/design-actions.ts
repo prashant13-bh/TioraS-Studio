@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { generateCustomDesign as generateCustomDesignFlow } from '@/ai/flows/generate-custom-designs';
 import { revalidatePath } from 'next/cache';
 import type { Design } from '@/lib/types';
-import { getFirebaseAdmin } from '@/firebase/server-config';
+import { addDesign } from './admin-actions'; // Using mock admin action
 
 const generateSchema = z.object({
   prompt: z.string().min(3, 'Prompt must be at least 3 characters long.'),
@@ -79,11 +79,9 @@ export async function saveDesignAction(
     }
 
     try {
-        const { firestore } = getFirebaseAdmin();
-        const designRef = firestore.collection('users').doc(userId).collection('designs').doc();
         const now = new Date();
-
-        const newDesign: Omit<Design, 'id'> = {
+        const newDesign: Design = {
+            id: `des_${Date.now()}`,
             name,
             prompt,
             product: productType,
@@ -94,7 +92,8 @@ export async function saveDesignAction(
             userId,
         };
         
-        await designRef.set(newDesign);
+        // Use the mock `addDesign` function
+        await addDesign(newDesign);
 
         revalidatePath('/admin/reviews');
         revalidatePath('/dashboard');
