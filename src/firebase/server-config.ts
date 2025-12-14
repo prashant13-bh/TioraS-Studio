@@ -1,7 +1,6 @@
 
 import { getApps, initializeApp, cert, App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { firebaseConfig } from './config';
 
 let adminApp: App;
 
@@ -13,15 +12,13 @@ if (!getApps().length) {
     });
   } else {
     // This fallback is for environments like Google Cloud Run where credentials are auto-discovered.
-    // It's less reliable for local development without specific setup.
-    adminApp = initializeApp({
-      projectId: firebaseConfig.projectId,
-    });
+    // It is less reliable for local development without specific setup. For local dev,
+    // ensure FIREBASE_SERVICE_ACCOUNT is set.
+    adminApp = initializeApp();
   }
 } else {
   adminApp = getApps()[0];
 }
-
 
 export function getFirebaseAdmin() {
     return {
