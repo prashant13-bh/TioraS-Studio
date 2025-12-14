@@ -2,14 +2,7 @@
 'use server';
 
 import type { Product } from '@/lib/types';
-import productsData from '@/lib/products.json';
-
-const allProducts: Product[] = productsData.products.map((p: any) => ({
-  ...p,
-  sizes: JSON.parse(p.sizes),
-  colors: JSON.parse(p.colors),
-  images: JSON.parse(p.images),
-}));
+import { getFirebaseAdmin } from '@/firebase/server-config';
 
 export async function getProducts({
   category,
@@ -19,29 +12,63 @@ export async function getProducts({
   limit?: number;
 }): Promise<{ products: Product[] }> {
   try {
-    let filteredProducts = allProducts;
+    const { firestore } = getFirebaseAdmin();
+    let query: admin.firestore.Query = firestore.collection('products');
 
     if (category && category !== 'All') {
-      filteredProducts = allProducts.filter(p => p.category === category);
+      query = query.where('category', '==', category);
     }
     
     if (limit) {
-      filteredProducts = filteredProducts.slice(0, limit);
+      query = query.limit(limit);
     }
     
-    return { products: filteredProducts };
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+        return { products: [] };
+    }
+    
+    const products: Product[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+             // Firestore might not store arrays correctly if they were not arrays originally
+            sizes: Array.isArray(data.sizes) ? data.sizes : [],
+            colors: Array.isArray(data.colors) ? data.colors : [],
+            images: Array.isArray(data.images) ? data.images : [],
+        } as Product;
+    });
+
+    return { products };
   } catch (error) {
-    console.error('Failed to fetch products from mock data:', error);
+    console.error('Failed to fetch products from Firestore:', error);
     return { products: [] };
   }
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
   try {
-    const product = allProducts.find(p => p.id === id);
-    return product || null;
+    const { firestore } = getFirebaseAdmin();
+    const doc = await firestore.collection('products').doc(id).get();
+
+    if (!doc.exists) {
+        return null;
+    }
+
+    const data = doc.data();
+    if (!data) return null;
+
+    return {
+        id: doc.id,
+        ...data,
+        sizes: Array.isArray(data.sizes) ? data.sizes : [],
+        colors: Array.isArray(data.colors) ? data.colors : [],
+        images: Array.isArray(data.images) ? data.images : [],
+    } as Product;
+
   } catch (error) {
-    console.error(`Failed to fetch product with id ${id} from mock data:`, error);
+    console.error(`Failed to fetch product with id ${id} from Firestore:`, error);
     return null;
   }
 }
