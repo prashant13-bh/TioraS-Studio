@@ -3,7 +3,7 @@
 
 import type { Product } from '@/lib/types';
 import { getFirebaseAdmin } from '@/firebase/server-config';
-import { collection, getDocs, doc, getDoc, query, where, limit as firestoreLimit } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, where, limit as firestoreLimit } from 'firebase-admin/firestore';
 
 export async function getProducts({
   category,
@@ -14,19 +14,19 @@ export async function getProducts({
 }): Promise<{ products: Product[] }> {
   try {
     const { firestore } = await getFirebaseAdmin();
-    const productsCollection = collection(firestore, 'products');
+    const productsCollection = firestore.collection('products');
     
-    let q = query(productsCollection);
+    let q: FirebaseFirestore.Query = productsCollection;
 
     if (category && category !== 'All') {
-      q = query(q, where('category', '==', category));
+      q = q.where('category', '==', category);
     }
     
     if (limit) {
-      q = query(q, firestoreLimit(limit));
+      q = q.limit(limit);
     }
 
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await q.get();
     const products = querySnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -49,14 +49,18 @@ export async function getProducts({
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     const { firestore } = await getFirebaseAdmin();
-    const productDocRef = doc(firestore, 'products', id);
-    const docSnap = await getDoc(productDocRef);
+    const productDocRef = firestore.doc(`products/${id}`);
+    const docSnap = await productDocRef.get();
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return null;
     }
     
     const data = docSnap.data();
+
+    if (!data) {
+        return null;
+    }
 
     return {
       id: docSnap.id,
