@@ -82,7 +82,7 @@ const productSchema = z.object({
     category: z.string().min(1, 'Category is required'),
     sizes: z.array(z.string()).min(1, 'At least one size is required.'),
     colors: z.array(z.string()).min(1, 'At least one color is required.'),
-    images: z.array(z.string().url()).min(1, 'At least one image is required.'),
+    images: z.array(z.string().url()).min(1, 'At least one image URL is required.'),
     isNew: z.boolean(),
 });
 
@@ -90,7 +90,7 @@ const productSchema = z.object({
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
     const validatedData = productSchema.safeParse(data);
     if (!validatedData.success) {
-        // console.error("Validation failed:", validatedData.error.flatten());
+        console.error("Validation failed:", validatedData.error.flatten());
         return { success: false, message: 'Invalid product data.' };
     }
     
@@ -114,7 +114,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
     const validatedData = productSchema.safeParse(data);
     if (!validatedData.success) {
-        // console.error("Validation failed:", validatedData.error.flatten());
+        console.error("Validation failed:", validatedData.error.flatten());
         return { success: false, message: 'Invalid product data.' };
     }
 

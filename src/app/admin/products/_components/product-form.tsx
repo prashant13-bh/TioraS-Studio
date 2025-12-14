@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct } from '@/app/actions/product-actions';
 import type { Product } from '@/lib/types';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import React from 'react';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -39,6 +40,7 @@ const formSchema = z.object({
   category: z.enum(['T-Shirt', 'Hoodie', 'Jacket', 'Cap']),
   sizes: z.string().min(1, 'Please enter comma-separated sizes.'),
   colors: z.string().min(1, 'Please enter comma-separated hex color codes.'),
+  images: z.array(z.object({ url: z.string().url('Please enter a valid URL.') })),
   isNew: z.boolean(),
 });
 
@@ -52,12 +54,14 @@ export function ProductForm({ product }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [newImageUrl, setNewImageUrl] = React.useState('');
 
   const defaultValues = product
     ? {
         ...product,
         sizes: product.sizes.join(', '),
         colors: product.colors.join(', '),
+        images: product.images.map(url => ({ url })),
       }
     : {
         name: '',
@@ -66,6 +70,7 @@ export function ProductForm({ product }: ProductFormProps) {
         category: 'T-Shirt' as const,
         sizes: 'S, M, L, XL',
         colors: '#000000, #FFFFFF',
+        images: [{ url: 'https://picsum.photos/seed/placeholder/600/800' }],
         isNew: true,
       };
 
@@ -75,16 +80,19 @@ export function ProductForm({ product }: ProductFormProps) {
     mode: 'onChange',
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
+
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
     
-    const images = product?.images?.length ? product.images : ['https://picsum.photos/seed/placeholder/600/800'];
-
     const productData = {
         ...data,
         sizes: data.sizes.split(',').map(s => s.trim()).filter(Boolean),
         colors: data.colors.split(',').map(c => c.trim()).filter(Boolean),
-        images: images,
+        images: data.images.map(img => img.url),
     };
 
     try {
@@ -118,6 +126,22 @@ export function ProductForm({ product }: ProductFormProps) {
         setIsSubmitting(false);
     }
   };
+
+  const handleAddImage = () => {
+    if (newImageUrl) {
+        try {
+            z.string().url().parse(newImageUrl);
+            append({ url: newImageUrl });
+            setNewImageUrl('');
+        } catch (error) {
+            toast({
+                title: 'Invalid URL',
+                description: 'Please enter a valid image URL.',
+                variant: 'destructive'
+            });
+        }
+    }
+  }
 
   return (
     <Form {...form}>
@@ -154,21 +178,63 @@ export function ProductForm({ product }: ProductFormProps) {
                     <FormLabel>Images & Video</FormLabel>
                     <FormDescription className="mb-2">Manage media for the product. The first item is the main display.</FormDescription>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                        {product?.images?.map((img, index) => (
-                            <div key={index} className="relative aspect-square w-full">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="relative group aspect-square w-full">
                                 <Image
-                                    src={img}
+                                    src={field.url}
                                     alt={`Product image ${index + 1}`}
                                     fill
                                     className="rounded-md object-cover"
                                 />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="size-8"
+                                        onClick={() => remove(index)}
+                                    >
+                                        <Trash2 className="size-4" />
+                                        <span className="sr-only">Remove Image</span>
+                                    </Button>
+                                </div>
                             </div>
                         ))}
-                         <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted/80">
-                            <PlusCircle className="size-8 text-muted-foreground" />
-                            <span className="sr-only">Add Media</span>
-                        </button>
+                         <Dialog>
+                            <DialogTrigger asChild>
+                                <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted/80">
+                                    <PlusCircle className="size-8 text-muted-foreground" />
+                                    <span className="sr-only">Add Media</span>
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Add New Image URL</DialogTitle>
+                                    <DialogDescription>
+                                        Paste the URL of the image you want to add.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-2">
+                                    <Label htmlFor="new-image-url">Image URL</Label>
+                                    <Input 
+                                        id="new-image-url"
+                                        value={newImageUrl}
+                                        onChange={(e) => setNewImageUrl(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                        <Button type="button" onClick={handleAddImage}>Add Image</Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
+                    <FormMessage>{form.formState.errors.images?.root?.message}</FormMessage>
                  </div>
             </div>
             <div className="space-y-8">
