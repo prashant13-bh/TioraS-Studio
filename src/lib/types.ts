@@ -1,5 +1,6 @@
 
 
+
 export type ProductMedia = {
     type: 'image' | 'video';
     url: string;
@@ -99,7 +100,7 @@ export type UserProfile = {
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
-  providerId: string;
+  providerId?: string;
   createdAt: string;
   isAdmin?: boolean;
 };

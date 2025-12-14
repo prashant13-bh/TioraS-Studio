@@ -14,16 +14,28 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useAuth, useUser } from '@/firebase';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { ADMIN_EMAILS } from '../admin/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
+
+async function checkAdminStatus(): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth/check-admin');
+    if (res.ok) {
+      const data = await res.json();
+      return data.isAdmin === true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,11 +43,16 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { auth, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRedirect = (user: any) => {
-    if (user?.email && ADMIN_EMAILS.includes(user.email)) {
+  const handleRedirect = async () => {
+    const isAdmin = await checkAdminStatus();
+    const redirectUrl = searchParams.get('redirect');
+    if (redirectUrl) {
+      router.push(redirectUrl);
+    } else if (isAdmin) {
       router.push('/admin');
     } else {
       router.push('/dashboard');
@@ -53,9 +70,9 @@ export default function LoginPage() {
     }
     setIsSubmitting(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       toast({ title: 'Success', description: "You've been signed in." });
-      handleRedirect(userCredential.user);
+      await handleRedirect();
     } catch (error: any) {
       toast({
         title: 'Login Failed',
@@ -79,9 +96,9 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
       toast({ title: 'Success', description: "You've been signed in with Google." });
-      handleRedirect(userCredential.user);
+      await handleRedirect();
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',

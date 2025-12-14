@@ -9,7 +9,7 @@ import { User, LogOut, Shield, Bell } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
-import { ADMIN_EMAILS } from '@/app/admin/layout';
+import { useEffect, useState } from 'react';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -18,19 +18,42 @@ const navLinks = [
   { title: 'Our Story', href: '/about' },
 ];
 
+async function checkAdminStatus(): Promise<boolean> {
+  // This is a client-side check. We fetch from an API route
+  // that would use the secure server-side `getCurrentUser`.
+  try {
+    const res = await fetch('/api/auth/check-admin');
+    if (res.ok) {
+      const data = await res.json();
+      return data.isAdmin === true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function Navbar() {
   const { user, loading } = useUser();
   const { auth } = useAuth();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    if (user && !loading) {
+      checkAdminStatus().then(setIsAdmin);
+    } else if (!user && !loading) {
+      setIsAdmin(false);
+    }
+  }, [user, loading]);
 
   const handleLogout = async () => {
     if (auth) {
       await auth.signOut();
+      setIsAdmin(false); // Reset admin status on logout
       router.push('/');
     }
   };
-  
-  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -85,7 +108,7 @@ export function Navbar() {
             <span className="sr-only">Notifications</span>
           </Button>
           <CartSheet />
-          <MobileNav navLinks={navLinks} />
+          <MobileNav navLinks={navLinks} isAdmin={isAdmin} />
         </div>
       </div>
     </header>

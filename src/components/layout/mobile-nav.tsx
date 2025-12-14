@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LogOut, Menu, User, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,16 +12,16 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { TiorasLogo } from '@/components/icons';
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase'; // Using the client-side user hook for UI display
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
-import { ADMIN_EMAILS } from '@/app/admin/layout';
 
 interface MobileNavProps {
   navLinks: { title: string; href: string }[];
+  isAdmin: boolean;
 }
 
-export function MobileNav({ navLinks }: MobileNavProps) {
+export function MobileNav({ navLinks, isAdmin }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useUser();
   const { auth } = useAuth();
@@ -34,8 +34,6 @@ export function MobileNav({ navLinks }: MobileNavProps) {
       router.push('/');
     }
   };
-
-  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { getUserDashboardData } from '@/app/actions/user-actions';
 import { format } from 'date-fns';
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/lib/auth/server-auth';
+import { getCurrentUser, UserWithRole } from '@/lib/auth/server-auth';
 
 export const metadata = {
   title: 'My Dashboard | TioraS',
@@ -37,6 +37,8 @@ export default async function DashboardPage() {
         return 'secondary';
     }
   };
+  
+  const displayName = user.name || user.email?.split('@')[0] || 'designer';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -45,7 +47,7 @@ export default async function DashboardPage() {
           My Dashboard
         </h1>
         <p className="text-lg text-muted-foreground">
-            Welcome back, {user.name || 'designer'}! Here are your creations and recent orders.
+            Welcome back, {displayName}! Here are your creations and recent orders.
         </p>
       </header>
       
