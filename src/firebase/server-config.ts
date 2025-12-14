@@ -16,28 +16,30 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 let adminApp: App;
 
 // This function initializes the Firebase Admin SDK if it hasn't been already.
-async function initializeAdminApp() {
-  if (!getApps().length) {
-    // When running in a Google Cloud environment (like Cloud Run),
-    // the SDK can often auto-discover credentials.
-    // For local development, you'd set GOOGLE_APPLICATION_CREDENTIALS.
-    try {
-        adminApp = initializeApp();
-    } catch(e) {
-        console.warn("Could not initialize Firebase Admin SDK with default credentials. This is expected in local development. Falling back to service account object if available.");
-         adminApp = initializeApp({
-            credential: cert(serviceAccount),
-         });
-    }
-  } else {
+function initializeAdminApp() {
+    // Check if the app is already initialized
+  if (getApps().length > 0) {
     adminApp = getApps()[0];
+    return;
+  }
+  
+  // When running in a Google Cloud environment (like Cloud Run),
+  // the SDK can often auto-discover credentials.
+  // For local development, you'd set GOOGLE_APPLICATION_CREDENTIALS.
+  try {
+      adminApp = initializeApp();
+  } catch(e) {
+      console.warn("Could not initialize Firebase Admin SDK with default credentials. This is expected in local development. Falling back to service account object if available.");
+       adminApp = initializeApp({
+          credential: cert(serviceAccount),
+       });
   }
 }
 
-export async function getFirebaseAdmin() {
-    if (!getApps().length) {
-        await initializeAdminApp();
-    }
+// Initialize the app when this module is first loaded
+initializeAdminApp();
+
+export function getFirebaseAdmin() {
     return {
         firestore: getFirestore(adminApp),
     };
