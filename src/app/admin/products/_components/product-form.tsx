@@ -67,7 +67,7 @@ export function ProductForm({ product }: ProductFormProps) {
         category: 'T-Shirt' as const,
         sizes: 'S, M, L, XL',
         colors: '#000000, #FFFFFF',
-        images: [{ value: '' }],
+        images: [{ value: 'https://picsum.photos/seed/101/600/800' }],
         isNew: true,
       };
 
@@ -86,27 +86,31 @@ export function ProductForm({ product }: ProductFormProps) {
     setIsSubmitting(true);
     const productData = {
         ...data,
-        sizes: data.sizes.split(',').map(s => s.trim()),
-        colors: data.colors.split(',').map(c => c.trim()),
-        images: data.images.map(img => img.value),
+        sizes: data.sizes.split(',').map(s => s.trim()).filter(Boolean),
+        colors: data.colors.split(',').map(c => c.trim()).filter(Boolean),
+        images: data.images.map(img => img.value).filter(Boolean),
     };
 
     try {
         let result;
         if (product) {
             result = await updateProduct(product.id, productData);
-            toast({ title: 'Product Updated', description: `"${data.name}" has been successfully updated.` });
+            if (result.success) {
+                toast({ title: 'Product Updated', description: `"${data.name}" has been successfully updated.` });
+            } else {
+                throw new Error(result.message || 'Update failed');
+            }
         } else {
             result = await createProduct(productData);
-            toast({ title: 'Product Created', description: `New product "${data.name}" has been added.` });
+            if (result.success) {
+                toast({ title: 'Product Created', description: `New product "${data.name}" has been added.` });
+            } else {
+                throw new Error(result.message || 'Creation failed');
+            }
         }
         
-        if (result.success) {
-            router.push('/admin/products');
-            router.refresh();
-        } else {
-            throw new Error(result.message || 'An unknown error occurred');
-        }
+        router.push('/admin/products');
+        router.refresh();
 
     } catch (error: any) {
         toast({
@@ -225,7 +229,7 @@ export function ProductForm({ product }: ProductFormProps) {
                                 <SelectItem value="T-Shirt">T-Shirt</SelectItem>
                                 <SelectItem value="Hoodie">Hoodie</SelectItem>
                                 <SelectItem value="Jacket">Jacket</SelectItem>
-                                <SelectItem value="Cap">Cap</SelectItem>
+                                <SelectItem value="Cap">Cap</Navbar>
                             </SelectContent>
                         </Select>
                         <FormMessage />

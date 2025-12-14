@@ -80,19 +80,24 @@ const productSchema = z.object({
     description: z.string().min(1, 'Description is required'),
     price: z.coerce.number().min(0, 'Price must be a positive number'),
     category: z.string().min(1, 'Category is required'),
-    sizes: z.string().min(1, 'Sizes are required'),
-    colors: z.string().min(1, 'Colors are required'),
+    sizes: z.array(z.string()).min(1, 'At least one size is required.'),
+    colors: z.array(z.string()).min(1, 'At least one color is required.'),
     images: z.array(z.string().url()).min(1, 'At least one image is required.'),
     isNew: z.boolean(),
 });
 
 
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    const validatedData = productSchema.safeParse(data);
+    if (!validatedData.success) {
+        return { success: false, message: 'Invalid product data.' };
+    }
+    
     try {
         const { firestore } = getFirebaseAdmin();
         const now = new Date().toISOString();
         const newProduct = {
-            ...data,
+            ...validatedData.data,
             createdAt: now,
             updatedAt: now,
         };
@@ -106,11 +111,16 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
 }
 
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    const validatedData = productSchema.safeParse(data);
+    if (!validatedData.success) {
+        return { success: false, message: 'Invalid product data.' };
+    }
+
     try {
         const { firestore } = getFirebaseAdmin();
         const now = new Date().toISOString();
         const updatedProduct = {
-            ...data,
+            ...validatedData.data,
             updatedAt: now,
         };
         await firestore.collection('products').doc(id).update(updatedProduct);
@@ -122,3 +132,4 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
         return { success: false, message: 'Failed to update product.' };
     }
 }
+
