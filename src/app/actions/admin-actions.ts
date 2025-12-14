@@ -16,21 +16,17 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     const ordersCollection = firestore.collectionGroup('orders');
     
     // Efficiently get counts and totals
-    const allOrdersSnapshot = await ordersCollection.get();
+    const allOrdersSnapshot = await ordersCollection.orderBy('createdAt', 'desc').get();
+    
     const totalOrders = allOrdersSnapshot.size;
     const totalRevenue = allOrdersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
-
-    // This is less efficient than a direct count with an index, but avoids the FAILED_PRECONDITION error for now.
-    // For a production app, creating the composite index in Firestore is the correct solution.
     const pendingOrders = allOrdersSnapshot.docs.filter(doc => doc.data().status === 'Pending').length;
 
     const usersSnapshot = await firestore.collection('users').count().get();
     const activeUsers = usersSnapshot.data().count;
 
-    // Get only the 5 most recent orders for the table
-    const recentOrdersQuery = ordersCollection.orderBy('createdAt', 'desc').limit(5);
-    const recentOrdersSnapshot = await recentOrdersQuery.get();
-    const recentOrders = recentOrdersSnapshot.docs.map(doc => {
+    // Get only the 5 most recent orders for the table from the already fetched snapshot
+    const recentOrders = allOrdersSnapshot.docs.slice(0, 5).map(doc => {
         const data = doc.data();
         return { 
             id: doc.id,
@@ -48,6 +44,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     };
   } catch (error) {
     console.error('Failed to fetch admin dashboard data from Firestore:', error);
+    // Return a default state on error to prevent crashing the page
     return {
       totalRevenue: 0,
       totalOrders: 0,
