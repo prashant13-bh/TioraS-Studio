@@ -68,17 +68,19 @@
           "description": "Category of the product (e.g., T-Shirt, Hoodie, Jacket, Accessories)."
         },
         "sizes": {
-          "type": "string",
-          "description": "JSON string representing available sizes for the product (e.g., [\"S\", \"M\", \"L\", \"XL\", \"XXL\"])."
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Available sizes for the product."
         },
         "colors": {
-          "type": "string",
-          "description": "JSON string representing available colors for the product (e.g., [\"Black\", \"White\", \"Navy\"])."
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Available colors for the product."
         },
-        "image": {
-          "type": "string",
-          "description": "URL of the product image.",
-          "format": "uri"
+        "images": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "description": "URLs of the product images."
         },
         "isNew": {
           "type": "boolean",
@@ -103,7 +105,7 @@
         "category",
         "sizes",
         "colors",
-        "image",
+        "images",
         "isNew",
         "createdAt",
         "updatedAt"
@@ -184,8 +186,8 @@
           "description": "Status of the order (Pending, Processing, Shipped, Delivered)."
         },
         "shippingAddr": {
-          "type": "string",
-          "description": "JSON string representing the shipping address for the order."
+          "type": "object",
+          "description": "Shipping address for the order."
         },
         "createdAt": {
           "type": "string",
@@ -261,124 +263,49 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles.  Accessible only by the user themselves or an admin.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            }
-          ]
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profiles. Accessible only by the user themselves or an admin."
+    },
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Stores product information. Publicly readable."
+    },
+    "/users/{userId}/designs/{designId}": {
+      "schema": {
+        "$ref": "#/entities/Design"
+      },
+      "description": "Stores user-created designs. Includes denormalized 'userId' for authorization independence."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/Order"
+      },
+      "description": "Stores user orders. Includes denormalized 'userId' for authorization independence."
+    },
+    "/users/{userId}/orders/{orderId}/orderItems/{orderItemId}": {
+      "schema": {
+        "$ref": "#/entities/OrderItem"
+      },
+      "description": "Stores individual items within an order."
+    },
+    "/roles_admin/{userId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "isAdmin": { "type": "boolean" }
         }
       },
-      {
-        "path": "/products/{productId}",
-        "definition": {
-          "entityName": "Product",
-          "schema": {
-            "$ref": "#/backend/entities/Product"
-          },
-          "description": "Stores product information. Publicly readable.",
-          "params": [
-            {
-              "name": "productId",
-              "description": "The unique identifier for the product."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/designs/{designId}",
-        "definition": {
-          "entityName": "Design",
-          "schema": {
-            "$ref": "#/backend/entities/Design"
-          },
-          "description": "Stores user-created designs. Includes denormalized 'userId' for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            },
-            {
-              "name": "designId",
-              "description": "The unique identifier for the design."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Stores user orders. Includes denormalized 'userId' for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier for the order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}/orderItems/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Stores individual items within an order.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier for the order."
-            },
-            {
-              "name": "orderItemId",
-              "description": "The unique identifier for the order item."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "entityName": "roles_admin",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Documents in this collection grant admin access to the user. Existence of document grants admin access.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore data structure is designed to support the TioraS e-commerce platform, focusing on AI-generated designs and product sales. It prioritizes authorization independence and efficient data retrieval.\n\n**Authorization Independence:**\n\n*   **Designs:** Designs are stored under `/users/{userId}/designs/{designId}`. The `Design` documents contain a `userId` field, which is denormalized authorization data. This enables security rules to validate ownership based on the path and the `userId` field within the document itself, without requiring `get()` calls to a parent `users` document.\n*   **Orders:** Orders are stored under `/users/{userId}/orders/{orderId}`. The `Order` documents contain a `userId` field. This enables security rules to validate ownership without requiring `get()` calls.\n\n**Structural Segregation:**\n\n*   Designs are segregated based on user ID to ensure only the owner or admins can manage them. The Design review process would have a separate admin approval collection to ensure proper authorization rules.\n*   Orders are segregated by User.\n\n**Access Modeling:**\n\n*   Private data (designs, orders) is modeled using path-based ownership under `/users/{userId}`.\n*   Admin functions (e.g. approving designs) would require a `/roles_admin/{uid}` collection for DBAC.\n\n**QAPs (Rules are not Filters):**\n\n*   The structure uses path-based ownership (`/users/{userId}/designs/{designId}`) which allows secure `list` operations for a specific user's designs. The security rules can efficiently filter by the `userId` embedded in the path, ensuring users can only access their own designs.\n\n**Invariants:**\n\n*   Timestamps (`createdAt`, `updatedAt`) can be enforced using security rules to prevent modification.\n*   Ownership of designs and orders is maintained by the `userId` field and path-based structure."
+      "description": "Documents in this collection grant admin access to the user. Existence of document grants admin access."
+    }
   }
 }

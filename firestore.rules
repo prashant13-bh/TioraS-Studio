@@ -87,11 +87,11 @@ service cloud.firestore {
      * @principle Restricts access to a user's own data tree and enforces self-creation.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; // Disallow listing all users for privacy.
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); // Only admins can list users.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && resource != null && request.resource.data.id == resource.data.id;
-      allow delete: if false; // Deletion should be handled by a trusted backend process.
+      allow update: if (isOwner(userId) || isAdmin()) && resource != null && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin(); // Only admins can delete users.
     }
 
     // -------------------------------------------------------------------------
@@ -144,11 +144,11 @@ service cloud.firestore {
      * @principle Enforces document ownership and validates the denormalized 'userId' for relational integrity.
      */
     match /users/{userId}/designs/{designId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId) || isAdmin();
     }
 
     /**
@@ -159,11 +159,11 @@ service cloud.firestore {
      * @principle Enforces document ownership for a user's private data and validates relational integrity.
      */
     match /users/{userId}/orders/{orderId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId) || isAdmin();
 
       /**
        * @description Manages the specific items within an order.
@@ -173,11 +173,11 @@ service cloud.firestore {
        * @principle Access is inherited from the parent document's ownership, enforced via the path.
        */
       match /orderItems/{orderItemId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
-        allow update: if isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
-        allow delete: if isExistingOwner(userId);
+        allow update: if (isOwner(userId) || isAdmin()) && isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
+        allow delete: if isExistingOwner(userId) || isAdmin();
       }
     }
   }

@@ -1,8 +1,8 @@
-
 'use server';
 
 import type { Product } from '@/lib/types';
-import productsData from '@/lib/products.json';
+import { initializeFirebase } from '@/firebase';
+import { collection, getDocs, doc, getDoc, query, where, limit as firestoreLimit } from 'firebase/firestore';
 
 export async function getProducts({
   category,
@@ -12,44 +12,48 @@ export async function getProducts({
   limit?: number;
 }): Promise<{ products: Product[] }> {
   try {
-    let products: Product[] = productsData.products.map(p => ({
-        ...p,
-        sizes: JSON.parse(p.sizes as any),
-        colors: JSON.parse(p.colors as any),
-        images: JSON.parse(p.images as any),
-    }));
+    const { firestore } = initializeFirebase();
+    const productsCollection = collection(firestore, 'products');
+    
+    let q = query(productsCollection);
 
     if (category && category !== 'All') {
-      products = products.filter(p => p.category === category);
+      q = query(q, where('category', '==', category));
     }
     
     if (limit) {
-      products = products.slice(0, limit);
+      q = query(q, firestoreLimit(limit));
     }
+
+    const querySnapshot = await getDocs(q);
+    const products = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Product[];
 
     return { products };
   } catch (error) {
-    console.error('Failed to fetch products:', error);
+    console.error('Failed to fetch products from Firestore:', error);
     return { products: [] };
   }
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
   try {
-    const product = productsData.products.find((p) => p.id === id);
+    const { firestore } = initializeFirebase();
+    const productDocRef = doc(firestore, 'products', id);
+    const docSnap = await getDoc(productDocRef);
 
-    if (!product) {
+    if (!docSnap.exists()) {
       return null;
     }
 
     return {
-      ...product,
-      sizes: JSON.parse(product.sizes as any),
-      colors: JSON.parse(product.colors as any),
-      images: JSON.parse(product.images as any),
-    };
+      id: docSnap.id,
+      ...docSnap.data(),
+    } as Product;
   } catch (error) {
-    console.error(`Failed to fetch product with id ${id}:`, error);
+    console.error(`Failed to fetch product with id ${id} from Firestore:`, error);
     return null;
   }
 }
