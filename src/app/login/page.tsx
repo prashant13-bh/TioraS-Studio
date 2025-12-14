@@ -1,6 +1,6 @@
 'use client';
 
-import { TiorasLogo } from '@/components/icons';
+import { GoogleIcon, TiorasLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,10 +15,11 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -44,6 +45,29 @@ export default function LoginPage() {
     } catch (error: any) {
       toast({
         title: 'Login Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!auth) {
+      toast({
+        title: 'Error',
+        description: 'Authentication service is not available.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      toast({ title: 'Success', description: "You've been signed in with Google." });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: 'Google Sign-In Failed',
         description: error.message,
         variant: 'destructive',
       });
@@ -109,11 +133,19 @@ export default function LoginPage() {
               </Button>
             </div>
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
           <Button className="w-full" onClick={handleLogin}>
             Sign In
           </Button>
+          <div className="relative my-4">
+            <Separator />
+            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
+          </div>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+            <GoogleIcon className="mr-2 size-5" />
+            Sign In with Google
+          </Button>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
            <Button variant="outline" className="w-full" asChild>
             <Link href="/">
               <ArrowLeft className="mr-2 size-4" />
