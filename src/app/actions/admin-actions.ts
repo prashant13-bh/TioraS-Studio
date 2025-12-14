@@ -6,6 +6,7 @@ import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
 import { subDays, format, startOfDay } from 'date-fns';
+import type { firestore as admin } from 'firebase-admin';
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
@@ -128,10 +129,16 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 }
 
 
-export async function getAllDesigns(): Promise<Design[]> {
+export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
     try {
         const { firestore } = getFirebaseAdmin();
-        const designsSnapshot = await firestore.collectionGroup('designs').orderBy('createdAt', 'desc').get();
+        let query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
+
+        if (status && status !== 'All') {
+            query = query.where('status', '==', status);
+        }
+
+        const designsSnapshot = await query.get();
 
         if (designsSnapshot.empty) {
             return [];
