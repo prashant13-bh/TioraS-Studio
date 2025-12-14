@@ -16,7 +16,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     const ordersCollection = firestore.collectionGroup('orders');
     
     // Efficiently get counts and totals
-    const allOrdersSnapshot = await ordersCollection.orderBy('createdAt', 'desc').get();
+    const allOrdersSnapshot = await ordersCollection.get();
     
     const totalOrders = allOrdersSnapshot.size;
     const totalRevenue = allOrdersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
@@ -25,15 +25,18 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     const usersSnapshot = await firestore.collection('users').count().get();
     const activeUsers = usersSnapshot.data().count;
 
-    // Get only the 5 most recent orders for the table from the already fetched snapshot
-    const recentOrders = allOrdersSnapshot.docs.slice(0, 5).map(doc => {
-        const data = doc.data();
-        return { 
-            id: doc.id,
-             ...data,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-        } as Order
-    });
+    // Sort documents by date in memory and get the 5 most recent
+    const recentOrders = allOrdersSnapshot.docs
+        .map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id,
+                 ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+            } as Order
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
 
     return {
       totalRevenue,
@@ -58,26 +61,28 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 export async function getAllOrders(): Promise<Order[]> {
    try {
     const { firestore } = getFirebaseAdmin();
-    const ordersSnapshot = await firestore.collectionGroup('orders').orderBy('createdAt', 'desc').get();
+    // Remove the orderBy clause to prevent index-related errors
+    const ordersSnapshot = await firestore.collectionGroup('orders').get();
     
-    // Note: This fetches all orders and then maps them. For very large datasets,
-    // pagination would be required on this page.
-    const orders = await Promise.all(ordersSnapshot.docs.map(async (doc) => {
+    const ordersData = await Promise.all(ordersSnapshot.docs.map(async (doc) => {
       const data = doc.data();
       const itemsSnapshot = await doc.ref.collection('orderItems').get();
       
-      const itemsCount = itemsSnapshot.size; // Get count of items instead of fetching them all
+      const itemsCount = itemsSnapshot.size;
       
       return {
         id: doc.id,
         ...data,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-        items: [], // Return an empty array or just the count
+        items: [],
         itemCount: itemsCount,
       } as Order;
     }));
 
-    return orders;
+    // Sort the orders in memory
+    const sortedOrders = ordersData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return sortedOrders;
   } catch (error) {
     console.error('Failed to fetch all orders from Firestore:', error);
     return [];
