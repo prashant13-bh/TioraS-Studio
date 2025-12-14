@@ -76,7 +76,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   }
 }
 
-export async function getAllOrders(): Promise<Order[]> {
+export async function getAllOrders({ query }: { query?: string }): Promise<Order[]> {
   try {
     const { firestore } = getFirebaseAdmin();
     const ordersSnapshot = await firestore.collectionGroup('orders').orderBy('createdAt', 'desc').get();
@@ -85,7 +85,7 @@ export async function getAllOrders(): Promise<Order[]> {
       return [];
     }
 
-    const allOrders: Order[] = ordersSnapshot.docs.map(doc => {
+    let allOrders: Order[] = ordersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -93,6 +93,15 @@ export async function getAllOrders(): Promise<Order[]> {
         itemCount: data.itemCount || (data.items ? data.items.length : 0),
       } as Order;
     });
+
+    if (query) {
+        const lowercasedQuery = query.toLowerCase();
+        allOrders = allOrders.filter(order => 
+            order.shippingAddr.name.toLowerCase().includes(lowercasedQuery) ||
+            order.shippingAddr.email.toLowerCase().includes(lowercasedQuery) ||
+            order.orderNumber.toLowerCase().includes(lowercasedQuery)
+        );
+    }
 
     return allOrders;
   } catch (error) {
@@ -132,7 +141,9 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
     try {
         const { firestore } = getFirebaseAdmin();
-        const designsSnapshot = await firestore.collectionGroup('designs').orderBy('createdAt', 'desc').get();
+        let query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
+        
+        const designsSnapshot = await query.get();
 
         if (designsSnapshot.empty) {
             return [];

@@ -19,9 +19,16 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { OrderActions } from './_components/order-actions';
 import type { Order } from '@/lib/types';
+import { Search } from '@/components/search';
+import { Suspense } from 'react';
 
-export default async function AdminOrdersPage() {
-  const orders: Order[] = await getAllOrders();
+export default async function AdminOrdersPage({
+    searchParams,
+}: {
+    searchParams?: { query?: string };
+}) {
+  const query = searchParams?.query || '';
+  const orders: Order[] = await getAllOrders({ query });
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -46,6 +53,11 @@ export default async function AdminOrdersPage() {
         <CardDescription>
           A list of all orders placed on the platform.
         </CardDescription>
+        <div className="pt-2">
+            <Suspense fallback={<div>Loading search...</div>}>
+                <Search placeholder="Search by name, email, or order #" />
+            </Suspense>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -91,6 +103,11 @@ export default async function AdminOrdersPage() {
             </TableBody>
           </Table>
         </div>
+         {orders.length === 0 && (
+          <div className="py-12 text-center text-muted-foreground">
+            No orders found for &quot;{query}&quot;.
+          </div>
+        )}
       </CardContent>
     </Card>
   );
