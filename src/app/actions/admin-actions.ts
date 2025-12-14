@@ -9,7 +9,10 @@ import { customAlphabet } from 'nanoid';
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
     const { firestore } = getFirebaseAdmin();
-    const allOrders = await getAllOrders(); // Reuse the optimized function
+    
+    // Fetch all orders using a collection group query
+    const ordersSnapshot = await firestore.collectionGroup('orders').get();
+    const allOrders: Order[] = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
 
     const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
     const totalOrders = allOrders.length;
@@ -24,7 +27,10 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
         // If users collection doesn't exist or there's an error, we default to 0
     }
 
-    const recentOrders = allOrders.slice(0, 5); // Already sorted by getAllOrders
+    // Sort orders by creation date to get the most recent ones
+    const recentOrders = allOrders
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
 
     return {
       totalRevenue,
@@ -61,7 +67,7 @@ export async function getAllOrders(): Promise<Order[]> {
         id: doc.id,
         ...data,
         // Ensure itemCount is present, default to 0 if not on document
-        itemCount: data.items?.length || 0, 
+        itemCount: data.itemCount || (data.items ? data.items.length : 0),
       } as Order;
     });
 
