@@ -14,16 +14,22 @@ import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useEffect, useState } from 'react';
 
 export function CartSheet() {
   const { items, total, itemCount, updateQuantity, removeFromCart } = useCart();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <ShoppingCart className="size-5" />
-          {itemCount > 0 && (
+          {isClient && itemCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
               {itemCount}
             </span>
@@ -33,9 +39,9 @@ export function CartSheet() {
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
+          <SheetTitle>Shopping Cart ({isClient ? itemCount : 0})</SheetTitle>
         </SheetHeader>
-        {itemCount > 0 ? (
+        {isClient && itemCount > 0 ? (
           <>
             <ScrollArea className="flex-1 pr-4">
               <div className="my-4 divide-y divide-border">

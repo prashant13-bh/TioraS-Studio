@@ -1,4 +1,3 @@
-
 'use client';
 
 import { TiorasLogo } from '@/components/icons';
@@ -14,8 +13,42 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { auth } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogin = async () => {
+    if (!auth) {
+      toast({
+        title: 'Error',
+        description: 'Authentication service is not available.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({ title: 'Success', description: "You've been signed in." });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: 'Login Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -32,15 +65,34 @@ export default function LoginPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@example.com" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" />
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full">Sign In</Button>
+          <Button className="w-full" onClick={handleLogin}>
+            Sign In
+          </Button>
+           <Button variant="outline" className="w-full" asChild>
+            <Link href="/">
+              <ArrowLeft className="mr-2 size-4" />
+              Back to Home
+            </Link>
+          </Button>
           <p className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link
