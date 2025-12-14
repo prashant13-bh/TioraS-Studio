@@ -1,3 +1,6 @@
+
+'use client';
+
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
@@ -8,6 +11,7 @@ import { FirebaseClientProvider } from '@/firebase';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -19,21 +23,29 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
 });
 
-export const metadata: Metadata = {
-  title: 'TioraS AI Menswear',
-  description: 'Premium AI-powered men\'s clothing e-commerce platform.',
-  icons: {
-    icon: '/favicon.ico',
-  },
-};
+// export const metadata: Metadata = {
+//   title: 'TioraS AI Menswear',
+//   description: 'Premium AI-powered men\'s clothing e-commerce platform.',
+//   icons: {
+//     icon: '/favicon.ico',
+//   },
+// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith('/admin');
+
   return (
     <html lang="en" className="dark">
+      <head>
+          <title>TioraS AI Menswear</title>
+          <meta name="description" content="Premium AI-powered men's clothing e-commerce platform." />
+          <link rel="icon" href="/favicon.ico" />
+      </head>
       <body
         className={cn(
           'min-h-screen bg-black font-body antialiased',
@@ -47,7 +59,7 @@ export default function RootLayout({
               <Navbar />
               <FirebaseErrorListener />
               <main className="flex-1">{children}</main>
-              <Footer />
+              {!isAdminPage && <Footer />}
             </div>
             <Toaster />
           </CartProvider>
