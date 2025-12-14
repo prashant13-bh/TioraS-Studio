@@ -87,32 +87,3 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
   
   return memoized;
 }
-
-// Keeping the old useUser hook as it's used in many places and relies on a different logic
-export const useUser = () => {
-    const { auth, isLoading: isAuthLoading } = useAuth();
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (isAuthLoading) {
-            setLoading(true);
-            return;
-        }
-
-        if (!auth) {
-            setUser(null);
-            setLoading(false);
-            return;
-        }
-
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, [auth, isAuthLoading]);
-
-    return { user, loading };
-};
