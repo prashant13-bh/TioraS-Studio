@@ -229,7 +229,7 @@ export function ProductForm({ product }: ProductFormProps) {
                                 <SelectItem value="T-Shirt">T-Shirt</SelectItem>
                                 <SelectItem value="Hoodie">Hoodie</SelectItem>
                                 <SelectItem value="Jacket">Jacket</SelectItem>
-                                <SelectItem value="Cap">Cap</Navbar>
+                                <SelectItem value="Cap">Cap</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
