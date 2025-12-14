@@ -21,6 +21,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
+const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +30,14 @@ export default function LoginPage() {
   const { auth } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  const handleRedirect = (user: any) => {
+    if (user?.email === ADMIN_EMAIL) {
+      router.push('/admin');
+    } else {
+      router.push('/dashboard');
+    }
+  };
 
   const handleLogin = async () => {
     if (!auth) {
@@ -39,9 +49,9 @@ export default function LoginPage() {
       return;
     }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast({ title: 'Success', description: "You've been signed in." });
-      router.push('/dashboard');
+      handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Login Failed',
@@ -62,9 +72,9 @@ export default function LoginPage() {
     }
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
       toast({ title: 'Success', description: "You've been signed in with Google." });
-      router.push('/dashboard');
+      handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',

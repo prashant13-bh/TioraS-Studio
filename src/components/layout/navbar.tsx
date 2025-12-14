@@ -1,11 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { TiorasLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 import { CartSheet } from './cart-sheet';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Shield } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
@@ -16,6 +15,8 @@ const navLinks = [
   { title: 'Collections', href: '/collections' },
   { title: 'Our Story', href: '/about' },
 ];
+
+const ADMIN_EMAIL = 'tyoras9686@gmail.com';
 
 export function Navbar() {
   const { user, loading } = useUser();
@@ -28,6 +29,8 @@ export function Navbar() {
       router.push('/');
     }
   };
+  
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -48,6 +51,9 @@ export function Navbar() {
                 {link.title}
               </Link>
             ))}
+             {isAdmin && (
+              <Link href="/admin" className="text-sm font-medium text-gray-300 transition-colors hover:text-white">Admin</Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-2">

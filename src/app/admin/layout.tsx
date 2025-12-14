@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Home,
   Package,
@@ -24,6 +24,8 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { TiorasLogo } from '@/components/icons';
+import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
@@ -31,12 +33,30 @@ const navItems = [
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
+const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const { user, loading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
+      router.replace('/');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user || user.email !== ADMIN_EMAIL) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">

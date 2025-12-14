@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { LogOut, Menu, User } from 'lucide-react';
+import { LogOut, Menu, User, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -19,6 +19,8 @@ interface MobileNavProps {
   navLinks: { title: string; href: string }[];
 }
 
+const ADMIN_EMAIL = 'tyoras9686@gmail.com';
+
 export function MobileNav({ navLinks }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useUser();
@@ -32,6 +34,8 @@ export function MobileNav({ navLinks }: MobileNavProps) {
       router.push('/');
     }
   };
+
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -69,13 +73,15 @@ export function MobileNav({ navLinks }: MobileNavProps) {
               >
                 <User className="size-5" /> My Dashboard
               </Link>
-               <Link
-                href="/admin"
-                className="text-lg font-medium text-foreground hover:text-primary"
-                onClick={() => setIsOpen(false)}
-              >
-                Admin
-              </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Shield className="size-5" /> Admin
+                </Link>
+              )}
             </>
           ) : (
              <Link
