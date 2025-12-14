@@ -132,22 +132,20 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
     try {
         const { firestore } = getFirebaseAdmin();
-        let query: admin.Query = firestore.collectionGroup('designs').orderBy('createdAt', 'desc');
-
-        if (status && status !== 'All') {
-            query = query.where('status', '==', status);
-        }
-
-        const designsSnapshot = await query.get();
+        const designsSnapshot = await firestore.collectionGroup('designs').orderBy('createdAt', 'desc').get();
 
         if (designsSnapshot.empty) {
             return [];
         }
 
-        const designs: Design[] = designsSnapshot.docs.map(doc => ({
+        let designs: Design[] = designsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         } as Design));
+
+        if (status && status !== 'All') {
+            designs = designs.filter(design => design.status === status);
+        }
 
         return designs;
 
