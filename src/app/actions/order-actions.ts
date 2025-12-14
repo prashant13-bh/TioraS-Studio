@@ -4,10 +4,9 @@
 import { z } from 'zod';
 import type { CartItem, ShippingAddress, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
-import { getFirebaseAdmin } from '@/firebase/server-config';
-import { getProductById } from './product-actions';
 import { customAlphabet } from 'nanoid';
-import { auth } from 'firebase-admin';
+// Mock data store for orders - in a real app this would be a database
+let orders: Order[] = [];
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
 
@@ -54,54 +53,43 @@ export async function createOrderAction(
   }
 
   try {
-    const { firestore } = getFirebaseAdmin();
-    const user = await auth().currentUser; // Assuming a way to get the current user server-side
-    
-    if (!user) {
-        return { success: false, message: 'User not authenticated.' };
-    }
-
     const orderNumber = `ORD-${nanoid()}`;
-    const now = new Date();
+    const now = new Date().toISOString();
     
-    const userOrdersCollection = firestore.collection(`users/${user.uid}/orders`);
-    const newOrderRef = userOrdersCollection.doc();
+    // In a real app, you would get the user ID from the session
+    const userId = 'mock_user_id'; 
 
-    const createdOrder: Omit<Order, 'id' | 'items'> = {
+    const newOrder: Order = {
+        id: `order_${Date.now()}`,
         orderNumber,
         total,
-        shippingAddr: shippingAddr,
+        shippingAddr,
         status: 'Pending',
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        userId: user.uid,
-    };
-    
-    await newOrderRef.set(createdOrder);
-
-    const orderItemsCollection = newOrderRef.collection('orderItems');
-    for (const item of items) {
-        const product = await getProductById(item.id);
-        if (!product) throw new Error(`Product with id ${item.id} not found`);
-
-        const orderItem: Omit<OrderItem, 'id' | 'product'> = {
-            orderId: newOrderRef.id,
+        createdAt: now,
+        updatedAt: now,
+        userId: userId,
+        items: items.map(item => ({
+            id: `item_${Date.now()}_${item.id}`,
+            orderId: `order_${Date.now()}`,
             productId: item.id,
             quantity: item.quantity,
             size: item.selectedSize,
             color: item.selectedColor,
             price: item.price,
-            createdAt: now.toISOString(),
-            updatedAt: now.toISOString(),
-        };
-        await orderItemsCollection.add(orderItem);
-    }
+            createdAt: now,
+            updatedAt: now,
+            // In a real app, you'd fetch the full product object
+            product: { ...item, description: '', category: '', sizes: [], colors: [], images: [item.image], isNew: false, createdAt: now, updatedAt: now } 
+        }))
+    };
+    
+    orders.push(newOrder);
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');
     revalidatePath('/dashboard');
 
-    return { success: true, orderId: newOrderRef.id };
+    return { success: true, orderId: newOrder.id };
   } catch (error) {
     console.error('Failed to create order:', error);
     return { success: false, message: 'Could not create order.' };

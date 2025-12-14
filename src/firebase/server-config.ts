@@ -1,33 +1,9 @@
 
-import { initializeApp, cert, getApps, App } from 'firebase-admin/app';
-import { getFirestore, Firestore } from 'firebase-admin/firestore';
-
-let adminApp: App;
-let firestore: Firestore;
-
-if (getApps().length === 0) {
-  const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccountEnv) {
-    throw new Error(
-      'FIREBASE_SERVICE_ACCOUNT environment variable is not set. Cannot initialize Firebase Admin SDK.'
-    );
-  }
-  
-  try {
-    const serviceAccount = JSON.parse(serviceAccountEnv);
-    adminApp = initializeApp({
-      credential: cert(serviceAccount),
-    });
-  } catch (e) {
-    console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT or initialize Firebase Admin SDK.", e);
-    throw new Error("Firebase Admin SDK initialization failed.");
-  }
-} else {
-  adminApp = getApps()[0];
-}
-
-firestore = getFirestore(adminApp);
+// This file is intentionally left blank for now to prevent server-side Firebase Admin SDK initialization issues.
+// A stable backend integration will be re-introduced according to the plan in `docs/backend-integration-plan.md`.
 
 export function getFirebaseAdmin() {
-  return { firestore };
+  throw new Error(
+    'Firebase Admin SDK is not configured. This is intentional to ensure app stability. See docs/backend-integration-plan.md'
+  );
 }
