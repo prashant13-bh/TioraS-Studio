@@ -1,9 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import { TiorasLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 import { CartSheet } from './cart-sheet';
-import { User } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
+import { useUser } from '@/firebase';
+import { useAuth } from '@/firebase/provider';
+import { useRouter } from 'next/navigation';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -13,6 +18,17 @@ const navLinks = [
 ];
 
 export function Navbar() {
+  const { user, loading } = useUser();
+  const { auth } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+      router.push('/');
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -35,16 +51,28 @@ export function Navbar() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-           <Button variant="ghost" asChild className="hidden md:inline-flex">
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild className="hidden md:inline-flex">
-              <Link href="/signup">Sign Up</Link>
-            </Button>
-
-          <Button variant="ghost" asChild size="icon" className="hidden md:inline-flex">
-            <Link href="/dashboard"><User className="size-5" /></Link>
-          </Button>
+          {!loading &&
+            (user ? (
+              <>
+                <Button variant="ghost" asChild size="icon" className="hidden md:inline-flex">
+                  <Link href="/dashboard">
+                    <User className="size-5" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="hidden md:inline-flex">
+                  <LogOut className="size-5" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="hidden md:inline-flex">
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button asChild className="hidden md:inline-flex">
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            ))}
 
           <CartSheet />
           <MobileNav navLinks={navLinks} />

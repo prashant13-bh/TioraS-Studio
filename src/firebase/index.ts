@@ -21,4 +21,5 @@ export function initializeFirebase() {
 
 // Re-export the hooks and providers
 export { FirebaseProvider, useAuth, useFirestore, useFirebase } from './provider';
+export { useUser } from './auth/use-user';
 export { FirebaseClientProvider } from './client-provider';

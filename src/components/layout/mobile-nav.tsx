@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
+import { LogOut, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -11,6 +11,9 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { TiorasLogo } from '@/components/icons';
+import { useUser } from '@/firebase';
+import { useAuth } from '@/firebase/provider';
+import { useRouter } from 'next/navigation';
 
 interface MobileNavProps {
   navLinks: { title: string; href: string }[];
@@ -18,6 +21,17 @@ interface MobileNavProps {
 
 export function MobileNav({ navLinks }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, loading } = useUser();
+  const { auth } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+      setIsOpen(false);
+      router.push('/');
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -34,7 +48,7 @@ export function MobileNav({ navLinks }: MobileNavProps) {
             <span className="font-headline text-2xl font-bold">TioraS.</span>
           </Link>
         </SheetHeader>
-        <nav className="flex flex-col gap-4">
+        <nav className="flex flex-1 flex-col gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.title}
@@ -45,21 +59,41 @@ export function MobileNav({ navLinks }: MobileNavProps) {
               {link.title}
             </Link>
           ))}
-           <Link
-            href="/dashboard"
-            className="text-lg font-medium text-foreground hover:text-primary"
-            onClick={() => setIsOpen(false)}
-          >
-            My Dashboard
-          </Link>
-          <Link
-            href="/admin"
-            className="text-lg font-medium text-foreground hover:text-primary"
-            onClick={() => setIsOpen(false)}
-          >
-            Admin
-          </Link>
+          <hr className="my-4 border-muted" />
+          {!loading && user ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="size-5" /> My Dashboard
+              </Link>
+               <Link
+                href="/admin"
+                className="text-lg font-medium text-foreground hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin
+              </Link>
+            </>
+          ) : (
+             <Link
+                href="/login"
+                className="text-lg font-medium text-foreground hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                Login
+              </Link>
+          )}
         </nav>
+        {!loading && user && (
+          <div className="mt-auto">
+            <Button variant="outline" className="w-full" onClick={handleLogout}>
+              <LogOut className="mr-2 size-5" /> Logout
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
