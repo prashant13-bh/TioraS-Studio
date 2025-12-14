@@ -75,12 +75,18 @@ export type Design = {
 
 export type Category = 'All' | 'T-Shirt' | 'Hoodie' | 'Jacket' | 'Cap';
 
+export type SalesData = {
+  name: string;
+  total: number;
+};
+
 export type AdminDashboardData = {
   totalRevenue: number;
   totalOrders: number;
   pendingOrders: number;
   activeUsers: number;
   recentOrders: Order[];
+  salesByDay: SalesData[];
 };
 
 export type UserProfile = {

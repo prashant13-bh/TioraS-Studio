@@ -5,6 +5,7 @@ import { getFirebaseAdmin } from '@/firebase/server-config';
 import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
+import { subDays, format, startOfDay } from 'date-fns';
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
@@ -32,12 +33,33 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5);
 
+    // Calculate sales data for the last 7 days
+    const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
+    const salesByDay = last7Days.map(day => ({
+        name: format(day, 'MMM d'),
+        total: 0,
+    })).reverse();
+
+    const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
+
+    allOrders.forEach(order => {
+        const orderDate = new Date(order.createdAt);
+        if (orderDate >= sevenDaysAgo) {
+            const dayStr = format(orderDate, 'MMM d');
+            const dayData = salesByDay.find(d => d.name === dayStr);
+            if (dayData) {
+                dayData.total += order.total;
+            }
+        }
+    });
+
     return {
       totalRevenue,
       totalOrders,
       pendingOrders,
       activeUsers,
       recentOrders,
+      salesByDay,
     };
   } catch (error) {
     console.error('Failed to fetch admin dashboard data from Firestore:', error);
@@ -48,6 +70,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       pendingOrders: 0,
       activeUsers: 0,
       recentOrders: [],
+      salesByDay: [],
     };
   }
 }

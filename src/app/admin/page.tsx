@@ -1,4 +1,5 @@
 
+
 import { getAdminDashboardData } from '@/app/actions/admin-actions';
 import {
   Card,
@@ -18,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Package, Users, Activity } from 'lucide-react';
 import { format } from 'date-fns';
+import { SalesChart } from './_components/sales-chart';
 
 export default async function AdminDashboardPage() {
   const data = await getAdminDashboardData();
@@ -39,8 +41,8 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <div className="grid gap-4 md:gap-8 auto-rows-max">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -90,45 +92,47 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
-          <CardDescription>An overview of the most recent orders.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden sm:table-cell">Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.recentOrders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-muted/50">
-                  <TableCell>
-                    <div className="font-medium">{order.shippingAddr.name}</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      {order.shippingAddr.email}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {format(new Date(order.createdAt), 'PPpp')}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(order.status)}>
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </>
+
+       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+            <Card className="xl:col-span-2">
+                <CardHeader>
+                    <CardTitle>Sales Overview</CardTitle>
+                    <CardDescription>Revenue from the last 7 days.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <SalesChart data={data.salesByDay} />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>An overview of the most recent orders.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Customer</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {data.recentOrders.map((order) => (
+                        <TableRow key={order.id} className="hover:bg-muted/50">
+                        <TableCell>
+                            <div className="font-medium">{order.shippingAddr.name}</div>
+                            <div className="hidden text-sm text-muted-foreground md:inline">
+                            {format(new Date(order.createdAt), 'PP')}
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </CardContent>
+            </Card>
+       </div>
+    </div>
   );
 }
