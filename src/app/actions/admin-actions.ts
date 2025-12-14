@@ -6,14 +6,6 @@ import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
 
-// MOCK DATA - In a real app, this would come from a database
-let designs: Design[] = [
-    { id: 'des_1', name: 'Cosmic Wolf', prompt: 'a wolf howling at a cosmic moon', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/301/400/400', status: 'Draft', createdAt: '2024-07-28T10:00:00Z', updatedAt: '2024-07-28T10:00:00Z', userId: 'user1' },
-    { id: 'des_2', name: 'Sunset City', prompt: 'a vibrant sunset over a futuristic city', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/302/400/400', status: 'Approved', createdAt: '2024-07-27T15:30:00Z', updatedAt: '2024-07-27T15:30:00Z', userId: 'user2' },
-    { id: 'des_3', name: 'Abstract Geometry', prompt: 'a minimalist design with geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Rejected', createdAt: '2024-07-26T09:00:00Z', updatedAt: '2024-07-26T09:00:00Z', userId: 'user1' },
-];
-
-
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   try {
     const { firestore } = getFirebaseAdmin();
@@ -107,23 +99,36 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
 export async function getAllDesigns(): Promise<Design[]> {
     try {
-        return [...designs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const { firestore } = getFirebaseAdmin();
+        const designsSnapshot = await firestore.collectionGroup('designs').orderBy('createdAt', 'desc').get();
+
+        if (designsSnapshot.empty) {
+            return [];
+        }
+
+        const designs: Design[] = designsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Design));
+
+        return designs;
+
     } catch (error) {
-        console.error('Failed to fetch designs:', error);
+        console.error('Failed to fetch designs from Firestore:', error);
         return [];
     }
 }
 
 
-export async function updateDesignStatus(designId: string, status: 'Approved' | 'Rejected') {
+export async function updateDesignStatus(designId: string, userId: string, status: 'Approved' | 'Rejected') {
     try {
-        const designIndex = designs.findIndex(d => d.id === designId);
-        if (designIndex > -1) {
-            designs[designIndex].status = status;
-            revalidatePath('/admin/reviews');
-            return { success: true };
-        }
-        return { success: false, message: 'Design not found.' };
+        const { firestore } = getFirebaseAdmin();
+        const designRef = firestore.collection('users').doc(userId).collection('designs').doc(designId);
+
+        await designRef.update({ status: status, updatedAt: new Date().toISOString() });
+
+        revalidatePath('/admin/reviews');
+        return { success: true };
     } catch (error) {
         console.error(`Failed to update design ${designId} status:`, error);
         return { success: false, message: 'Database update failed.' };
@@ -149,7 +154,7 @@ export async function updateOrderStatus(orderId: string, userId: string, status:
 
 // These functions are added to simulate the database
 export async function addDesign(design: Design) {
-    designs.push(design);
+    // This is a mock function and should be replaced with Firestore logic
 }
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
@@ -163,7 +168,7 @@ export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'create
         createdAt: now,
         updatedAt: now,
     };
-    // orders.push(newOrder); // This was for mock data
+    // This was for mock data, should be implemented with Firestore
     return newOrder;
 }
 

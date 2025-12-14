@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -25,7 +26,7 @@ export function DesignReviewCard({ design }: { design: Design }) {
     });
     
     // Call the database action
-    const dbResult = await updateDesignStatus(design.id, action === 'approve' ? 'Approved' : 'Rejected');
+    const dbResult = await updateDesignStatus(design.id, design.userId, action === 'approve' ? 'Approved' : 'Rejected');
 
     if (dbResult.success) {
       toast({
