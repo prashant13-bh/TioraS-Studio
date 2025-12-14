@@ -28,8 +28,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct } from '@/app/actions/product-actions';
 import type { Product } from '@/lib/types';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import React from 'react';
+import Image from 'next/image';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -77,11 +78,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
     
-    //
-    // TODO: This is a temporary placeholder for the file upload feature.
-    // The `images` array will be populated with URLs from the upload service.
-    //
-    const images = product?.images.length ? product.images : ['https://picsum.photos/seed/placeholder/600/800'];
+    const images = product?.images?.length ? product.images : ['https://picsum.photos/seed/placeholder/600/800'];
 
     const productData = {
         ...data,
@@ -155,17 +152,22 @@ export function ProductForm({ product }: ProductFormProps) {
                 />
                  <div>
                     <FormLabel>Images & Video</FormLabel>
-                    <FormDescription className="mb-2">Upload images and videos for the product. The first item will be the main display.</FormDescription>
-                    <div className="flex items-center justify-center w-full">
-                        <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB; MP4 up to 100MB</p>
+                    <FormDescription className="mb-2">Manage media for the product. The first item is the main display.</FormDescription>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                        {product?.images?.map((img, index) => (
+                            <div key={index} className="relative aspect-square w-full">
+                                <Image
+                                    src={img}
+                                    alt={`Product image ${index + 1}`}
+                                    fill
+                                    className="rounded-md object-cover"
+                                />
                             </div>
-                            {/* This input will be used for the actual file upload logic in the future */}
-                            <input id="dropzone-file" type="file" className="hidden" multiple disabled/>
-                        </div>
+                        ))}
+                         <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted/80">
+                            <PlusCircle className="size-8 text-muted-foreground" />
+                            <span className="sr-only">Add Media</span>
+                        </button>
                     </div>
                  </div>
             </div>
