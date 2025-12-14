@@ -3,6 +3,7 @@
 
 import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import { getFirebaseAdmin } from '@/firebase/server-config';
 
 // MOCK DATA - In a real app, this would come from a database
 let designs: Design[] = [
@@ -47,12 +48,34 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 }
 
 export async function getAllOrders(): Promise<Order[]> {
-   try {
-    // Return a sorted copy of the mock orders
-    return [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  try {
+    const { firestore } = getFirebaseAdmin();
+    const allOrders: Order[] = [];
+    
+    // First, get all users
+    const usersSnapshot = await firestore.collection('users').get();
+    
+    // Then, for each user, get their orders
+    for (const userDoc of usersSnapshot.docs) {
+      const ordersSnapshot = await userDoc.ref.collection('orders').get();
+      ordersSnapshot.forEach(orderDoc => {
+        const orderData = orderDoc.data();
+        allOrders.push({
+          ...orderData,
+          id: orderDoc.id,
+          // Handle potential missing fields gracefully
+          items: orderData.items || [],
+          itemCount: orderData.items?.length || 0,
+        } as Order);
+      });
+    }
+
+    // Sort all collected orders by creation date
+    return allOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   } catch (error) {
-    console.error('Failed to fetch mock orders:', error);
-    return [];
+    console.error('Failed to fetch all orders from Firestore:', error);
+    return []; // Return empty array on error to prevent page crash
   }
 }
 
