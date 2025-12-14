@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Search as SearchIcon } from 'lucide-react';

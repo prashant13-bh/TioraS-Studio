@@ -113,4 +113,3 @@ export function OrderTable({ orders, initialQuery = '' }: OrderTableProps) {
     </div>
   );
 }
-
