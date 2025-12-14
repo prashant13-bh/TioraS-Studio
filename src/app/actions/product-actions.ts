@@ -1,6 +1,6 @@
 'use server';
 
-import type { Product } from '@/lib/types';
+import type { Product, ProductMedia } from '@/lib/types';
 import { getFirebaseAdmin } from '@/firebase/server-config';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -37,7 +37,7 @@ export async function getProducts({
             ...data,
             sizes: Array.isArray(data.sizes) ? data.sizes : [],
             colors: Array.isArray(data.colors) ? data.colors : [],
-            images: Array.isArray(data.images) ? data.images : [],
+            media: Array.isArray(data.media) ? data.media : [],
         } as Product;
     });
 
@@ -65,7 +65,7 @@ export async function getProductById(id: string): Promise<Product | null> {
         ...data,
         sizes: Array.isArray(data.sizes) ? data.sizes : [],
         colors: Array.isArray(data.colors) ? data.colors : [],
-        images: Array.isArray(data.images) ? data.images : [],
+        media: Array.isArray(data.media) ? data.media : [],
     } as Product;
 
   } catch (error) {
@@ -74,6 +74,11 @@ export async function getProductById(id: string): Promise<Product | null> {
   }
 }
 
+const mediaSchema = z.object({
+    type: z.enum(['image', 'video']),
+    url: z.string().url('Please enter a valid URL.'),
+});
+
 const productSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     description: z.string().min(1, 'Description is required'),
@@ -81,7 +86,7 @@ const productSchema = z.object({
     category: z.string().min(1, 'Category is required'),
     sizes: z.array(z.string()).min(1, 'At least one size is required.'),
     colors: z.array(z.string()).min(1, 'At least one color is required.'),
-    images: z.array(z.string().url()).min(1, 'At least one image URL is required.'),
+    media: z.array(mediaSchema).min(1, 'At least one image or video is required.'),
     isNew: z.boolean(),
 });
 

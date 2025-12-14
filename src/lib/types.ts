@@ -1,5 +1,10 @@
 
 
+export type ProductMedia = {
+    type: 'image' | 'video';
+    url: string;
+}
+
 export type Product = {
   id: string;
   name: string;
@@ -8,7 +13,7 @@ export type Product = {
   category: string;
   sizes: string[];
   colors: string[];
-  images: string[];
+  media: ProductMedia[];
   isNew: boolean;
   createdAt: string;
   updatedAt: string;

@@ -24,10 +24,11 @@ export function AddToCartForm({ product }: { product: Product }) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
+    const imageToAdd = product.media.find(m => m.type === 'image')?.url || product.media[0].url;
     addToCart({
       id: product.id,
       name: product.name,
-      image: product.images[0],
+      image: imageToAdd,
       price: product.price,
       selectedSize,
       selectedColor,

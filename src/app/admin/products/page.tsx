@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -61,7 +61,7 @@ export default async function AdminProductsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="hidden w-[100px] sm:table-cell">
-                  <span className="sr-only">Image</span>
+                  <span className="sr-only">Media</span>
                 </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
@@ -76,13 +76,23 @@ export default async function AdminProductsPage() {
               {products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="hidden sm:table-cell">
-                    <Image
-                      alt={product.name}
-                      className="aspect-square rounded-md object-cover"
-                      height="64"
-                      src={product.images[0]}
-                      width="64"
-                    />
+                    {product.media.length > 0 ? (
+                        product.media[0].type === 'image' ? (
+                             <Image
+                                alt={product.name}
+                                className="aspect-square rounded-md object-cover"
+                                height="64"
+                                src={product.media[0].url}
+                                width="64"
+                            />
+                        ) : (
+                            <div className="flex aspect-square size-16 items-center justify-center rounded-md bg-muted">
+                                <Video className="size-6 text-muted-foreground"/>
+                            </div>
+                        )
+                    ) : (
+                        <div className="aspect-square size-16 rounded-md bg-muted" />
+                    )}
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.category}</TableCell>

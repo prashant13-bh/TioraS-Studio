@@ -26,12 +26,18 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct } from '@/app/actions/product-actions';
-import type { Product } from '@/lib/types';
-import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
+import type { Product, ProductMedia } from '@/lib/types';
+import { Loader2, PlusCircle, Trash2, Video } from 'lucide-react';
 import React from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+const mediaSchema = z.object({
+  type: z.enum(['image', 'video']),
+  url: z.string().url('Please enter a valid URL.'),
+});
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -40,7 +46,7 @@ const formSchema = z.object({
   category: z.enum(['T-Shirt', 'Hoodie', 'Jacket', 'Cap']),
   sizes: z.string().min(1, 'Please enter comma-separated sizes.'),
   colors: z.string().min(1, 'Please enter comma-separated hex color codes.'),
-  images: z.array(z.object({ url: z.string().url('Please enter a valid URL.') })).min(1, 'Add at least one image URL.'),
+  media: z.array(mediaSchema).min(1, 'Add at least one image or video.'),
   isNew: z.boolean(),
 });
 
@@ -54,14 +60,16 @@ export function ProductForm({ product }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [newImageUrl, setNewImageUrl] = React.useState('');
+  const [newMediaUrl, setNewMediaUrl] = React.useState('');
+  const [newMediaType, setNewMediaType] = React.useState<'image' | 'video'>('image');
+  const [isAddMediaOpen, setIsAddMediaOpen] = React.useState(false);
 
   const defaultValues = product
     ? {
         ...product,
         sizes: product.sizes.join(', '),
         colors: product.colors.join(', '),
-        images: product.images.map(url => ({ url })),
+        media: product.media,
       }
     : {
         name: '',
@@ -70,7 +78,7 @@ export function ProductForm({ product }: ProductFormProps) {
         category: 'T-Shirt' as const,
         sizes: 'S, M, L, XL',
         colors: '#000000, #FFFFFF',
-        images: [{ url: 'https://picsum.photos/seed/placeholder/600/800' }],
+        media: [{ type: 'image', url: 'https://picsum.photos/seed/placeholder/600/800' }],
         isNew: true,
       };
 
@@ -82,7 +90,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: 'images',
+    name: 'media',
   });
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -92,7 +100,6 @@ export function ProductForm({ product }: ProductFormProps) {
         ...data,
         sizes: data.sizes.split(',').map(s => s.trim()).filter(Boolean),
         colors: data.colors.split(',').map(c => c.trim()).filter(Boolean),
-        images: data.images.map(img => img.url),
     };
 
     try {
@@ -105,7 +112,7 @@ export function ProductForm({ product }: ProductFormProps) {
                 throw new Error(result.message || 'Update failed');
             }
         } else {
-            result = await createProduct(productData);
+            result = await createProduct(productData as Omit<Product, 'id' | 'createdAt' | 'updatedAt'>);
             if (result.success) {
                 toast({ title: 'Product Created', description: `New product "${data.name}" has been added.` });
             } else {
@@ -127,16 +134,18 @@ export function ProductForm({ product }: ProductFormProps) {
     }
   };
 
-  const handleAddImage = () => {
-    if (newImageUrl) {
+  const handleAddMedia = () => {
+    if (newMediaUrl) {
         try {
-            z.string().url().parse(newImageUrl);
-            append({ url: newImageUrl });
-            setNewImageUrl('');
+            z.string().url().parse(newMediaUrl);
+            append({ url: newMediaUrl, type: newMediaType });
+            setNewMediaUrl('');
+            setNewMediaType('image');
+            setIsAddMediaOpen(false);
         } catch (error) {
             toast({
                 title: 'Invalid URL',
-                description: 'Please enter a valid image URL.',
+                description: 'Please enter a valid media URL.',
                 variant: 'destructive'
             });
         }
@@ -180,12 +189,18 @@ export function ProductForm({ product }: ProductFormProps) {
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                         {fields.map((field, index) => (
                             <div key={field.id} className="relative group aspect-square w-full">
-                                <Image
-                                    src={field.url}
-                                    alt={`Product image ${index + 1}`}
-                                    fill
-                                    className="rounded-md object-cover"
-                                />
+                                {field.type === 'image' ? (
+                                     <Image
+                                        src={field.url}
+                                        alt={`Product media ${index + 1}`}
+                                        fill
+                                        className="rounded-md object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-full items-center justify-center rounded-md bg-muted">
+                                        <Video className="size-8 text-muted-foreground"/>
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Button
                                         type="button"
@@ -195,12 +210,12 @@ export function ProductForm({ product }: ProductFormProps) {
                                         onClick={() => remove(index)}
                                     >
                                         <Trash2 className="size-4" />
-                                        <span className="sr-only">Remove Image</span>
+                                        <span className="sr-only">Remove Media</span>
                                     </Button>
                                 </div>
                             </div>
                         ))}
-                         <Dialog>
+                         <Dialog open={isAddMediaOpen} onOpenChange={setIsAddMediaOpen}>
                             <DialogTrigger asChild>
                                 <button type="button" className="flex aspect-square w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted/80">
                                     <PlusCircle className="size-8 text-muted-foreground" />
@@ -209,32 +224,43 @@ export function ProductForm({ product }: ProductFormProps) {
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Add New Image URL</DialogTitle>
+                                    <DialogTitle>Add New Media</DialogTitle>
                                     <DialogDescription>
-                                        Paste the URL of the image you want to add.
+                                        Paste the URL of the image or video you want to add.
                                     </DialogDescription>
                                 </DialogHeader>
-                                <div className="space-y-2">
-                                    <Label htmlFor="new-image-url">Image URL</Label>
-                                    <Input 
-                                        id="new-image-url"
-                                        value={newImageUrl}
-                                        onChange={(e) => setNewImageUrl(e.target.value)}
-                                        placeholder="https://..."
-                                    />
+                                <div className="space-y-4">
+                                     <div className="space-y-2">
+                                        <Label>Media Type</Label>
+                                         <RadioGroup value={newMediaType} onValueChange={(v) => setNewMediaType(v as 'image' | 'video')}>
+                                            <div className="flex items-center space-x-2">
+                                                <RadioGroupItem value="image" id="r-image" />
+                                                <Label htmlFor="r-image">Image</Label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <RadioGroupItem value="video" id="r-video" />
+                                                <Label htmlFor="r-video">Video</Label>
+                                            </div>
+                                        </RadioGroup>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-media-url">Media URL</Label>
+                                        <Input 
+                                            id="new-media-url"
+                                            value={newMediaUrl}
+                                            onChange={(e) => setNewMediaUrl(e.target.value)}
+                                            placeholder="https://..."
+                                        />
+                                    </div>
                                 </div>
                                 <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="outline">Cancel</Button>
-                                    </DialogClose>
-                                    <DialogClose asChild>
-                                        <Button type="button" onClick={handleAddImage}>Add Image</Button>
-                                    </DialogClose>
+                                    <Button type="button" variant="outline" onClick={() => setIsAddMediaOpen(false)}>Cancel</Button>
+                                    <Button type="button" onClick={handleAddMedia}>Add Media</Button>
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
                     </div>
-                    <FormMessage>{form.formState.errors.images?.root?.message || form.formState.errors.images?.message}</FormMessage>
+                    <FormMessage>{form.formState.errors.media?.root?.message || form.formState.errors.media?.message}</FormMessage>
                  </div>
             </div>
             <div className="space-y-8">

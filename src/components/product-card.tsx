@@ -4,25 +4,33 @@ import type { Product } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, ShoppingBag } from 'lucide-react';
+import { Eye, Video } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const primaryMedia = product.media.find(m => m.type === 'image') || product.media[0];
+
   return (
     <Card className="group relative w-full overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-300 hover:shadow-xl">
       <Link href={`/products/${product.id}`} className="block">
         <div className="relative aspect-[3/4] w-full overflow-hidden">
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            data-ai-hint={`${product.category.toLowerCase()} clothing`}
-          />
+          {primaryMedia.type === 'image' ? (
+            <Image
+              src={primaryMedia.url}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              data-ai-hint={`${product.category.toLowerCase()} clothing`}
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center bg-muted">
+              <Video className="size-12 text-muted-foreground" />
+            </div>
+          )}
           {product.isNew && (
             <Badge className="absolute left-2 top-2 text-xs px-1.5 py-0.5 md:left-3 md:top-3 md:text-sm md:px-2 md:py-0.5 bg-primary font-bold">
               New
