@@ -4,43 +4,91 @@
 import type { AdminDashboardData, Design, Order, OrderItem, UserProfile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { subDays, format, startOfDay } from 'date-fns';
-import { getFirebaseAdmin } from '@/firebase/server-config';
-import { FieldValue } from 'firebase-admin/firestore';
+
+const MOCK_ORDERS: Order[] = [
+    {
+        id: 'ord_1',
+        userId: 'user_1',
+        orderNumber: 'ORD-7005',
+        total: 8998.00,
+        status: 'Delivered',
+        shippingAddr: { name: 'Satoshi Nakamoto', email: 'satoshi@gmx.com', address: '123 Bitcoin Rd', city: 'Cyberspace', state: 'Internet', zip: '10101', phone: '1234567890'},
+        createdAt: subDays(new Date(), 2).toISOString(),
+        updatedAt: subDays(new Date(), 2).toISOString(),
+        itemCount: 2,
+    },
+    {
+        id: 'ord_2',
+        userId: 'user_2',
+        orderNumber: 'ORD-7004',
+        total: 5499.00,
+        status: 'Shipped',
+        shippingAddr: { name: 'Vitalik Buterin', email: 'vitalik@ethereum.org', address: '456 Ether Lane', city: 'Toronto', state: 'ON', zip: 'M5A 1A1', phone: '1234567890'},
+        createdAt: subDays(new Date(), 4).toISOString(),
+        updatedAt: subDays(new Date(), 3).toISOString(),
+        itemCount: 1,
+    },
+    {
+        id: 'ord_3',
+        userId: 'user_1',
+        orderNumber: 'ORD-7003',
+        total: 2499.00,
+        status: 'Processing',
+        shippingAddr: { name: 'Satoshi Nakamoto', email: 'satoshi@gmx.com', address: '123 Bitcoin Rd', city: 'Cyberspace', state: 'Internet', zip: '10101', phone: '1234567890'},
+        createdAt: subDays(new Date(), 1).toISOString(),
+        updatedAt: subDays(new Date(), 1).toISOString(),
+        itemCount: 1,
+    },
+    {
+        id: 'ord_4',
+        userId: 'user_3',
+        orderNumber: 'ORD-7002',
+        total: 1499.00,
+        status: 'Pending',
+        shippingAddr: { name: 'Charles Hoskinson', email: 'charles@cardano.org', address: '789 ADA Blvd', city: 'Boulder', state: 'CO', zip: '80302', phone: '1234567890'},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        itemCount: 1,
+    },
+    {
+        id: 'ord_5',
+        userId: 'user_4',
+        orderNumber: 'ORD-7001',
+        total: 12999.00,
+        status: 'Delivered',
+        shippingAddr: { name: 'Gavin Wood', email: 'gavin@polkadot.network', address: '101 Polkadot Plaza', city: 'Zug', state: 'Switzerland', zip: '6300', phone: '1234567890'},
+        createdAt: subDays(new Date(), 10).toISOString(),
+        updatedAt: subDays(new Date(), 10).toISOString(),
+        itemCount: 3,
+    },
+];
+
+const MOCK_USERS: UserProfile[] = [
+    { id: 'user_1', displayName: 'Satoshi Nakamoto', email: 'satoshi@gmx.com', photoURL: 'https://i.pravatar.cc/150?u=user_1', createdAt: new Date().toISOString(), isAdmin: true },
+    { id: 'user_2', displayName: 'Vitalik Buterin', email: 'vitalik@ethereum.org', photoURL: 'https://i.pravatar.cc/150?u=user_2', createdAt: new Date().toISOString() },
+    { id: 'user_3', displayName: 'Charles Hoskinson', email: 'charles@cardano.org', photoURL: 'https://i.pravatar.cc/150?u=user_3', createdAt: new Date().toISOString() },
+    { id: 'user_4', displayName: 'Gavin Wood', email: 'gavin@polkadot.network', photoURL: 'https://i.pravatar.cc/150?u=user_4', createdAt: new Date().toISOString() },
+];
+
+const MOCK_DESIGNS: Design[] = [
+    { id: 'des_1', userId: 'user_1', name: 'Cosmic Wolf', prompt: 'a wolf howling at a cosmic moon', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/401/400', status: 'Approved', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'des_2', userId: 'user_2', name: 'Synthwave Sunset', prompt: 'a synthwave sunset over a retro city', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/402/400', status: 'Draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'des_3', userId: 'user_3', name: 'Geometric Bear', prompt: 'a bear made of geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/403/400', status: 'Rejected', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'des_4', userId: 'user_4', name: 'Floral Skull', prompt: 'a skull made of flowers', product: 'Cap', imageUrl: 'https://picsum.photos/seed/404/400', status: 'Draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+];
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
+    const totalRevenue = MOCK_ORDERS.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = MOCK_ORDERS.length;
+    const pendingOrders = MOCK_ORDERS.filter(order => order.status === 'Pending').length;
+    const activeUsers = MOCK_USERS.length;
 
-    const ordersSnapshot = await db.collectionGroup('orders').get();
-    const usersSnapshot = await db.collection('users').get();
+    const recentOrders = [...MOCK_ORDERS].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
-    const totalRevenue = ordersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
-    const totalOrders = ordersSnapshot.size;
-    const pendingOrders = ordersSnapshot.docs.filter(doc => doc.data().status === 'Pending').length;
-    const activeUsers = usersSnapshot.size;
-
-    const recentOrdersQuery = db.collectionGroup('orders').orderBy('createdAt', 'desc').limit(5);
-    const recentOrdersSnapshot = await recentOrdersQuery.get();
-    const recentOrders: Order[] = recentOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-
-    const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
-    const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i));
-    const salesByDay = last7Days.map(day => ({
-        name: format(day, 'MMM d'),
-        total: 0,
+    const salesByDay = Array.from({ length: 7 }, (_, i) => ({
+        name: format(subDays(new Date(), i), 'MMM d'),
+        total: Math.floor(Math.random() * 5000) + 1000,
     })).reverse();
-    
-    const recentOrdersForChart = await db.collectionGroup('orders').where('createdAt', '>=', sevenDaysAgo.toISOString()).get();
-    recentOrdersForChart.forEach(doc => {
-        const order = doc.data() as Order;
-        const orderDate = new Date(order.createdAt);
-        const dayStr = format(orderDate, 'MMM d');
-        const dayData = salesByDay.find(d => d.name === dayStr);
-        if (dayData) {
-            dayData.total += order.total;
-        }
-    });
-    
 
     return {
       totalRevenue,
@@ -54,160 +102,83 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 
 
 export async function getAllOrders({ query }: { query?: string }): Promise<Order[]> {
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-    
-    const ordersSnapshot = await db.collectionGroup('orders').orderBy('createdAt', 'desc').get();
-    const orders = ordersSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as Order);
-
     if (query) {
         const lowercasedQuery = query.toLowerCase();
-        return orders.filter(order => 
+        return MOCK_ORDERS.filter(order => 
             order.shippingAddr.name.toLowerCase().includes(lowercasedQuery) ||
             order.shippingAddr.email.toLowerCase().includes(lowercasedQuery) ||
             order.orderNumber.toLowerCase().includes(lowercasedQuery)
         );
     }
-    return orders;
+    return MOCK_ORDERS;
 }
 
 export async function getAllUsers(): Promise<UserProfile[]> {
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-
-    const usersSnapshot = await db.collection('users').get();
-    const adminRolesSnapshot = await db.collection('roles_admin').get();
-    const adminIds = new Set(adminRolesSnapshot.docs.map(doc => doc.id));
-
-    const users: UserProfile[] = usersSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            id: doc.id,
-            displayName: data.displayName || null,
-            email: data.email || null,
-            photoURL: data.photoURL || null,
-            createdAt: data.createdAt,
-            isAdmin: adminIds.has(doc.id),
-        };
-    });
-    
-    return users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return MOCK_USERS;
 }
 
 export async function getAllDesigns({ status }: { status?: Design['status'] | 'All' }): Promise<Design[]> {
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-
-    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collectionGroup('designs').orderBy('createdAt', 'desc');
-
     if (status && status !== 'All') {
-        query = query.where('status', '==', status);
+        return MOCK_DESIGNS.filter(d => d.status === status);
     }
-
-    const designsSnapshot = await query.get();
-    return designsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Design);
+    return MOCK_DESIGNS;
 }
 
 
 export async function updateDesignStatus(designId: string, userId: string, status: 'Approved' | 'Rejected') {
-    if (!userId || !designId) return { success: false, message: 'User ID and Design ID are required.' };
-    
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-    const designRef = db.collection('users').doc(userId).collection('designs').doc(designId);
-
-    try {
-        await designRef.update({ status: status, updatedAt: FieldValue.serverTimestamp() });
-        revalidatePath('/admin/reviews');
-        return { success: true };
-    } catch (error) {
-        console.error("Error updating design status:", error);
-        return { success: false, message: 'Failed to update design status.' };
-    }
+    console.log(`MOCK: Updating design ${designId} for user ${userId} to ${status}`);
+    revalidatePath('/admin/reviews');
+    return { success: true };
 }
 
 
 export async function updateOrderStatus(orderId: string, userId: string, status: Order['status']) {
-    if (!userId || !orderId) return { success: false, message: 'User ID and Order ID are required.' };
-    
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-    const orderRef = db.collection('users').doc(userId).collection('orders').doc(orderId);
-
-    try {
-        await orderRef.update({ status, updatedAt: FieldValue.serverTimestamp() });
-        revalidatePath('/admin/orders');
-        revalidatePath(`/admin/orders/${orderId}`);
-        revalidatePath('/admin');
-        return { success: true, message: `Order status updated to ${status}` };
-    } catch (error) {
-         console.error("Error updating order status:", error);
-        return { success: false, message: 'Order not found or failed to update.' };
-    }
+    console.log(`MOCK: Updating order ${orderId} for user ${userId} to ${status}`);
+    revalidatePath('/admin/orders');
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath('/admin');
+    return { success: true, message: `Order status updated to ${status}` };
 }
 
 
 export async function grantAdminRole(userId: string) {
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-    const roleRef = db.collection('roles_admin').doc(userId);
-
-    try {
-        await roleRef.set({ isAdmin: true });
-        revalidatePath('/admin/users');
-        return { success: true, message: 'Admin role granted.' };
-    } catch (error) {
-        console.error("Error granting admin role:", error);
-        return { success: false, message: 'Failed to grant admin role.' };
-    }
+    console.log(`MOCK: Granting admin role to ${userId}`);
+    revalidatePath('/admin/users');
+    return { success: true, message: 'Admin role granted.' };
 }
 
 
 export async function revokeAdminRole(userId: string) {
-     const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-    const roleRef = db.collection('roles_admin').doc(userId);
-
-    try {
-        await roleRef.delete();
-        revalidatePath('/admin/users');
-        return { success: true, message: 'Admin role revoked.' };
-    } catch (error) {
-        console.error("Error revoking admin role:", error);
-        return { success: false, message: 'Failed to revoke admin role.' };
-    }
+    console.log(`MOCK: Revoking admin role for ${userId}`);
+    revalidatePath('/admin/users');
+    return { success: true, message: 'Admin role revoked.' };
 }
 
 
 export async function getOrderById(orderId: string, userId: string): Promise<(Order & {items: OrderItem[]}) | null> {
-    if (!userId || !orderId) return null;
+    const order = MOCK_ORDERS.find(o => o.id === orderId && o.userId === userId);
+    if (!order) return null;
 
-    const admin = getFirebaseAdmin();
-    const db = admin.firestore;
-
-    const orderRef = db.collection('users').doc(userId).collection('orders').doc(orderId);
-    const orderDoc = await orderRef.get();
-
-    if (!orderDoc.exists) return null;
-
-    const itemsSnapshot = await orderRef.collection('orderItems').get();
-    const items: OrderItem[] = itemsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as OrderItem));
+    // Mocking order items
+    const items: OrderItem[] = [
+        { id: 'item_1', orderId: orderId, productId: 'prod_1', quantity: 1, size: 'M', color: '#000000', price: 2499.00, name: 'Tioras Signature Tee', image: 'https://picsum.photos/seed/101/600/800' },
+        { id: 'item_2', orderId: orderId, productId: 'prod_2', quantity: 1, size: 'L', color: '#1F2937', price: 5499.00, name: 'Urban Explorer Hoodie', image: 'https://picsum.photos/seed/103/600/800' },
+    ];
     
-    return { ...orderDoc.data(), id: orderDoc.id, items } as Order & {items: OrderItem[]};
+    return { ...order, items: items.slice(0, order.itemCount) };
 }
 
 // These are not used by the admin panel but are needed for other parts of the app.
-// I will connect them to Firestore in a subsequent step.
 export async function addDesign(design: Design) {
-   // To be implemented
+   console.log('MOCK: Adding design', design);
 }
 
 export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>) {
-    // To be implemented
+    console.log('MOCK: Adding order', order);
     const newOrder: Order = {
         ...order,
         id: `ord_${Date.now()}`,
-        orderNumber: `ORD-MOCK`,
+        orderNumber: `ORD-MOCK-${Math.floor(Math.random() * 1000)}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     };

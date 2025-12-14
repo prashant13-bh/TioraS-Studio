@@ -1,7 +1,7 @@
 
-import { redirect } from 'next/navigation';
 import { AdminClientLayout } from './_components/admin-client-layout';
-import { getCurrentUser } from '@/lib/auth/server-auth';
+import { getCurrentUser } from '@/lib/auth/mock-auth'; // Using mock auth
+import { redirect } from 'next/navigation';
 
 
 export default async function AdminLayout({
@@ -11,13 +11,11 @@ export default async function AdminLayout({
 }) {
   const user = await getCurrentUser();
 
-  // If the user is not an admin, they are redirected.
-  // This is the secure, server-side gatekeeper for the entire admin section.
+  // In this mock setup, we still perform a "server-side" check.
+  // In a real app, getCurrentUser would hit a live auth service.
   if (!user || !user.isAdmin) {
     redirect('/');
   }
-
-  // If the user is an admin, we render the client-side layout which
-  // contains the navigation and other UI elements.
+  
   return <AdminClientLayout>{children}</AdminClientLayout>;
 }

@@ -4,11 +4,87 @@
 import type { Product, ProductMedia } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getFirebaseAdmin } from '@/firebase/server-config';
-import { FieldValue } from 'firebase-admin/firestore';
 
-const db = getFirebaseAdmin().firestore;
-const productsCollection = db.collection('products');
+const MOCK_PRODUCTS: Product[] = [
+    {
+        id: 'prod_1',
+        name: 'Tioras Signature Tee',
+        description: 'Experience the perfect blend of comfort and style with our signature tee. Made from 100% premium pima cotton, this t-shirt is designed for a relaxed fit and ultimate softness.',
+        price: 2499.00,
+        category: 'T-Shirt',
+        sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        colors: ['#000000', '#FFFFFF', '#4B5563'],
+        media: [
+            { type: 'image', url: 'https://picsum.photos/seed/101/600/800' },
+            { type: 'image', url: 'https://picsum.photos/seed/102/600/800' },
+        ],
+        isNew: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'prod_2',
+        name: 'Urban Explorer Hoodie',
+        description: 'Our Urban Explorer Hoodie is crafted from a heavyweight fleece-back jersey for maximum warmth and comfort. Features a double-lined hood and kangaroo pocket.',
+        price: 5499.00,
+        category: 'Hoodie',
+        sizes: ['S', 'M', 'L', 'XL'],
+        colors: ['#1F2937', '#9CA3AF'],
+        media: [
+             { type: 'image', url: 'https://picsum.photos/seed/103/600/800' },
+             { type: 'image', url: 'https://picsum.photos/seed/104/600/800' },
+             { type: 'video', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
+        ],
+        isNew: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'prod_3',
+        name: 'Tech-Wear Jacket',
+        description: 'A versatile, all-weather jacket made from water-resistant technical fabric. Features sealed seams, multiple utility pockets, and a packable hood.',
+        price: 8999.00,
+        category: 'Jacket',
+        sizes: ['M', 'L', 'XL'],
+        colors: ['#000000'],
+        media: [
+            { type: 'image', url: 'https://picsum.photos/seed/105/600/800' },
+        ],
+        isNew: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'prod_4',
+        name: 'Minimalist Logo Cap',
+        description: 'A classic six-panel cap made from durable cotton twill, featuring a subtle embroidered Tioras logo. Adjustable strap for a perfect fit.',
+        price: 1499.00,
+        category: 'Cap',
+        sizes: ['One Size'],
+        colors: ['#000000', '#F3F4F6'],
+        media: [
+            { type: 'image', url: 'https://picsum.photos/seed/106/600/800' },
+        ],
+        isNew: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+     {
+        id: 'prod_5',
+        name: 'Everyday Comfort Tee',
+        description: 'A reliable and comfortable t-shirt for everyday wear, made from soft-touch cotton.',
+        price: 1999.00,
+        category: 'T-Shirt',
+        sizes: ['S', 'M', 'L'],
+        colors: ['#374151', '#E5E7EB'],
+        media: [
+            { type: 'image', url: 'https://picsum.photos/seed/107/600/800' },
+        ],
+        isNew: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }
+];
 
 
 export async function getProducts({
@@ -18,35 +94,22 @@ export async function getProducts({
   category?: string;
   limit?: number;
 }): Promise<{ products: Product[] }> {
-    let query: FirebaseFirestore.Query = productsCollection;
-    
-    if (category && category !== 'All') {
-        query = query.where('category', '==', category);
-    }
+  let products = MOCK_PRODUCTS;
 
-    if (limit) {
-        query = query.limit(limit);
-    }
+  if (category && category !== 'All') {
+    products = products.filter((p) => p.category === category);
+  }
 
-    const snapshot = await query.get();
-    if (snapshot.empty) {
-        return { products: [] };
-    }
-    
-    const products = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    } as Product));
+  if (limit) {
+    products = products.slice(0, limit);
+  }
 
-    return { products };
+  return { products };
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-    const doc = await productsCollection.doc(id).get();
-    if (!doc.exists) {
-        return null;
-    }
-    return { id: doc.id, ...doc.data() } as Product;
+  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  return product || null;
 }
 
 
@@ -68,56 +131,24 @@ const productSchema = z.object({
 
 
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
-    const validatedData = productSchema.safeParse(data);
-    if (!validatedData.success) {
-        console.error("Validation failed:", validatedData.error.flatten());
-        return { success: false, message: 'Invalid product data.' };
-    }
-    
-    try {
-        const docRef = await productsCollection.add({
-            ...validatedData.data,
-            createdAt: FieldValue.serverTimestamp(),
-            updatedAt: FieldValue.serverTimestamp(),
-        });
-        revalidatePath('/admin/products');
-        return { success: true, id: docRef.id };
-    } catch (error) {
-        console.error("Error creating product:", error);
-        return { success: false, message: 'Failed to create product in database.' };
-    }
+    // This is a mock function
+    console.log("Mock createProduct called with:", data);
+    revalidatePath('/admin/products');
+    return { success: true, id: `prod_${Date.now()}` };
 }
 
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
-    const validatedData = productSchema.safeParse(data);
-    if (!validatedData.success) {
-        console.error("Validation failed:", validatedData.error.flatten());
-        return { success: false, message: 'Invalid product data.' };
-    }
-
-    try {
-        await productsCollection.doc(id).update({
-            ...validatedData.data,
-            updatedAt: FieldValue.serverTimestamp(),
-        });
-
-        revalidatePath('/admin/products');
-        revalidatePath(`/products/${id}`);
-        return { success: true };
-    } catch (error) {
-        console.error("Error updating product:", error);
-        return { success: false, message: 'Product not found or failed to update.' };
-    }
+    // This is a mock function
+    console.log(`Mock updateProduct called for ID ${id} with:`, data);
+    revalidatePath('/admin/products');
+    revalidatePath(`/products/${id}`);
+    return { success: true };
 }
 
 export async function deleteProduct(id: string) {
-    try {
-        await productsCollection.doc(id).delete();
-        revalidatePath('/admin/products');
-        revalidatePath('/catalog');
-        return { success: true, message: 'Product deleted successfully.' };
-    } catch (error) {
-        console.error("Error deleting product:", error);
-        return { success: false, message: 'Failed to delete product.' };
-    }
+    // This is a mock function
+    console.log(`Mock deleteProduct called for ID ${id}`);
+    revalidatePath('/admin/products');
+    revalidatePath('/catalog');
+    return { success: true, message: 'Product deleted successfully.' };
 }

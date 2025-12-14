@@ -1,5 +1,5 @@
 
-import { getCurrentUser } from '@/lib/auth/server-auth';
+import { getCurrentUser } from '@/lib/auth/mock-auth'; // Using mock auth
 import { NextResponse } from 'next/server';
 
 export async function GET() {
