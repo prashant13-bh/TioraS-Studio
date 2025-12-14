@@ -3,6 +3,7 @@ import { TiorasLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 import { CartSheet } from './cart-sheet';
+import { User } from 'lucide-react';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -34,9 +35,17 @@ export function Navbar() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild className="hidden text-sm font-medium text-gray-300 transition-colors hover:text-white md:inline-flex">
-            <Link href="/admin">Admin</Link>
+           <Button variant="ghost" asChild className="hidden md:inline-flex">
+              <Link href="/login">Login</Link>
+            </Button>
+            <Button asChild className="hidden md:inline-flex">
+              <Link href="/signup">Sign Up</Link>
+            </Button>
+
+          <Button variant="ghost" asChild size="icon" className="hidden md:inline-flex">
+            <Link href="/dashboard"><User className="size-5" /></Link>
           </Button>
+
           <CartSheet />
           <MobileNav navLinks={navLinks} />
         </div>
