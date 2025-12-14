@@ -89,7 +89,6 @@ export async function getAllOrders(): Promise<Order[]> {
       return {
         id: doc.id,
         ...data,
-        // Ensure itemCount is present, default to 0 if not on document
         itemCount: data.itemCount || (data.items ? data.items.length : 0),
       } as Order;
     });
@@ -105,6 +104,8 @@ export async function getAllUsers(): Promise<UserProfile[]> {
     try {
         const { firestore } = getFirebaseAdmin();
         const usersSnapshot = await firestore.collection('users').orderBy('createdAt', 'desc').get();
+        const adminRolesSnapshot = await firestore.collection('roles_admin').get();
+        const adminIds = new Set(adminRolesSnapshot.docs.map(doc => doc.id));
 
         if (usersSnapshot.empty) {
             return [];
@@ -115,6 +116,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
             return {
                 id: doc.id,
                 ...data,
+                isAdmin: adminIds.has(doc.id),
             } as UserProfile;
         });
 
@@ -181,6 +183,30 @@ export async function updateOrderStatus(orderId: string, userId: string, status:
     }
 }
 
+
+export async function grantAdminRole(userId: string) {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        await firestore.collection('roles_admin').doc(userId).set({ isAdmin: true });
+        revalidatePath('/admin/users');
+        return { success: true, message: 'Admin role granted.' };
+    } catch (error) {
+        console.error(`Failed to grant admin role to ${userId}:`, error);
+        return { success: false, message: 'Failed to grant admin role.' };
+    }
+}
+
+export async function revokeAdminRole(userId: string) {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        await firestore.collection('roles_admin').doc(userId).delete();
+        revalidatePath('/admin/users');
+        return { success: true, message: 'Admin role revoked.' };
+    } catch (error) {
+        console.error(`Failed to revoke admin role for ${userId}:`, error);
+        return { success: false, message: 'Failed to revoke admin role.' };
+    }
+}
 
 // These functions are added to simulate the database
 export async function addDesign(design: Design) {

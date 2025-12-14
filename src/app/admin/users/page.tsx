@@ -19,6 +19,8 @@ import type { UserProfile } from '@/lib/types';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { UserActions } from './_components/user-actions';
+import { getCurrentUser } from '@/lib/auth/server-auth';
   
 export const metadata = {
     title: 'Users | TioraS Admin',
@@ -26,7 +28,10 @@ export const metadata = {
 };
 
 export default async function AdminUsersPage() {
-    const users: UserProfile[] = await getAllUsers();
+    const [users, currentUser] = await Promise.all([
+      getAllUsers(),
+      getCurrentUser()
+    ]);
   
     const getProviderName = (providerId?: string) => {
         if (!providerId) return 'Email/Pass';
@@ -49,6 +54,7 @@ export default async function AdminUsersPage() {
                   <TableHead>User</TableHead>
                   <TableHead className="hidden sm:table-cell">Sign-up Date</TableHead>
                   <TableHead className="hidden md:table-cell">Provider</TableHead>
+                  <TableHead className="hidden md:table-cell">Role</TableHead>
                   <TableHead>
                     <span className="sr-only">Actions</span>
                   </TableHead>
@@ -75,8 +81,15 @@ export default async function AdminUsersPage() {
                     <TableCell className="hidden md:table-cell">
                         <Badge variant="outline">{getProviderName(user.providerId)}</Badge>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                        {user.isAdmin ? (
+                            <Badge>Admin</Badge>
+                        ) : (
+                            <Badge variant="secondary">User</Badge>
+                        )}
+                    </TableCell>
                     <TableCell>
-                      {/* Placeholder for future actions */}
+                      <UserActions user={user} currentUserId={currentUser?.uid} />
                     </TableCell>
                   </TableRow>
                 ))}

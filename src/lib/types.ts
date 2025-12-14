@@ -96,4 +96,5 @@ export type UserProfile = {
   photoURL: string | null;
   providerId: string;
   createdAt: string;
+  isAdmin?: boolean;
 };
