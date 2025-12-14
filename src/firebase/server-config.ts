@@ -27,12 +27,22 @@ function initializeAdminApp() {
   // the SDK can often auto-discover credentials.
   // For local development, you'd set GOOGLE_APPLICATION_CREDENTIALS.
   try {
+      // First, try to initialize with default credentials. This works in many cloud environments.
       adminApp = initializeApp();
   } catch(e) {
       console.warn("Could not initialize Firebase Admin SDK with default credentials. This is expected in local development. Falling back to service account object if available.");
-       adminApp = initializeApp({
+      // If default fails, try to use the service account from environment variables.
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        adminApp = initializeApp({
           credential: cert(serviceAccount),
-       });
+        });
+      } else {
+        console.error("Firebase Admin SDK initialization failed. No default credentials found and FIREBASE_SERVICE_ACCOUNT env var is not set.");
+        // Fallback to a basic init with just projectId if nothing else works, though this may have limited permissions.
+         adminApp = initializeApp({
+            projectId: firebaseConfig.projectId,
+         });
+      }
   }
 }
 
