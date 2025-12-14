@@ -3,6 +3,8 @@
 
 import type { Product } from '@/lib/types';
 import { getFirebaseAdmin } from '@/firebase/server-config';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 export async function getProducts({
   category,
@@ -33,7 +35,6 @@ export async function getProducts({
         return {
             id: doc.id,
             ...data,
-             // Firestore might not store arrays correctly if they were not arrays originally
             sizes: Array.isArray(data.sizes) ? data.sizes : [],
             colors: Array.isArray(data.colors) ? data.colors : [],
             images: Array.isArray(data.images) ? data.images : [],
@@ -71,4 +72,52 @@ export async function getProductById(id: string): Promise<Product | null> {
     console.error(`Failed to fetch product with id ${id} from Firestore:`, error);
     return null;
   }
+}
+
+const productSchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().min(1, 'Description is required'),
+    price: z.coerce.number().min(0, 'Price must be a positive number'),
+    category: z.string().min(1, 'Category is required'),
+    sizes: z.string().min(1, 'Sizes are required'),
+    colors: z.string().min(1, 'Colors are required'),
+    images: z.string().min(1, 'Images are required'),
+    isNew: z.boolean(),
+});
+
+
+export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        const now = new Date().toISOString();
+        const newProduct = {
+            ...data,
+            createdAt: now,
+            updatedAt: now,
+        };
+        const docRef = await firestore.collection('products').add(newProduct);
+        revalidatePath('/admin/products');
+        return { success: true, id: docRef.id };
+    } catch (error) {
+        console.error('Failed to create product:', error);
+        return { success: false, message: 'Failed to create product.' };
+    }
+}
+
+export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+    try {
+        const { firestore } = getFirebaseAdmin();
+        const now = new Date().toISOString();
+        const updatedProduct = {
+            ...data,
+            updatedAt: now,
+        };
+        await firestore.collection('products').doc(id).update(updatedProduct);
+        revalidatePath('/admin/products');
+        revalidatePath(`/products/${id}`);
+        return { success: true };
+    } catch (error) {
+        console.error(`Failed to update product ${id}:`, error);
+        return { success: false, message: 'Failed to update product.' };
+    }
 }

@@ -1,0 +1,256 @@
+
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { createProduct, updateProduct } from '@/app/actions/product-actions';
+import type { Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+import React from 'react';
+
+const formSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  description: z.string().min(10, 'Description must be at least 10 characters.'),
+  price: z.coerce.number().min(0, 'Price must be a positive number.'),
+  category: z.enum(['T-Shirt', 'Hoodie', 'Jacket', 'Cap']),
+  sizes: z.string().min(1, 'Please enter comma-separated sizes.'),
+  colors: z.string().min(1, 'Please enter comma-separated hex color codes.'),
+  images: z.string().min(1, 'Please enter comma-separated image URLs.'),
+  isNew: z.boolean(),
+});
+
+type ProductFormValues = z.infer<typeof formSchema>;
+
+interface ProductFormProps {
+  product?: Product | null;
+}
+
+export function ProductForm({ product }: ProductFormProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const defaultValues = product
+    ? {
+        ...product,
+        sizes: product.sizes.join(', '),
+        colors: product.colors.join(', '),
+        images: product.images.join(', '),
+      }
+    : {
+        name: '',
+        description: '',
+        price: 0,
+        category: 'T-Shirt' as const,
+        sizes: 'S, M, L, XL',
+        colors: '#000000, #FFFFFF',
+        images: '',
+        isNew: true,
+      };
+
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+
+  const onSubmit = async (data: ProductFormValues) => {
+    setIsSubmitting(true);
+    const productData = {
+        ...data,
+        sizes: data.sizes.split(',').map(s => s.trim()),
+        colors: data.colors.split(',').map(c => c.trim()),
+        images: data.images.split(',').map(i => i.trim()),
+    };
+
+    try {
+        let result;
+        if (product) {
+            result = await updateProduct(product.id, productData);
+            toast({ title: 'Product Updated', description: `"${data.name}" has been successfully updated.` });
+        } else {
+            result = await createProduct(productData);
+            toast({ title: 'Product Created', description: `New product "${data.name}" has been added.` });
+        }
+        
+        if (result.success) {
+            router.push('/admin/products');
+            router.refresh();
+        } else {
+            throw new Error(result.message || 'An unknown error occurred');
+        }
+
+    } catch (error: any) {
+        toast({
+            title: 'Error',
+            description: error.message || (product ? 'Could not update product.' : 'Could not create product.'),
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="md:col-span-2 space-y-8">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Product Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Tioras Signature Tee" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="Describe the product..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="images"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Image URLs</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="Enter comma-separated image URLs" {...field} />
+                        </FormControl>
+                        <FormDescription>The first image will be the main display image.</FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+            <div className="space-y-8">
+                <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Price</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="2499" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="T-Shirt">T-Shirt</SelectItem>
+                                <SelectItem value="Hoodie">Hoodie</SelectItem>
+                                <SelectItem value="Jacket">Jacket</SelectItem>
+                                <SelectItem value="Cap">Cap</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="sizes"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Sizes</FormLabel>
+                        <FormControl>
+                            <Input placeholder="S, M, L, XL" {...field} />
+                        </FormControl>
+                        <FormDescription>Comma-separated values.</FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="colors"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Colors</FormLabel>
+                        <FormControl>
+                            <Input placeholder="#000000, #FFFFFF" {...field} />
+                        </FormControl>
+                        <FormDescription>Comma-separated hex codes.</FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="isNew"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel>New Arrival</FormLabel>
+                                <FormDescription>
+                                    Display a 'New' badge on the product.
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                    />
+            </div>
+        </div>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+          {product ? 'Save Changes' : 'Create Product'}
+        </Button>
+      </form>
+    </Form>
+  );
+}
