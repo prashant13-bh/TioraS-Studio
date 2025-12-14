@@ -2,23 +2,18 @@
 'use client';
 
 import { Search as SearchIcon } from 'lucide-react';
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 import { Input } from './ui/input';
 
-export function Search({ placeholder }: { placeholder: string }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+interface SearchProps {
+  placeholder: string;
+  onSearchChange: (query: string) => void;
+  initialQuery?: string;
+}
 
+export function Search({ placeholder, onSearchChange, initialQuery }: SearchProps) {
   const handleSearch = useDebouncedCallback((term: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (term) {
-      params.set('query', term);
-    } else {
-      params.delete('query');
-    }
-    replace(`${pathname}?${params.toString()}`);
+    onSearchChange(term);
   }, 300);
 
   return (
@@ -27,10 +22,8 @@ export function Search({ placeholder }: { placeholder: string }) {
       <Input
         className="w-full rounded-lg bg-background pl-9"
         placeholder={placeholder}
-        onChange={(e) => {
-          handleSearch(e.target.value);
-        }}
-        defaultValue={searchParams.get('query')?.toString()}
+        onChange={(e) => handleSearch(e.target.value)}
+        defaultValue={initialQuery}
       />
     </div>
   );
