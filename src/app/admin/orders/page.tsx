@@ -54,9 +54,7 @@ export default async function AdminOrdersPage({
           A list of all orders placed on the platform.
         </CardDescription>
         <div className="pt-2">
-            <Suspense fallback={<div>Loading search...</div>}>
-                <Search placeholder="Search by name, email, or order #" />
-            </Suspense>
+            <Search placeholder="Search by name, email, or order #" />
         </div>
       </CardHeader>
       <CardContent>
