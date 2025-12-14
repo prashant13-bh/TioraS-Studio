@@ -17,9 +17,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { OrderActions } from './_components/order-actions';
+import type { Order } from '@/lib/types';
 
 export default async function AdminOrdersPage() {
-  const orders = await getAllOrders();
+  const orders: Order[] = await getAllOrders();
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -76,7 +77,7 @@ export default async function AdminOrdersPage() {
                     <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-center">
-                    {order.items.reduce((acc, item) => acc + item.quantity, 0)}
+                    {order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0}
                   </TableCell>
                   <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>

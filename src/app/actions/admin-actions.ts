@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { AdminDashboardData, Design, Order } from '@/lib/types';
+import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { getFirebaseAdmin } from '@/firebase/server-config';
 import { collection, getDocs, query, where, limit, orderBy } from 'firebase-admin/firestore';
@@ -56,14 +56,18 @@ export async function getAllOrders(): Promise<Order[]> {
     const { firestore } = getFirebaseAdmin();
     const ordersSnapshot = await firestore.collectionGroup('orders').orderBy('createdAt', 'desc').get();
     
-    const orders = ordersSnapshot.docs.map(doc => {
+    const orders = await Promise.all(ordersSnapshot.docs.map(async (doc) => {
       const data = doc.data();
+      const itemsSnapshot = await doc.ref.collection('orderItems').get();
+      const items = itemsSnapshot.docs.map(itemDoc => itemDoc.data() as OrderItem);
+      
       return {
         id: doc.id,
         ...data,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+        items: items,
       } as Order;
-    });
+    }));
 
     return orders;
   } catch (error) {
