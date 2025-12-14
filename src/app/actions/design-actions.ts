@@ -1,10 +1,11 @@
+
 'use server';
 
 import { z } from 'zod';
 import { generateCustomDesign as generateCustomDesignFlow } from '@/ai/flows/generate-custom-designs';
 import { revalidatePath } from 'next/cache';
-import { addDesign } from './admin-actions';
 import type { Design } from '@/lib/types';
+import { getFirebaseAdmin } from '@/firebase/server-config';
 
 const generateSchema = z.object({
   prompt: z.string().min(3, 'Prompt must be at least 3 characters long.'),
@@ -51,6 +52,7 @@ export async function generateDesignAction(prevState: any, formData: FormData) {
 
 
 const saveSchema = z.object({
+    userId: z.string().min(1, 'User ID is required.'),
     name: z.string().min(1),
     prompt: z.string().min(1),
     productType: z.string().min(1),
@@ -58,12 +60,14 @@ const saveSchema = z.object({
 });
 
 export async function saveDesignAction(
+    userId: string,
     name: string,
     prompt: string,
     productType: string,
     imageUrl: string
 ) {
     const validatedFields = saveSchema.safeParse({
+        userId,
         name,
         prompt,
         productType,
@@ -75,17 +79,22 @@ export async function saveDesignAction(
     }
 
     try {
-        const newDesign: Design = {
-            id: `des_${Date.now()}`,
+        const { firestore } = getFirebaseAdmin();
+        const designRef = firestore.collection('users').doc(userId).collection('designs').doc();
+        const now = new Date().toISOString();
+
+        const newDesign: Omit<Design, 'id'> = {
             name,
             prompt,
             product: productType,
             imageUrl,
             status: 'Draft',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: now,
+            updatedAt: now,
+            userId,
         };
-        addDesign(newDesign);
+        
+        await designRef.set(newDesign);
 
         revalidatePath('/admin/reviews');
         revalidatePath('/dashboard');

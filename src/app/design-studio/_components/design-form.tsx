@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState } from 'react';
@@ -18,6 +19,7 @@ import {
 import { Bot, Download, Loader2, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import React, { useEffect, useRef, useState } from 'react';
+import { useUser } from '@/firebase';
 
 const initialState = {
   message: '',
@@ -48,9 +50,11 @@ function SubmitButton() {
 
 export function DesignForm() {
   const [state, formAction] = useActionState(generateDesignAction, initialState);
+  const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [name, setName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (state.message && state.imageUrl === null && !state.errors) {
@@ -63,14 +67,20 @@ export function DesignForm() {
   }, [state.message, state.imageUrl, state.errors, toast]);
   
   const handleSave = async () => {
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to save a design.", variant: 'destructive'});
+        return;
+    }
     if (state.imageUrl && state.prompt && state.productType) {
+        setIsSaving(true);
         const designName = name || `AI Design - ${new Date().toLocaleString()}`;
-        const result = await saveDesignAction(designName, state.prompt, state.productType, state.imageUrl);
+        const result = await saveDesignAction(user.uid, designName, state.prompt, state.productType, state.imageUrl);
         if (result.success) {
             toast({ title: "Success", description: result.message });
         } else {
             toast({ title: "Error", description: result.message, variant: 'destructive' });
         }
+        setIsSaving(false);
     }
   };
 
@@ -144,7 +154,10 @@ export function DesignForm() {
                 className="w-full max-w-sm md:max-w-md"
             />
             <div className='flex flex-col sm:flex-row gap-2 w-full max-w-sm md:max-w-md'>
-                <Button onClick={handleSave} variant="secondary" className="w-full"><Save className="mr-2 size-4" /> Save</Button>
+                <Button onClick={handleSave} variant="secondary" className="w-full" disabled={isSaving || userLoading}>
+                    {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+                     Save
+                </Button>
                 <Button onClick={handleDownload} className="w-full"><Download className="mr-2 size-4" /> Download</Button>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -21,6 +22,7 @@ import { createOrderAction } from '@/app/actions/order-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import React from 'react';
+import { useUser } from '@/firebase';
 
 const shippingAddressSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -34,6 +36,7 @@ const shippingAddressSchema = z.object({
 
 export default function CheckoutPage() {
   const { items, total, clearCart, itemCount } = useCart();
+  const { user, loading: userLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -51,14 +54,45 @@ export default function CheckoutPage() {
     },
   });
 
+  React.useEffect(() => {
+    if (!userLoading && !user) {
+        toast({
+            title: 'Authentication Required',
+            description: 'Please log in to proceed to checkout.',
+            variant: 'destructive'
+        });
+        router.push('/login?redirect=/checkout');
+    }
+     if (!userLoading && user && user.displayName) {
+      form.setValue('name', user.displayName);
+    }
+    if (!userLoading && user && user.email) {
+      form.setValue('email', user.email);
+    }
+  }, [user, userLoading, router, toast, form]);
+
+
   if (itemCount === 0 && typeof window !== 'undefined') {
     router.replace('/catalog');
     return null;
   }
+  
+  if (userLoading) {
+    return <div className="container text-center py-12">Loading user details...</div>
+  }
 
   async function onSubmit(values: z.infer<typeof shippingAddressSchema>) {
+    if (!user) {
+        toast({
+            title: 'Error',
+            description: 'You must be logged in to place an order.',
+            variant: 'destructive'
+        });
+        return;
+    }
+
     setIsSubmitting(true);
-    const result = await createOrderAction(items, total, values);
+    const result = await createOrderAction(user.uid, items, total, values);
     setIsSubmitting(false);
 
     if (result.success) {
@@ -182,7 +216,7 @@ export default function CheckoutPage() {
                     </FormItem>
                   )}
                 />
-                 <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                 <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || userLoading || !user}>
                   {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
                   Place Order (₹{total.toFixed(2)})
                 </Button>

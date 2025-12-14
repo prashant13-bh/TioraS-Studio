@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier;
     confirmationResult?: ConfirmationResult;
+    grecaptcha?: any;
   }
 }
 
@@ -29,16 +30,21 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!auth) return;
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
+    if (!auth || window.recaptchaVerifier) return;
+    
+    // Ensure the container exists before creating the verifier
+    if (recaptchaContainerRef.current) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+            'size': 'invisible',
+            'callback': (response: any) => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+              // This callback is sometimes needed for auto-verification.
+            }
+        });
+        window.recaptchaVerifier.render();
     }
   }, [auth]);
 
@@ -48,7 +54,7 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
         return;
     }
     if (!window.recaptchaVerifier) {
-        toast({ title: "Error", description: "reCAPTCHA not ready. Please try again in a moment.", variant: "destructive"});
+        toast({ title: "Error", description: "reCAPTCHA not ready. Please refresh and try again.", variant: "destructive"});
         return;
     }
 
@@ -61,13 +67,10 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
     } catch (error: any) {
       console.error("Error sending OTP", error);
       toast({ title: 'Error', description: `Failed to send OTP: ${error.message}`, variant: 'destructive' });
-      // @ts-ignore
-      window.recaptchaVerifier.render().then((widgetId) => {
-        if (auth) {
-          // @ts-ignore
-          grecaptcha.reset(widgetId);
-        }
-      });
+      // Only reset if grecaptcha is available on window
+      if (window.grecaptcha && typeof window.grecaptcha.reset === 'function' && window.recaptchaVerifier) {
+          window.grecaptcha.reset(window.recaptchaVerifier.widgetId);
+      }
     } finally {
       setIsSendingOtp(false);
     }
@@ -92,10 +95,11 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
 
   return (
     <div className="space-y-4 pt-4">
+      <div ref={recaptchaContainerRef}></div>
       {!otpSent ? (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">Phone Number (with country code)</Label>
             <Input
               id="phone"
               type="tel"
