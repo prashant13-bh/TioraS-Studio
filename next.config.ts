@@ -9,11 +9,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  devIndicators: {
-    allowedDevOrigins: [
-      '6000-firebase-studio-1765276165915.cluster-ejd22kqny5htuv5dfowoyipt52.cloudworkstations.dev',
-    ]
-  },
   images: {
     remotePatterns: [
       {
@@ -29,7 +24,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'httpshttps',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
