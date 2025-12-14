@@ -77,7 +77,7 @@ export default async function AdminOrdersPage() {
                     <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-center">
-                    {order.items?.reduce((acc, item) => acc + item.quantity, 0) || 0}
+                    {order.itemCount || 0}
                   </TableCell>
                   <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>

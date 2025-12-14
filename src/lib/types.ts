@@ -57,6 +57,7 @@ export type Order = {
     createdAt: string;
     updatedAt: string;
     items: OrderItem[];
+    itemCount?: number;
 };
 
 export type Design = {
