@@ -45,12 +45,13 @@ const getStatusVariant = (status: string) => {
 };
 
 export default async function AdminOrderDetailPage({
-  params,
+  params: p,
   searchParams,
 }: {
   params: { id: string };
   searchParams: { userId?: string };
 }) {
+  const params = await p;
   if (!searchParams.userId) {
     // In a real app, you might want a more graceful error, but for now, this is clear.
     throw new Error('User ID is required to view an order.');

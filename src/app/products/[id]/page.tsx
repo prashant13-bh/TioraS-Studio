@@ -15,7 +15,8 @@ import ProductCard from '@/components/product-card';
 import { AddToCartForm } from './_components/add-to-cart-form';
 import { ProductImageGallery } from './_components/product-image-gallery';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params: p }: { params: { id: string } }) {
+  const params = await p;
   const product = await getProductById(params.id);
   if (!product) {
     return {
@@ -28,7 +29,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
+export default async function ProductPage({ params: p }: { params: { id: string } }) {
+  const params = await p;
   const product = await getProductById(params.id);
 
   if (!product) {

@@ -14,7 +14,8 @@ export const metadata = {
     description: 'Edit an existing product.',
 };
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params: p }: { params: { id: string } }) {
+  const params = await p;
   const product = await getProductById(params.id);
 
   if (!product) {
