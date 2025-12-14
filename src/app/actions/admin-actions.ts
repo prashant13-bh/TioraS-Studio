@@ -172,6 +172,7 @@ export async function updateOrderStatus(orderId: string, userId: string, status:
         await orderRef.update({ status: status });
 
         revalidatePath('/admin/orders');
+        revalidatePath(`/admin/orders/${orderId}`);
         revalidatePath('/admin');
         return { success: true, message: `Order status updated to ${status}` };
     } catch (error) {
@@ -201,16 +202,28 @@ export async function addOrder(order: Omit<Order, 'id' | 'orderNumber' | 'create
     return newOrder;
 }
 
-export async function getOrderById(orderId: string, userId: string): Promise<Order | undefined> {
+export async function getOrderById(orderId: string, userId: string): Promise<(Order & {items: OrderItem[]}) | null> {
     try {
         const { firestore } = getFirebaseAdmin();
-        const orderDoc = await firestore.collection('users').doc(userId).collection('orders').doc(orderId).get();
+        const orderRef = firestore.collection('users').doc(userId).collection('orders').doc(orderId);
+        
+        const orderDoc = await orderRef.get();
+
         if (!orderDoc.exists) {
-            return undefined;
+            return null;
         }
-        return { id: orderDoc.id, ...orderDoc.data() } as Order;
+
+        const itemsSnapshot = await orderRef.collection('orderItems').get();
+        const items: OrderItem[] = itemsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as OrderItem));
+
+        return {
+            id: orderDoc.id,
+            ...(orderDoc.data() as Omit<Order, 'id'>),
+            items,
+        };
+
     } catch (error) {
         console.error('Failed to get order by id:', error);
-        return undefined;
+        return null;
     }
 }

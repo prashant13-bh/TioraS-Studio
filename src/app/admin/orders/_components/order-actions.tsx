@@ -14,6 +14,7 @@ import { updateOrderStatus } from '@/app/actions/admin-actions';
 import { useToast } from '@/hooks/use-toast';
 import { useTransition } from 'react';
 import type { Order } from '@/lib/types';
+import Link from 'next/link';
 
 interface OrderActionsProps {
   orderId: string;
@@ -53,7 +54,9 @@ export function OrderActions({ orderId, userId, currentStatus }: OrderActionsPro
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem>View Details</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/admin/orders/${orderId}?userId=${userId}`}>View Details</Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => handleStatusUpdate('Shipped')}
