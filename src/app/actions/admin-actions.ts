@@ -3,40 +3,28 @@
 
 import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
-import { getFirebaseAdmin } from '@/firebase/server-config';
-import { getProductById } from './product-actions';
 
 // MOCK DATA - In a real app, this would come from a database
-let designs: Design[] = [];
+let designs: Design[] = [
+    { id: 'des_1', name: 'Cosmic Wolf', prompt: 'a wolf howling at a cosmic moon', product: 'Hoodie', imageUrl: 'https://picsum.photos/seed/301/400/400', status: 'Draft', createdAt: '2024-07-28T10:00:00Z', updatedAt: '2024-07-28T10:00:00Z' },
+    { id: 'des_2', name: 'Sunset City', prompt: 'a vibrant sunset over a futuristic city', product: 'T-Shirt', imageUrl: 'https://picsum.photos/seed/302/400/400', status: 'Approved', createdAt: '2024-07-27T15:30:00Z', updatedAt: '2024-07-27T15:30:00Z' },
+    { id: 'des_3', name: 'Abstract Geometry', prompt: 'a minimalist design with geometric shapes', product: 'Jacket', imageUrl: 'https://picsum.photos/seed/303/400/400', status: 'Rejected', createdAt: '2024-07-26T09:00:00Z', updatedAt: '2024-07-26T09:00:00Z' },
+];
 
+let orders: Order[] = [
+    { id: 'ord_1', userId: 'user_1', orderNumber: 'ORD-7005', total: 8998.00, status: 'Delivered', shippingAddr: { name: 'Alice', email: 'alice@example.com', address: '123 Main St', city: 'City', state: 'State', zip: '12345', phone: '555-1234' }, createdAt: '2024-07-28T12:00:00Z', updatedAt: '2024-07-28T12:00:00Z', items: [], itemCount: 2 },
+    { id: 'ord_2', userId: 'user_2', orderNumber: 'ORD-7004', total: 2499.00, status: 'Shipped', shippingAddr: { name: 'Bob', email: 'bob@example.com', address: '456 Oak Ave', city: 'City', state: 'State', zip: '12345', phone: '555-5678' }, createdAt: '2024-07-27T18:45:00Z', updatedAt: '2024-07-27T18:45:00Z', items: [], itemCount: 1 },
+    { id: 'ord_3', userId: 'user_1', orderNumber: 'ORD-7003', total: 12999.00, status: 'Pending', shippingAddr: { name: 'Alice', email: 'alice@example.com', address: '123 Main St', city: 'City', state: 'State', zip: '12345', phone: '555-1234' }, createdAt: '2024-07-29T08:30:00Z', updatedAt: '2024-07-29T08:30:00Z', items: [], itemCount: 3 },
+];
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
+  // This now uses mock data and will not fail.
   try {
-    const { firestore } = getFirebaseAdmin();
-    const ordersCollection = firestore.collectionGroup('orders');
-    
-    // Efficiently get counts and totals
-    const allOrdersSnapshot = await ordersCollection.get();
-    
-    const totalOrders = allOrdersSnapshot.size;
-    const totalRevenue = allOrdersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
-    const pendingOrders = allOrdersSnapshot.docs.filter(doc => doc.data().status === 'Pending').length;
-
-    const usersSnapshot = await firestore.collection('users').count().get();
-    const activeUsers = usersSnapshot.data().count;
-
-    // Sort documents by date in memory and get the 5 most recent
-    const recentOrders = allOrdersSnapshot.docs
-        .map(doc => {
-            const data = doc.data();
-            return { 
-                id: doc.id,
-                 ...data,
-                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-            } as Order
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
+    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => order.status === 'Pending').length;
+    const activeUsers = 125; // Mocked value
+    const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
     return {
       totalRevenue,
@@ -46,7 +34,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       recentOrders,
     };
   } catch (error) {
-    console.error('Failed to fetch admin dashboard data from Firestore:', error);
+    console.error('This should not happen with mock data:', error);
     // Return a default state on error to prevent crashing the page
     return {
       totalRevenue: 0,
@@ -60,31 +48,10 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
 
 export async function getAllOrders(): Promise<Order[]> {
    try {
-    const { firestore } = getFirebaseAdmin();
-    // Remove the orderBy clause to prevent index-related errors
-    const ordersSnapshot = await firestore.collectionGroup('orders').get();
-    
-    const ordersData = await Promise.all(ordersSnapshot.docs.map(async (doc) => {
-      const data = doc.data();
-      const itemsSnapshot = await doc.ref.collection('orderItems').get();
-      
-      const itemsCount = itemsSnapshot.size;
-      
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-        items: [],
-        itemCount: itemsCount,
-      } as Order;
-    }));
-
-    // Sort the orders in memory
-    const sortedOrders = ordersData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    return sortedOrders;
+    // Return a sorted copy of the mock orders
+    return [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
-    console.error('Failed to fetch all orders from Firestore:', error);
+    console.error('Failed to fetch mock orders:', error);
     return [];
   }
 }
@@ -116,29 +83,14 @@ export async function updateDesignStatus(designId: string, status: 'Approved' | 
 
 export async function updateOrderStatus(orderId: string, status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered') {
     try {
-        const { firestore } = getFirebaseAdmin();
-        // This query is inefficient as it scans a collection group.
-        // A better data model would be a top-level `orders` collection that includes a `userId`
-        // or a direct path if the userId is known. For now, we accept the inefficiency.
-        const ordersQuery = await firestore.collectionGroup('orders').get();
-
-        let orderDoc;
-        ordersQuery.forEach(doc => {
-            if (doc.id === orderId) {
-                orderDoc = doc;
-            }
-        });
-
-
-        if (!orderDoc) {
-            return { success: false, message: 'Order not found.' };
-        }
-
-        await orderDoc.ref.update({ status: status, updatedAt: new Date() });
-
-        revalidatePath('/admin/orders');
-        revalidatePath('/admin');
-        return { success: true, message: `Order status updated to ${status}` };
+       const orderIndex = orders.findIndex(o => o.id === orderId);
+       if (orderIndex > -1) {
+           orders[orderIndex].status = status;
+           revalidatePath('/admin/orders');
+           revalidatePath('/admin');
+           return { success: true, message: `Order status updated to ${status}` };
+       }
+       return { success: false, message: 'Order not found.' };
     } catch (error) {
         console.error(`Failed to update order ${orderId} status:`, error);
         return { success: false, message: 'Database update failed.' };
@@ -152,34 +104,5 @@ export async function addDesign(design: Design) {
 }
 
 export async function getOrderById(orderId: string): Promise<Order | undefined> {
-    const { firestore } = getFirebaseAdmin();
-    // This is inefficient. In a real app, you would have the full path or a better query structure.
-    const ordersQuery = await firestore.collectionGroup('orders').get();
-    let orderDoc;
-    ordersQuery.forEach(doc => {
-        if (doc.id === orderId) {
-            orderDoc = doc;
-        }
-    });
-
-    if (!orderDoc) {
-        return undefined;
-    }
-    const data = orderDoc.data();
-
-    // Fetch order items
-    const itemsSnapshot = await orderDoc.ref.collection('orderItems').get();
-    const items = await Promise.all(itemsSnapshot.docs.map(async (itemDoc) => {
-        const itemData = itemDoc.data();
-        const product = await getProductById(itemData.productId);
-        return { ...itemData, id: itemDoc.id, product } as OrderItem;
-    }));
-
-    return {
-      id: orderDoc.id,
-      ...data,
-      createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-      updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : new Date().toISOString(),
-      items
-    } as Order;
+    return orders.find(o => o.id === orderId);
 }
