@@ -1,3 +1,4 @@
+
 'use client';
 
 import { GoogleIcon, TiorasLogo } from '@/components/icons';
@@ -15,11 +16,13 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/firebase';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -29,6 +32,10 @@ export default function SignupPage() {
   const { auth } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  const handleRedirect = () => {
+    router.push('/dashboard');
+  };
 
   const handleSignUp = async () => {
     if (!auth) {
@@ -40,9 +47,12 @@ export default function SignupPage() {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, { displayName: name });
+      }
       toast({ title: 'Success', description: 'Your account has been created.' });
-      router.push('/dashboard');
+      handleRedirect();
     } catch (error: any) {
       toast({
         title: 'Sign Up Failed',
@@ -65,7 +75,7 @@ export default function SignupPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       toast({ title: 'Success', description: "You've been signed in with Google." });
-      router.push('/dashboard');
+      handleRedirect();
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',
@@ -88,57 +98,69 @@ export default function SignupPage() {
             Join TioraS to start designing and shopping.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-                <span className="sr-only">
-                  {showPassword ? 'Hide password' : 'Show password'}
-                </span>
-              </Button>
-            </div>
-          </div>
-          <Button className="w-full" onClick={handleSignUp}>
-            Sign Up
-          </Button>
+        <CardContent>
+           <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="email"><Mail className="mr-2 size-4" />Email</TabsTrigger>
+              <TabsTrigger value="phone"><Phone className="mr-2 size-4"/>Phone</TabsTrigger>
+            </TabsList>
+            <TabsContent value="email" className="space-y-4 pt-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                    <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                        {showPassword ? (
+                        <EyeOff className="size-4" />
+                        ) : (
+                        <Eye className="size-4" />
+                        )}
+                        <span className="sr-only">
+                        {showPassword ? 'Hide password' : 'Show password'}
+                        </span>
+                    </Button>
+                    </div>
+                </div>
+                <Button className="w-full" onClick={handleSignUp}>
+                    Sign Up
+                </Button>
+            </TabsContent>
+             <TabsContent value="phone">
+                <PhoneAuthForm onVerify={handleRedirect} />
+            </TabsContent>
+          </Tabs>
+
            <div className="relative my-4">
             <Separator />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
@@ -148,7 +170,7 @@ export default function SignupPage() {
             Sign Up with Google
           </Button>
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-4 pt-4">
            <Button variant="outline" className="w-full" asChild>
             <Link href="/">
               <ArrowLeft className="mr-2 size-4" />
@@ -166,6 +188,7 @@ export default function SignupPage() {
           </p>
         </CardFooter>
       </Card>
+      <div id="recaptcha-container"></div>
     </div>
   );
 }

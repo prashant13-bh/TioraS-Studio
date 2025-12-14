@@ -19,9 +19,11 @@ import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { ADMIN_EMAILS } from '../admin/layout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -86,7 +88,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="mb-4 inline-flex items-center justify-center gap-2">
             <TiorasLogo className="size-8 text-primary" />
@@ -94,58 +96,70 @@ export default function LoginPage() {
           </Link>
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account.
+            Sign in to access your account.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary underline-offset-4 hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-                <span className="sr-only">
-                  {showPassword ? 'Hide password' : 'Show password'}
-                </span>
+        <CardContent>
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="email"><Mail className="mr-2 size-4" />Email</TabsTrigger>
+              <TabsTrigger value="phone"><Phone className="mr-2 size-4"/>Phone</TabsTrigger>
+            </TabsList>
+            <TabsContent value="email" className="space-y-4 pt-4">
+               <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                    <span className="sr-only">
+                      {showPassword ? 'Hide password' : 'Show password'}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+              <Button className="w-full" onClick={handleLogin}>
+                Sign In
               </Button>
-            </div>
-          </div>
-          <Button className="w-full" onClick={handleLogin}>
-            Sign In
-          </Button>
+            </TabsContent>
+            <TabsContent value="phone">
+                <PhoneAuthForm onVerify={handleRedirect} />
+            </TabsContent>
+          </Tabs>
+
           <div className="relative my-4">
             <Separator />
             <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
@@ -154,8 +168,9 @@ export default function LoginPage() {
             <GoogleIcon className="mr-2 size-5" />
             Sign In with Google
           </Button>
+
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-4 pt-4">
            <Button variant="outline" className="w-full" asChild>
             <Link href="/">
               <ArrowLeft className="mr-2 size-4" />
@@ -173,6 +188,7 @@ export default function LoginPage() {
           </p>
         </CardFooter>
       </Card>
+      <div id="recaptcha-container"></div>
     </div>
   );
 }
