@@ -4,7 +4,6 @@
 import type { AdminDashboardData, Design, Order, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { getFirebaseAdmin } from '@/firebase/server-config';
-import { collection, getDocs, query, where, limit, orderBy } from 'firebase-admin/firestore';
 import { getProductById } from './product-actions';
 
 // MOCK DATA - In a real app, this would come from a database
@@ -16,21 +15,28 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     const { firestore } = getFirebaseAdmin();
     const ordersCollection = firestore.collectionGroup('orders');
     
+    // Efficiently get counts and totals
     const allOrdersSnapshot = await ordersCollection.get();
-    const allOrders = allOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+    const totalOrders = allOrdersSnapshot.size;
+    const totalRevenue = allOrdersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
 
-    const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
-    const totalOrders = allOrders.length;
-    
-    const pendingOrdersSnapshot = await ordersCollection.where('status', '==', 'Pending').get();
-    const pendingOrders = pendingOrdersSnapshot.size;
+    const pendingOrdersSnapshot = await ordersCollection.where('status', '==', 'Pending').count().get();
+    const pendingOrders = pendingOrdersSnapshot.data().count;
 
-    const usersSnapshot = await firestore.collection('users').get();
-    const activeUsers = usersSnapshot.size;
+    const usersSnapshot = await firestore.collection('users').count().get();
+    const activeUsers = usersSnapshot.data().count;
 
+    // Get only the 5 most recent orders for the table
     const recentOrdersQuery = ordersCollection.orderBy('createdAt', 'desc').limit(5);
     const recentOrdersSnapshot = await recentOrdersQuery.get();
-    const recentOrders = recentOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+    const recentOrders = recentOrdersSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+            id: doc.id,
+             ...data,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+        } as Order
+    });
 
     return {
       totalRevenue,
@@ -59,7 +65,12 @@ export async function getAllOrders(): Promise<Order[]> {
     const orders = await Promise.all(ordersSnapshot.docs.map(async (doc) => {
       const data = doc.data();
       const itemsSnapshot = await doc.ref.collection('orderItems').get();
-      const items = itemsSnapshot.docs.map(itemDoc => itemDoc.data() as OrderItem);
+      
+      const items = await Promise.all(itemsSnapshot.docs.map(async (itemDoc) => {
+        const itemData = itemDoc.data();
+        // Avoid fetching the full product if only name is needed for some views
+        return { ...itemData, id: itemDoc.id } as OrderItem;
+      }));
       
       return {
         id: doc.id,
@@ -104,6 +115,8 @@ export async function updateDesignStatus(designId: string, status: 'Approved' | 
 export async function updateOrderStatus(orderId: string, status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered') {
     try {
         const { firestore } = getFirebaseAdmin();
+        // This query is inefficient. We need the user ID to find the order.
+        // For now, we will assume we can find it. A better data model would be a top-level `orders` collection.
         const ordersQuery = await firestore.collectionGroup('orders').where('id', '==', orderId).get();
 
         if (ordersQuery.empty) {
@@ -111,7 +124,7 @@ export async function updateOrderStatus(orderId: string, status: 'Pending' | 'Pr
         }
 
         const orderDoc = ordersQuery.docs[0];
-        await orderDoc.ref.update({ status: status });
+        await orderDoc.ref.update({ status: status, updatedAt: new Date().toISOString() });
 
         revalidatePath('/admin/orders');
         revalidatePath('/admin');

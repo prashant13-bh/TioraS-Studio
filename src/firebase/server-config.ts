@@ -5,36 +5,29 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 let adminApp: App;
 let firestore: Firestore;
 
-// This function ensures a single instance of the Firebase Admin SDK is initialized and reused.
-function getInitializedAdminApp() {
-  if (!getApps().length) {
-    const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!serviceAccountEnv) {
-      throw new Error(
-        'FIREBASE_SERVICE_ACCOUNT environment variable is not set. Cannot initialize Firebase Admin SDK.'
-      );
-    }
-    
-    try {
-      const serviceAccount = JSON.parse(serviceAccountEnv);
-      adminApp = initializeApp({
-        credential: cert(serviceAccount),
-      });
-      firestore = getFirestore(adminApp);
-    } catch (e) {
-      console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT or initialize Firebase Admin SDK.", e);
-      throw new Error("Firebase Admin SDK initialization failed.");
-    }
-
-  } else {
-    adminApp = getApps()[0];
-    firestore = getFirestore(adminApp);
+if (getApps().length === 0) {
+  const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!serviceAccountEnv) {
+    throw new Error(
+      'FIREBASE_SERVICE_ACCOUNT environment variable is not set. Cannot initialize Firebase Admin SDK.'
+    );
   }
-  return { adminApp, firestore };
+  
+  try {
+    const serviceAccount = JSON.parse(serviceAccountEnv);
+    adminApp = initializeApp({
+      credential: cert(serviceAccount),
+    });
+  } catch (e) {
+    console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT or initialize Firebase Admin SDK.", e);
+    throw new Error("Firebase Admin SDK initialization failed.");
+  }
+} else {
+  adminApp = getApps()[0];
 }
 
-// Main export that provides the initialized firestore instance.
+firestore = getFirestore(adminApp);
+
 export function getFirebaseAdmin() {
-  const { firestore } = getInitializedAdminApp();
   return { firestore };
 }
