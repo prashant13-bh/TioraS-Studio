@@ -30,6 +30,8 @@ export default async function AdminOrdersPage() {
         return 'secondary';
       case 'Delivered':
         return 'outline';
+      case 'Cancelled':
+        return 'destructive';
       case 'Pending':
       default:
         return 'destructive';
@@ -81,7 +83,7 @@ export default async function AdminOrdersPage() {
                   </TableCell>
                   <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
                   <TableCell>
-                    <OrderActions orderId={order.id} currentStatus={order.status} />
+                    <OrderActions orderId={order.id} userId={order.userId} currentStatus={order.status} />
                   </TableCell>
                 </TableRow>
               ))}

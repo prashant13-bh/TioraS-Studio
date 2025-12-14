@@ -12,21 +12,22 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Truck, CheckCircle } from 'lucide-react';
 import { updateOrderStatus } from '@/app/actions/admin-actions';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import type { Order } from '@/lib/types';
 
 interface OrderActionsProps {
   orderId: string;
+  userId: string;
   currentStatus: Order['status'];
 }
 
-export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
+export function OrderActions({ orderId, userId, currentStatus }: OrderActionsProps) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
   const handleStatusUpdate = (status: 'Shipped' | 'Delivered') => {
     startTransition(async () => {
-      const result = await updateOrderStatus(orderId, status);
+      const result = await updateOrderStatus(orderId, userId, status);
       if (result.success) {
         toast({
           title: 'Status Updated',

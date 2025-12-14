@@ -30,6 +30,8 @@ export default async function AdminDashboardPage() {
         return 'secondary';
       case 'Delivered':
         return 'outline';
+      case 'Cancelled':
+        return 'destructive';
       case 'Pending':
       default:
         return 'destructive';
