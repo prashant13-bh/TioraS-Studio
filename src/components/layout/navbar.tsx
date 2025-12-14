@@ -20,7 +20,7 @@ const navLinks = [
 
 async function checkAdminStatus(): Promise<boolean> {
   // This is a client-side check. We fetch from an API route
-  // that would use the secure server-side `getCurrentUser`.
+  // that uses the secure server-side `getCurrentUser`.
   try {
     const res = await fetch('/api/auth/check-admin');
     if (res.ok) {
