@@ -90,6 +90,7 @@ const productSchema = z.object({
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
     const validatedData = productSchema.safeParse(data);
     if (!validatedData.success) {
+        // console.error("Validation failed:", validatedData.error.flatten());
         return { success: false, message: 'Invalid product data.' };
     }
     
@@ -113,6 +114,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
     const validatedData = productSchema.safeParse(data);
     if (!validatedData.success) {
+        // console.error("Validation failed:", validatedData.error.flatten());
         return { success: false, message: 'Invalid product data.' };
     }
 
@@ -132,4 +134,3 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
         return { success: false, message: 'Failed to update product.' };
     }
 }
-
