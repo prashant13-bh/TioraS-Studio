@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct } from '@/app/actions/product-actions';
 import type { Product } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import React from 'react';
 
 const formSchema = z.object({
@@ -38,7 +38,7 @@ const formSchema = z.object({
   category: z.enum(['T-Shirt', 'Hoodie', 'Jacket', 'Cap']),
   sizes: z.string().min(1, 'Please enter comma-separated sizes.'),
   colors: z.string().min(1, 'Please enter comma-separated hex color codes.'),
-  images: z.string().min(1, 'Please enter comma-separated image URLs.'),
+  images: z.array(z.object({ value: z.string().url({ message: "Please enter a valid URL." }) })).min(1, 'At least one image is required.'),
   isNew: z.boolean(),
 });
 
@@ -58,7 +58,7 @@ export function ProductForm({ product }: ProductFormProps) {
         ...product,
         sizes: product.sizes.join(', '),
         colors: product.colors.join(', '),
-        images: product.images.join(', '),
+        images: product.images.map(url => ({ value: url })),
       }
     : {
         name: '',
@@ -67,13 +67,19 @@ export function ProductForm({ product }: ProductFormProps) {
         category: 'T-Shirt' as const,
         sizes: 'S, M, L, XL',
         colors: '#000000, #FFFFFF',
-        images: '',
+        images: [{ value: '' }],
         isNew: true,
       };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
+    mode: 'onChange',
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'images'
   });
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -82,7 +88,7 @@ export function ProductForm({ product }: ProductFormProps) {
         ...data,
         sizes: data.sizes.split(',').map(s => s.trim()),
         colors: data.colors.split(',').map(c => c.trim()),
-        images: data.images.split(',').map(i => i.trim()),
+        images: data.images.map(img => img.value),
     };
 
     try {
@@ -144,20 +150,50 @@ export function ProductForm({ product }: ProductFormProps) {
                         </FormItem>
                     )}
                 />
-                 <FormField
-                    control={form.control}
-                    name="images"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Image URLs</FormLabel>
-                        <FormControl>
-                            <Textarea rows={5} placeholder="Enter one image URL per line." {...field} />
-                        </FormControl>
-                        <FormDescription>The first image in the list will be the main display image for the product.</FormDescription>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                 <div>
+                    <FormLabel>Images</FormLabel>
+                    <FormDescription className="mb-2">The first image will be the main display image. Add at least one image URL.</FormDescription>
+                    <div className="space-y-4">
+                        {fields.map((field, index) => (
+                        <FormField
+                            key={field.id}
+                            control={form.control}
+                            name={`images.${index}.value`}
+                            render={({ field }) => (
+                            <FormItem>
+                                <div className="flex items-center gap-2">
+                                <FormControl>
+                                    <Input placeholder="https://example.com/image.png" {...field} />
+                                </FormControl>
+                                {fields.length > 1 && (
+                                    <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                    >
+                                    <Trash2 className="size-4" />
+                                    <span className="sr-only">Remove image</span>
+                                    </Button>
+                                )}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        ))}
+                    </div>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => append({ value: '' })}
+                        >
+                        <PlusCircle className="mr-2 size-4" />
+                        Add Image
+                    </Button>
+                 </div>
             </div>
             <div className="space-y-8">
                 <FormField

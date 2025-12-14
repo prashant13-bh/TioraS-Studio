@@ -82,7 +82,7 @@ const productSchema = z.object({
     category: z.string().min(1, 'Category is required'),
     sizes: z.string().min(1, 'Sizes are required'),
     colors: z.string().min(1, 'Colors are required'),
-    images: z.string().min(1, 'Images are required'),
+    images: z.array(z.string().url()).min(1, 'At least one image is required.'),
     isNew: z.boolean(),
 });
 
