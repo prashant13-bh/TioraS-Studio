@@ -43,10 +43,15 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
   }, [auth]);
 
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
+    if (!auth) {
         toast({ title: "Error", description: "Auth service not ready.", variant: "destructive"});
         return;
     }
+    if (!window.recaptchaVerifier) {
+        toast({ title: "Error", description: "reCAPTCHA not ready. Please try again in a moment.", variant: "destructive"});
+        return;
+    }
+
     setIsSendingOtp(true);
     try {
       const confirmationResult = await signInWithPhoneNumber(auth, `+${phone}`, window.recaptchaVerifier);
@@ -56,6 +61,7 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
     } catch (error: any) {
       console.error("Error sending OTP", error);
       toast({ title: 'Error', description: `Failed to send OTP: ${error.message}`, variant: 'destructive' });
+      // @ts-ignore
       window.recaptchaVerifier.render().then((widgetId) => {
         if (auth) {
           // @ts-ignore

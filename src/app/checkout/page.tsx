@@ -81,7 +81,7 @@ export default function CheckoutPage() {
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <header className="mb-8 text-center">
-            <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter lg:text-5xl">
+            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
               Checkout
             </h1>
           </header>
