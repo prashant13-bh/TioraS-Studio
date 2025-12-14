@@ -42,8 +42,6 @@ export type OrderItem = {
     size: string;
     color: string;
     price: number;
-    createdAt: string;
-    updatedAt: string;
     product: Product;
 };
 
@@ -56,7 +54,7 @@ export type Order = {
     shippingAddr: ShippingAddress;
     createdAt: string;
     updatedAt: string;
-    items: OrderItem[];
+    items?: OrderItem[];
     itemCount: number;
 };
 

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createOrderAction } from '@/app/actions/order-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const { items, total, clearCart, itemCount } = useCart();
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -61,7 +62,8 @@ export default function CheckoutPage() {
             description: 'Please log in to proceed to checkout.',
             variant: 'destructive'
         });
-        router.push('/login?redirect=/checkout');
+        const redirect = searchParams.get('redirect') || '/checkout';
+        router.push(`/login?redirect=${redirect}`);
     }
      if (!userLoading && user && user.displayName) {
       form.setValue('name', user.displayName);
@@ -69,7 +71,7 @@ export default function CheckoutPage() {
     if (!userLoading && user && user.email) {
       form.setValue('email', user.email);
     }
-  }, [user, userLoading, router, toast, form]);
+  }, [user, userLoading, router, toast, form, searchParams]);
 
 
   if (itemCount === 0 && typeof window !== 'undefined') {
@@ -97,6 +99,10 @@ export default function CheckoutPage() {
 
     if (result.success) {
       clearCart();
+      toast({
+        title: 'Order Placed!',
+        description: 'Your order has been successfully placed.',
+      });
       router.push(`/checkout/success?orderId=${result.orderId}`);
     } else {
       toast({

@@ -61,7 +61,7 @@ export async function createOrderAction(
     
     const newOrderRef = firestore.collection('users').doc(userId).collection('orders').doc();
     
-    const orderData: Omit<Order, 'id' | 'items' | 'itemCount'> = {
+    const orderData: Omit<Order, 'id' | 'items'> = {
         orderNumber,
         total,
         shippingAddr,
@@ -69,39 +69,45 @@ export async function createOrderAction(
         createdAt: now,
         updatedAt: now,
         userId: userId,
+        itemCount: items.reduce((acc, item) => acc + item.quantity, 0),
     };
 
     await newOrderRef.set(orderData);
 
     // In a real app, you would fetch product details from the DB
     // For now, we continue to use the cart item details
-    const orderItems: OrderItem[] = items.map(item => ({
-        id: item.id, // Reusing product id for simplicity as OrderItem ID
-        orderId: newOrderRef.id,
-        productId: item.id,
-        quantity: item.quantity,
-        size: item.selectedSize,
-        color: item.selectedColor,
-        price: item.price, // Price at time of purchase
-        createdAt: now,
-        updatedAt: now,
-        product: { 
-            ...item, 
-            description: '', 
-            category: '', 
-            sizes: [], 
-            colors: [], 
-            images: [item.image], 
-            isNew: false, 
-            createdAt: now, 
-            updatedAt: now 
-        }
-    }));
-
     // Firestore doesn't directly store the nested 'items' array on the Order doc
     // in this model. The UI will fetch them from the subcollection.
-    // However, we can store a summary if needed, e.g., itemCount.
-    await newOrderRef.update({ itemCount: items.length });
+    // However, for admin panel quick views or other purposes, it could be useful
+    // to denormalize some item data if needed, but we will rely on subcollections.
+    
+    const orderItemsBatch = firestore.batch();
+    items.forEach(item => {
+        const orderItemRef = newOrderRef.collection('orderItems').doc(); // Auto-generate ID for each item
+        const orderItem: Omit<OrderItem, 'id'> = {
+            orderId: newOrderRef.id,
+            productId: item.id,
+            quantity: item.quantity,
+            size: item.selectedSize,
+            color: item.selectedColor,
+            price: item.price, // Price at time of purchase
+            product: { 
+                ...item, 
+                id: item.id,
+                description: '', 
+                category: '', 
+                sizes: [], 
+                colors: [], 
+                images: [item.image], 
+                isNew: false, 
+                createdAt: now, 
+                updatedAt: now 
+            }
+        };
+        orderItemsBatch.set(orderItemRef, orderItem);
+    });
+
+    await orderItemsBatch.commit();
 
     revalidatePath('/admin');
     revalidatePath('/admin/orders');
