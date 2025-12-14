@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { getUserDashboardData } from '@/app/actions/user-actions';
 import { format } from 'date-fns';
+import { getMockDashboardData } from '@/lib/mock-data';
 
 export const metadata = {
   title: 'My Dashboard | TioraS',
@@ -13,7 +14,8 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-    const { savedDesigns, orderHistory } = await getUserDashboardData();
+    // Reverted to mock data to fix bug
+    const { savedDesigns, orderHistory } = getMockDashboardData();
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -100,7 +102,7 @@ export default async function DashboardPage() {
                             {orderHistory.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
+                                <TableCell>{format(new Date(order.date), 'PPP')}</TableCell>
                                 <TableCell>
                                 <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                                 </TableCell>
