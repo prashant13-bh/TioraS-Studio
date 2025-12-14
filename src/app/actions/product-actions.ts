@@ -5,6 +5,7 @@ import type { Product } from '@/lib/types';
 import { getFirebaseAdmin } from '@/firebase/server-config';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import type { firestore as admin } from 'firebase-admin';
 
 export async function getProducts({
   category,
@@ -15,7 +16,7 @@ export async function getProducts({
 }): Promise<{ products: Product[] }> {
   try {
     const { firestore } = getFirebaseAdmin();
-    let query: admin.firestore.Query = firestore.collection('products');
+    let query: admin.Query = firestore.collection('products');
 
     if (category && category !== 'All') {
       query = query.where('category', '==', category);
@@ -116,7 +117,7 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
         revalidatePath('/admin/products');
         revalidatePath(`/products/${id}`);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Failed to update product ${id}:`, error);
         return { success: false, message: 'Failed to update product.' };
     }
