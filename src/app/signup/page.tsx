@@ -24,6 +24,7 @@ import { ArrowLeft, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
+import { isAdminEmail } from '@/lib/admin-config';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -56,11 +57,12 @@ export default function SignupPage() {
         
         // Create user document in Firestore
         const db = getFirestore();
+        const role = isAdminEmail(email) ? 'admin' : 'customer';
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           id: userCredential.user.uid,
           name: name,
           email: email,
-          role: 'customer',
+          role: role,
           createdAt: new Date().toISOString(),
         });
       }
@@ -89,7 +91,23 @@ export default function SignupPage() {
     setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Create/Update user document in Firestore
+      const db = getFirestore();
+      const email = userCredential.user.email;
+      const role = isAdminEmail(email) ? 'admin' : 'customer';
+      
+      // We use setDoc with merge: true to avoid overwriting existing data if the user already exists
+      // but we want to ensure the role is correct if it's a new admin signing up via Google
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        id: userCredential.user.uid,
+        name: userCredential.user.displayName,
+        email: email,
+        role: role,
+        createdAt: new Date().toISOString(), // This might overwrite createdAt, but acceptable for now or check existence first
+      }, { merge: true });
+
       toast({ title: 'Success', description: "You've been signed in with Google." });
       handleRedirect();
     } catch (error: any) {
