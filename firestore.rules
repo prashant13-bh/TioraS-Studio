@@ -49,9 +49,11 @@ service cloud.firestore {
       // Users can create their own profile with matching ID.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       
-      // Users can update their own profile (except role). Admins can update all.
-      // Prevent users from promoting themselves to admin via update.
-      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
+      // Users can update their own profile (except role and email). Admins can update all.
+      // Prevent users from promoting themselves to admin or changing email via update.
+      allow update: if (isOwner(userId) && 
+                        request.resource.data.role == resource.data.role && 
+                        request.resource.data.email == resource.data.email) || isAdmin();
       
       // Only admins can delete users.
       allow delete: if isAdmin();
