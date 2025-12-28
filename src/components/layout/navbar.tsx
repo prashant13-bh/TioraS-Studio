@@ -58,11 +58,11 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-headline text-2xl font-bold text-yellow-400">
+            <span className="font-headline text-2xl font-bold text-primary">
               TioraS.
             </span>
           </Link>
@@ -71,7 +71,7 @@ export function Navbar() {
               <Link
                 key={link.title}
                 href={link.href}
-                className="text-sm font-medium text-gray-300 transition-colors hover:text-white"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 {link.title}
               </Link>

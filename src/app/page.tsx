@@ -41,16 +41,16 @@ export default async function Home() {
             <span>The Future of Fashion is Here</span>
           </Badge>
           
-          <h1 className="mx-auto mb-6 max-w-4xl font-headline text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+          <h1 className="mx-auto mb-6 max-w-4xl animate-slide-up font-headline text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl" style={{ animationDelay: '0.1s' }}>
             Design Your <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Legacy</span>
           </h1>
           
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground md:text-xl">
+          <p className="mx-auto mb-10 max-w-2xl animate-slide-up text-lg text-muted-foreground md:text-xl" style={{ animationDelay: '0.2s' }}>
             Experience the perfect fusion of artificial intelligence and artisan craftsmanship. 
             Create, customize, and wear your unique vision.
           </p>
           
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="flex animate-slide-up flex-col items-center justify-center gap-4 sm:flex-row" style={{ animationDelay: '0.3s' }}>
             <Button asChild size="lg" className="h-12 px-8 text-lg font-semibold shadow-lg transition-all hover:scale-105 hover:shadow-xl">
               <Link href="/design-studio">
                 Start Designing <ArrowRight className="ml-2 size-5" />
