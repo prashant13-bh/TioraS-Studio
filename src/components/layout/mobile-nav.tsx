@@ -81,6 +81,13 @@ export function MobileNav({ navLinks, isAdmin }: MobileNavProps) {
                   <User className="size-5" /> My Dashboard
                 </Link>
               )}
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="size-5" /> Profile
+              </Link>
             </>
           ) : (
              <Link

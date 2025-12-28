@@ -100,6 +100,12 @@ export function Navbar() {
                 <Button variant="ghost" size="icon" onClick={handleLogout} className="hidden md:inline-flex">
                   <LogOut className="size-5" />
                 </Button>
+                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+                  <Link href="/profile">
+                    <User className="size-5" />
+                    <span className="sr-only">Profile</span>
+                  </Link>
+                </Button>
               </>
             ) : (
               <>
