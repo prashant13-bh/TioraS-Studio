@@ -10,6 +10,8 @@ import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { isAdminEmail } from '@/lib/admin-config';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -18,20 +20,7 @@ const navLinks = [
   { title: 'Our Story', href: '/about' },
 ];
 
-async function checkAdminStatus(): Promise<boolean> {
-  // This is a client-side check. We fetch from an API route
-  // that uses the secure server-side `getCurrentUser`.
-  try {
-    const res = await fetch('/api/auth/check-admin');
-    if (res.ok) {
-      const data = await res.json();
-      return data.isAdmin === true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
-}
+
 
 export function Navbar() {
   const { user, loading } = useUser();
@@ -40,11 +29,23 @@ export function Navbar() {
   const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
-    if (user && !loading) {
-      checkAdminStatus().then(setIsAdmin);
-    } else if (!user && !loading) {
-      setIsAdmin(false);
-    }
+    const checkUserRole = async () => {
+      if (user && !loading) {
+        try {
+          const db = getFirestore();
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const userData = userDoc.data();
+          const isAdm = userData?.role === 'admin' || isAdminEmail(user.email);
+          setIsAdmin(isAdm);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setIsAdmin(false);
+        }
+      } else if (!user && !loading) {
+        setIsAdmin(false);
+      }
+    };
+    checkUserRole();
   }, [user, loading]);
 
   const handleLogout = async () => {
