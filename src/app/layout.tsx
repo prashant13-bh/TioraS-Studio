@@ -11,25 +11,9 @@ import { FirebaseClientProvider } from '@/firebase';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
-import { usePathname } from 'next/navigation';
+import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
-});
-
-// export const metadata: Metadata = {
-//   title: 'TioraS AI Menswear',
-//   description: 'Premium AI-powered men\'s clothing e-commerce platform.',
-//   icons: {
-//     icon: '/favicon.ico',
-//   },
-// };
+// ... imports
 
 export default function RootLayout({
   children,
@@ -62,6 +46,7 @@ export default function RootLayout({
               {!isAdminPage && <Footer />}
             </div>
             <Toaster />
+            <Analytics />
           </CartProvider>
         </FirebaseClientProvider>
       </body>

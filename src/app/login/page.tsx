@@ -24,20 +24,9 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 
-async function checkAdminStatus(): Promise<boolean> {
-  try {
-    const res = await fetch('/api/auth/check-admin');
-    if (res.ok) {
-      const data = await res.json();
-      return data.isAdmin === true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
-}
+import { isAdminEmail } from '@/lib/admin-config';
 
-import { Suspense } from 'react';
+// ... imports
 
 function LoginContent() {
   const [email, setEmail] = useState('');
@@ -49,8 +38,10 @@ function LoginContent() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRedirect = async () => {
-    const isAdmin = await checkAdminStatus();
+  const handleRedirect = async (user?: User) => {
+    const currentUser = user || auth?.currentUser;
+    const isAdmin = isAdminEmail(currentUser?.email);
+    
     const redirectUrl = searchParams.get('redirect');
     if (redirectUrl) {
       router.push(redirectUrl);
@@ -72,9 +63,9 @@ function LoginContent() {
     }
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       toast({ title: 'Success', description: "You've been signed in." });
-      await handleRedirect();
+      await handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Login Failed',
@@ -98,9 +89,9 @@ function LoginContent() {
     setIsSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
       toast({ title: 'Success', description: "You've been signed in with Google." });
-      await handleRedirect();
+      await handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',

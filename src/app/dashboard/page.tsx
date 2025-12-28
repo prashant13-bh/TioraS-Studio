@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { getUserDashboardData } from '@/app/actions/user-actions';
+import { fetchUserDashboardData } from '@/lib/firestore-actions';
 import { format } from 'date-fns';
 import { redirect, useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
@@ -24,7 +24,7 @@ export default function DashboardPage() {
         if (!loading && !user) {
             router.push('/login?redirect=/dashboard');
         } else if (user) {
-            getUserDashboardData().then(data => {
+            fetchUserDashboardData(user.uid).then(data => {
                 setDashboardData(data);
                 setIsDataLoading(false);
             });

@@ -27,11 +27,35 @@ const navItems = [
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
 
+import { useUser } from '@/firebase';
+import { isAdminEmail } from '@/lib/admin-config';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 export function AdminClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || !isAdminEmail(user.email)) {
+        router.push('/');
+      }
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading admin panel...</div>;
+  }
+
+  if (!user || !isAdminEmail(user.email)) {
+    return null; // Will redirect
+  }
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">

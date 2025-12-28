@@ -1,6 +1,7 @@
 
+'use client';
 
-import { getAdminDashboardData } from '@/app/actions/admin-actions';
+import { fetchAdminDashboardData } from '@/lib/firestore-actions';
 import {
   Card,
   CardContent,
@@ -20,9 +21,19 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, Package, Users, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { SalesChart } from './_components/sales-chart';
+import { useEffect, useState } from 'react';
+import type { AdminDashboardData } from '@/lib/types';
 
-export default async function AdminDashboardPage() {
-  const data = await getAdminDashboardData();
+export default function AdminDashboardPage() {
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAdminDashboardData().then(dashboardData => {
+      setData(dashboardData);
+      setLoading(false);
+    });
+  }, []);
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -39,6 +50,14 @@ export default async function AdminDashboardPage() {
         return 'destructive';
     }
   };
+
+  if (loading) {
+      return <div className="flex h-96 items-center justify-center">Loading dashboard data...</div>;
+  }
+
+  if (!data) {
+      return <div className="flex h-96 items-center justify-center">Failed to load data.</div>;
+  }
 
   return (
     <div className="grid gap-4 md:gap-8 auto-rows-max">
@@ -117,17 +136,23 @@ export default async function AdminDashboardPage() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {data.recentOrders.map((order) => (
-                        <TableRow key={order.id} className="hover:bg-muted/50">
-                        <TableCell>
-                            <div className="font-medium">{order.shippingAddr.name}</div>
-                            <div className="hidden text-sm text-muted-foreground md:inline">
-                            {format(new Date(order.createdAt), 'PP')}
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+                    {data.recentOrders.length > 0 ? (
+                        data.recentOrders.map((order) => (
+                            <TableRow key={order.id} className="hover:bg-muted/50">
+                            <TableCell>
+                                <div className="font-medium">{order.shippingAddr?.name || 'Unknown'}</div>
+                                <div className="hidden text-sm text-muted-foreground md:inline">
+                                {order.createdAt ? format(new Date(order.createdAt), 'PP') : 'N/A'}
+                                </div>
+                            </TableCell>
+                            <TableCell className="text-right">₹{order.total?.toFixed(2) || '0.00'}</TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell colSpan={2} className="text-center text-muted-foreground">No recent orders</TableCell>
                         </TableRow>
-                    ))}
+                    )}
                     </TableBody>
                 </Table>
                 </CardContent>
