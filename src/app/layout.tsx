@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ClientLayout } from '@/components/layout/client-layout';
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           'min-h-screen bg-black font-body antialiased',
@@ -36,9 +37,16 @@ export default function RootLayout({
           spaceGrotesk.variable
         )}
       >
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </ThemeProvider>
       </body>
     </html>
   );

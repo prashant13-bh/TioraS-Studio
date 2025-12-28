@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 import { CartSheet } from './cart-sheet';
 import { User, LogOut, Shield, Bell } from 'lucide-react';
+import { ModeToggle } from '@/components/mode-toggle';
 import { useUser } from '@/firebase';
 import { useAuth } from '@/firebase/provider';
 import { useRouter } from 'next/navigation';
@@ -122,6 +123,7 @@ export function Navbar() {
             <Bell className="size-5" />
             <span className="sr-only">Notifications</span>
           </Button>
+          <ModeToggle />
           <CartSheet />
           <MobileNav navLinks={navLinks} isAdmin={isAdmin} />
         </div>
