@@ -75,20 +75,28 @@ export function Navbar() {
                 {link.title}
               </Link>
             ))}
-             {isAdmin && (
-              <Link href="/admin" className="text-sm font-medium text-gray-300 transition-colors hover:text-white">Admin</Link>
-            )}
+
           </nav>
         </div>
         <div className="flex items-center gap-2">
           {!loading &&
             (user ? (
               <>
-                <Button variant="ghost" asChild size="icon" className="hidden md:inline-flex">
-                  <Link href="/dashboard">
-                    <User className="size-5" />
-                  </Link>
-                </Button>
+                {isAdmin ? (
+                  <Button variant="ghost" asChild className="hidden md:inline-flex">
+                    <Link href="/admin">
+                      <Shield className="mr-2 size-4" />
+                      Admin Dashboard
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" asChild className="hidden md:inline-flex">
+                    <Link href="/dashboard">
+                      <User className="mr-2 size-4" />
+                      My Dashboard
+                    </Link>
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" onClick={handleLogout} className="hidden md:inline-flex">
                   <LogOut className="size-5" />
                 </Button>

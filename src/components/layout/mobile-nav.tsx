@@ -64,20 +64,21 @@ export function MobileNav({ navLinks, isAdmin }: MobileNavProps) {
           <hr className="my-4 border-muted" />
           {!loading && user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
-                onClick={() => setIsOpen(false)}
-              >
-                <User className="size-5" /> My Dashboard
-              </Link>
-              {isAdmin && (
+              {isAdmin ? (
                 <Link
                   href="/admin"
                   className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Shield className="size-5" /> Admin
+                  <Shield className="size-5" /> Admin Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="size-5" /> My Dashboard
                 </Link>
               )}
             </>
