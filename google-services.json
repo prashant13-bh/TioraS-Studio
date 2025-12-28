@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "372408711772",
+    "firebase_url": "https://studio-8710289248-529e5-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "studio-8710289248-529e5",
+    "storage_bucket": "studio-8710289248-529e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372408711772:android:9adf1ea80790ae1bd2c499",
+        "android_client_info": {
+          "package_name": "TioraS.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372408711772-ta7g5u479tbbnp4vvu54gpumdk85i7ol.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvHYZeMYR9CISuwhXEP-DwrWZJxrBlKyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372408711772-ta7g5u479tbbnp4vvu54gpumdk85i7ol.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
