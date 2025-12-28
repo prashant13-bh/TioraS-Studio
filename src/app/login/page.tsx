@@ -26,6 +26,7 @@ import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 
 import { isAdminEmail } from '@/lib/admin-config';
 import { Suspense } from 'react';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 // ... imports
 
@@ -39,9 +40,18 @@ function LoginContent() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+// ... other imports
+
   const handleRedirect = async (user?: User) => {
     const currentUser = user || auth?.currentUser;
-    const isAdmin = isAdminEmail(currentUser?.email);
+    if (!currentUser) return;
+
+    const db = getFirestore();
+    const userDocRef = doc(db, 'users', currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    const userData = userDoc.data();
+    const isAdmin = userData?.role === 'admin' || isAdminEmail(currentUser.email);
     
     const redirectUrl = searchParams.get('redirect');
     if (redirectUrl) {

@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
@@ -52,6 +53,16 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName: name });
+        
+        // Create user document in Firestore
+        const db = getFirestore();
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          id: userCredential.user.uid,
+          name: name,
+          email: email,
+          role: 'customer',
+          createdAt: new Date().toISOString(),
+        });
       }
       toast({ title: 'Success', description: 'Your account has been created.' });
       handleRedirect();
