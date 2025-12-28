@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 
 import { isAdminEmail } from '@/lib/admin-config';
+import { Suspense } from 'react';
 
 // ... imports
 
