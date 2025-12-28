@@ -1,4 +1,4 @@
-export const ADMIN_EMAILS = ['prashant13.bh@gmail.com', ...(process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(email => email.trim()).filter(Boolean)];
+export const ADMIN_EMAILS = ['ph293815@gmail.com', 'tyoras9686@gmail.com', ...(process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(email => email.trim()).filter(Boolean)];
 
 export const isAdminEmail = (email: string | null | undefined) => {
   if (!email) return false;
