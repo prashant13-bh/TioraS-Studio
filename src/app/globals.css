@@ -71,3 +71,18 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-md border border-white/10;
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 10px theme("colors.primary.DEFAULT"),
+      0 0 20px theme("colors.primary.DEFAULT");
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px theme("colors.primary.DEFAULT");
+  }
+}
