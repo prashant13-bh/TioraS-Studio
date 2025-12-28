@@ -37,7 +37,9 @@ async function checkAdminStatus(): Promise<boolean> {
   }
 }
 
-export default function LoginPage() {
+import { Suspense } from 'react';
+
+function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -217,5 +219,13 @@ export default function LoginPage() {
       </Card>
       <div id="recaptcha-container"></div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

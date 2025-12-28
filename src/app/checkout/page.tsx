@@ -34,7 +34,9 @@ const shippingAddressSchema = z.object({
   phone: z.string().min(10, 'Phone number is required.'),
 });
 
-export default function CheckoutPage() {
+import { Suspense } from 'react';
+
+function CheckoutContent() {
   const { items, total, clearCart, itemCount } = useCart();
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
@@ -275,5 +277,13 @@ export default function CheckoutPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="container text-center py-12">Loading...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
