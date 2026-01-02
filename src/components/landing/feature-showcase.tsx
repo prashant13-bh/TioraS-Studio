@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Bot, Layers, Users, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -13,6 +14,7 @@ const features = [
     href: '/design-studio',
     cta: 'Start Creating',
     className: 'md:col-span-2 md:row-span-2',
+    image: '/assets/ai-studio-bg.png',
   },
   {
     title: 'Premium Collections',
@@ -63,6 +65,18 @@ export function FeatureShowcase() {
               transition={{ duration: 0.4, delay: index * 0.1 }}
               className={`group relative overflow-hidden rounded-3xl border bg-background/50 p-8 transition-all hover:bg-accent/50 ${feature.className}`}
             >
+              {feature.image && (
+                <div className="absolute inset-0 z-0 opacity-40 transition-opacity group-hover:opacity-60">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+                </div>
+              )}
+              
               <div className="absolute top-0 right-0 -mt-4 -mr-4 size-32 rounded-full bg-gradient-to-br from-primary/10 to-transparent blur-2xl transition-all group-hover:scale-150"></div>
               
               <div className="relative z-10 flex h-full flex-col justify-between">
@@ -71,12 +85,12 @@ export function FeatureShowcase() {
                     {feature.icon}
                   </div>
                   <h3 className="mb-2 font-headline text-2xl font-bold">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <p className="text-muted-foreground max-w-[280px]">{feature.description}</p>
                 </div>
                 
                 <div className="mt-8">
                   <Button asChild variant="ghost" className="group-hover:translate-x-1 transition-transform p-0 hover:bg-transparent">
-                    <Link href={feature.href} className="flex items-center text-primary">
+                    <Link href={feature.href} className="flex items-center text-primary font-bold">
                       {feature.cta} <ArrowRight className="ml-2 size-4" />
                     </Link>
                   </Button>
