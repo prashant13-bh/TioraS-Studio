@@ -66,14 +66,14 @@ export function FeatureShowcase() {
               className={`group relative overflow-hidden rounded-3xl border bg-background/50 p-8 transition-all hover:bg-accent/50 ${feature.className}`}
             >
               {feature.image && (
-                <div className="absolute inset-0 z-0 opacity-40 transition-opacity group-hover:opacity-60">
+                <div className="absolute inset-0 z-0 opacity-80 transition-opacity group-hover:opacity-100">
                   <Image
                     src={feature.image}
                     alt={feature.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent"></div>
                 </div>
               )}
               
