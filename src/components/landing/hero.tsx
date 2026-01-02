@@ -1,27 +1,47 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+const heroImages = [
+  '/assets/hero-shop-1.png',
+  '/assets/hero-shop-2.png',
+  '/assets/hero-bg.png',
+];
 
 export function Hero() {
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden bg-background text-center">
-      {/* Background Image with Zoom Effect */}
+      {/* Background Image Carousel with Zoom Effect */}
       <div className="absolute inset-0 -z-20">
-        <motion.div
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-          className="relative h-full w-full"
-        >
-          <img
-            src="/assets/hero-bg.png"
-            alt="Futuristic Fashion Background"
-            className="h-full w-full object-cover opacity-60"
-          />
-        </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 0.6, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="relative h-full w-full"
+          >
+            <img
+              src={heroImages[currentImage]}
+              alt="TioraS Studio Interior"
+              className="h-full w-full object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background"></div>
       </div>
 
