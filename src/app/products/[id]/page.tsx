@@ -15,6 +15,7 @@ import {
 import ProductCard from '@/components/product-card';
 import { AddToCartForm } from './_components/add-to-cart-form';
 import { ProductImageGallery } from './_components/product-image-gallery';
+import { ProductReviews } from './_components/product-reviews';
 
 export async function generateMetadata({ params: p }: { params: { id: string } }) {
   const params = await p;
@@ -86,6 +87,8 @@ export default async function ProductPage({ params: p }: { params: { id: string 
           </div>
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
 
       {filteredRelatedProducts.length > 0 && (
         <div className="mt-16 md:mt-24">

@@ -1,11 +1,12 @@
-
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Video } from 'lucide-react';
+import { Eye, Video, Heart } from 'lucide-react';
+import { useWishlist } from '@/lib/wishlist-context';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,18 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const primaryMedia = product.media.find(m => m.type === 'image') || product.media[0];
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
 
   return (
     <Card className="group relative w-full overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-300 hover:shadow-xl">
@@ -37,6 +50,18 @@ export default function ProductCard({ product }: ProductCardProps) {
               New
             </Badge>
           )}
+          
+          <Button
+            size="icon"
+            variant="secondary"
+            className={cn(
+              "absolute right-2 top-2 z-10 size-8 rounded-full shadow-md transition-all md:right-3 md:top-3 md:size-10",
+              isWishlisted ? "bg-red-500 text-white hover:bg-red-600" : "hover:text-red-500"
+            )}
+            onClick={toggleWishlist}
+          >
+            <Heart className={cn("size-4 md:size-5", isWishlisted && "fill-current")} />
+          </Button>
         </div>
         <div className="p-2 md:p-4">
           <h3 className="truncate font-headline text-base md:text-lg font-semibold">{product.name}</h3>

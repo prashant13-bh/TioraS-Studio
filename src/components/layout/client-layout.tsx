@@ -1,6 +1,7 @@
 'use client';
 
 import { CartProvider } from '@/lib/cart-context';
+import { WishlistProvider } from '@/lib/wishlist-context';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
@@ -20,14 +21,16 @@ export function ClientLayout({
   return (
     <FirebaseClientProvider>
       <CartProvider>
-        <div className="flex min-h-screen flex-col">
-          <Navbar />
-          <FirebaseErrorListener />
-          <main className="flex-1">{children}</main>
-          {!isAdminPage && <Footer />}
-        </div>
-        <Toaster />
-        <Analytics />
+        <WishlistProvider>
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <FirebaseErrorListener />
+            <main className="flex-1">{children}</main>
+            {!isAdminPage && <Footer />}
+          </div>
+          <Toaster />
+          <Analytics />
+        </WishlistProvider>
       </CartProvider>
     </FirebaseClientProvider>
   );
