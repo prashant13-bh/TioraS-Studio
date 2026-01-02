@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-black font-body antialiased',
+          'min-h-screen bg-background font-body antialiased',
           inter.variable,
           spaceGrotesk.variable
         )}
