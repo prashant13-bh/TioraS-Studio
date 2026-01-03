@@ -1,23 +1,23 @@
-import { getProducts } from '@/app/actions/product-actions';
-import { Hero } from '@/components/landing/hero';
-import { Vision } from '@/components/landing/vision';
-import { HowItWorks } from '@/components/landing/how-it-works';
-import { FeatureShowcase } from '@/components/landing/feature-showcase';
-import { TrendingCarousel } from '@/components/landing/trending-carousel';
-import { Newsletter } from '@/components/landing/newsletter';
+"use client";
 
-export default async function Home() {
-  const { products } = await getProducts({});
-  const featuredProducts = products.slice(0, 8); // Fetch more for the carousel
+import CanvasRoot from "@/components/canvas/CanvasRoot";
+import HeroSection from "@/components/sections/HeroSection";
+import ProductsSection from "@/components/sections/ProductsSection";
+import CustomStudioSection from "@/components/sections/CustomStudioSection";
+import QualitySection from "@/components/sections/QualitySection";
+import FinalCTASection from "@/components/sections/FinalCTASection";
 
+export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Hero />
-      <Vision />
-      <HowItWorks />
-      <FeatureShowcase />
-      <TrendingCarousel products={featuredProducts} />
-      <Newsletter />
-    </div>
+    <>
+      <CanvasRoot />
+      <main>
+        <HeroSection />
+        <ProductsSection />
+        <CustomStudioSection />
+        <QualitySection />
+        <FinalCTASection />
+      </main>
+    </>
   );
 }
