@@ -1,12 +1,21 @@
+'use client';
 
-import { getProducts } from '@/app/actions/product-actions';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -15,124 +24,339 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
-import { MoreHorizontal, PlusCircle, Video } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
+import { 
+  Search, 
+  MoreHorizontal, 
+  Download, 
+  ArrowUpDown, 
+  PlusCircle,
+  FileSpreadsheet,
+  FileText
+} from 'lucide-react';
 import Link from 'next/link';
-import { DeleteProductDialog } from './_components/delete-product-dialog';
+import Image from 'next/image';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import { toast } from 'sonner';
 
-export const metadata = {
-    title: 'Products | TioraS Admin',
-    description: 'Manage all products in the store.',
-};
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  stock: number;
+  sku: string;
+  media: { type: string; url: string }[];
+  isNew?: boolean;
+}
 
-export default async function AdminProductsPage() {
-  const { products } = await getProducts({});
+export default function ProductsTablePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { firestore: db } = initializeFirebase();
+        const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(productsQuery);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        toast.error('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const columns = useMemo<ColumnDef<Product>[]>(
+    () => [
+      {
+        accessorKey: 'media',
+        header: 'Image',
+        cell: ({ row }) => {
+          const media = row.original.media;
+          return media?.[0]?.url ? (
+            <Image
+              src={media[0].url}
+              alt={row.original.name}
+              width={48}
+              height={48}
+              className="rounded-md object-cover"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-muted rounded-md" />
+          );
+        },
+        enableSorting: false,
+      },
+      {
+        accessorKey: 'name',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+      },
+      {
+        accessorKey: 'sku',
+        header: 'SKU',
+      },
+      {
+        accessorKey: 'category',
+        header: 'Category',
+        cell: ({ row }) => <Badge variant="outline">{row.original.category}</Badge>,
+      },
+      {
+        accessorKey: 'stock',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Stock
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const stock = row.original.stock || 0;
+          return (
+            <Badge variant={stock < 10 ? 'destructive' : 'secondary'}>
+              {stock}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: 'price',
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Price
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => `₹${row.original.price.toFixed(2)}`,
+      },
+      {
+        id: 'actions',
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/products/${row.original.id}/edit`}>Edit</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${row.original.id}`}>View</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: products,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+    },
+  });
+
+  const exportToExcel = () => {
+    const data = products.map(p => ({
+      Name: p.name,
+      SKU: p.sku,
+      Category: p.category,
+      Stock: p.stock,
+      Price: p.price,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Products');
+    XLSX.writeFile(wb, `Products_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success('Exported to Excel!');
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('TioraS Studio - Products List', 20, 20);
+    doc.setFontSize(10);
+    
+    let y = 40;
+    products.forEach((p, i) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(`${i + 1}. ${p.name} - ${p.category} - ₹${p.price} - Stock: ${p.stock}`, 20, y);
+      y += 8;
+    });
+
+    doc.save(`Products_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('Exported to PDF!');
+  };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-            <div>
-                <CardTitle>Products</CardTitle>
-                <CardDescription>
-                A list of all products in your store.
-                </CardDescription>
-            </div>
+          <CardTitle>Products</CardTitle>
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={exportToExcel}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export to Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToPDF}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export to PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button asChild>
-                <Link href="/admin/products/new">
-                    <PlusCircle className="mr-2 size-4" />
-                    Add Product
-                </Link>
+              <Link href="/admin/products/new">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Product
+              </Link>
             </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Search */}
+        <div className="flex items-center py-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
-                  <span className="sr-only">Media</span>
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead className="hidden md:table-cell">Status</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="hidden sm:table-cell">
-                    {product.media.length > 0 ? (
-                        product.media[0].type === 'image' ? (
-                             <Image
-                                alt={product.name}
-                                className="aspect-square rounded-md object-cover"
-                                height="64"
-                                src={product.media[0].url}
-                                width="64"
-                            />
-                        ) : (
-                            <div className="flex aspect-square size-16 items-center justify-center rounded-md bg-muted">
-                                <Video className="size-6 text-muted-foreground"/>
-                            </div>
-                        )
-                    ) : (
-                        <div className="aspect-square size-16 rounded-md bg-muted" />
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>
-                    <Badge variant={(product.stock || 0) < 10 ? 'destructive' : 'secondary'}>
-                      {product.stock || 0}
-                    </Badge>
-                  </TableCell>
-                   <TableCell className="hidden md:table-cell">
-                     {product.isNew ? (
-                        <Badge>New</Badge>
-                     ) : (
-                        <Badge variant="outline">Active</Badge>
-                     )}
-                  </TableCell>
-                  <TableCell className="text-right">₹{product.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                            <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DeleteProductDialog productId={product.id} productName={product.name} />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="text-center py-8">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="text-center py-8">
+                    No products found.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between py-4">
+          <p className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length} product(s)
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
