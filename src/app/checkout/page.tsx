@@ -117,11 +117,7 @@ function CheckoutContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <header className="mb-8 text-center">
-        <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
-          Checkout
-        </h1>
-      </header>
+
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
         <Card>

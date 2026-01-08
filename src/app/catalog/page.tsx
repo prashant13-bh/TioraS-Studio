@@ -172,16 +172,6 @@ export default function CatalogPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <header className="mb-8 text-center">
-        <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl">
-          Our Collection
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Discover meticulously crafted pieces for the modern you.
-        </p>
-      </header>
-
       {/* Search and Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         {/* Search */}
