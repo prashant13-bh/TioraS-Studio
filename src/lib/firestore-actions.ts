@@ -91,3 +91,20 @@ export async function fetchUserDashboardData(userId: string) {
     return { savedDesigns: [], orderHistory: [] };
   }
 }
+
+export async function fetchOrderById(orderId: string): Promise<Order | null> {
+  const { firestore: db } = initializeFirebase();
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+
+    if (orderSnap.exists()) {
+      return { id: orderSnap.id, ...orderSnap.data() } as Order;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    return null;
+  }
+}
