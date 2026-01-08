@@ -29,6 +29,7 @@ const navItems = [
   { href: '/admin/invoices', icon: FileText, label: 'Invoices' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
+  { href: '/admin/seed', icon: Package, label: 'Seed Data' },
 ];
 
 import { useUser } from '@/firebase';
