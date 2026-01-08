@@ -30,18 +30,9 @@ import type { Product, ProductMedia } from "@/lib/types";
 import { Loader2, PlusCircle, Trash2, Video } from "lucide-react";
 import React from "react";
 import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const mediaSchema = z.object({
   type: z.enum(["image", "video"]),
@@ -73,11 +64,6 @@ export function ProductForm({ product }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [newMediaUrl, setNewMediaUrl] = React.useState("");
-  const [newMediaType, setNewMediaType] = React.useState<"image" | "video">(
-    "image"
-  );
-  const [isAddMediaOpen, setIsAddMediaOpen] = React.useState(false);
 
   const defaultValues = product
     ? {
@@ -175,23 +161,7 @@ export function ProductForm({ product }: ProductFormProps) {
     }
   };
 
-  const handleAddMedia = () => {
-    if (newMediaUrl) {
-      try {
-        z.string().url().parse(newMediaUrl);
-        append({ url: newMediaUrl, type: newMediaType });
-        setNewMediaUrl("");
-        setNewMediaType("image");
-        setIsAddMediaOpen(false);
-      } catch (error) {
-        toast({
-          title: "Invalid URL",
-          description: "Please enter a valid media URL.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
+
 
   return (
     <Form {...form}>
@@ -232,103 +202,24 @@ export function ProductForm({ product }: ProductFormProps) {
               )}
             />
             <div>
-              <FormLabel>Images & Video</FormLabel>
-              <FormDescription className="mb-2">
-                Manage media for the product. The first item is the main
-                display.
+              <FormLabel>Images</FormLabel>
+              <FormDescription className="mb-4">
+                Upload product images. The first image will be the main display.
               </FormDescription>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {fields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="relative group aspect-square w-full"
-                  >
-                    {field.type === "image" ? (
-                      <Image
-                        src={field.url}
-                        alt={`Product media ${index + 1}`}
-                        fill
-                        className="rounded-md object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center rounded-md bg-muted">
-                        <Video className="size-8 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="size-4" />
-                        <span className="sr-only">Remove Media</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                <Dialog open={isAddMediaOpen} onOpenChange={setIsAddMediaOpen}>
-                  <DialogTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex aspect-square w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted/80"
-                    >
-                      <PlusCircle className="size-8 text-muted-foreground" />
-                      <span className="sr-only">Add Media</span>
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add New Media</DialogTitle>
-                      <DialogDescription>
-                        Paste the URL of the image or video you want to add.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Media Type</Label>
-                        <RadioGroup
-                          value={newMediaType}
-                          onValueChange={(v) =>
-                            setNewMediaType(v as "image" | "video")
-                          }
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="image" id="r-image" />
-                            <Label htmlFor="r-image">Image</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="video" id="r-video" />
-                            <Label htmlFor="r-video">Video</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="new-media-url">Media URL</Label>
-                        <Input
-                          id="new-media-url"
-                          value={newMediaUrl}
-                          onChange={(e) => setNewMediaUrl(e.target.value)}
-                          placeholder="https://..."
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsAddMediaOpen(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="button" onClick={handleAddMedia}>
-                        Add Media
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+              
+              <div className="space-y-4">
+                <ImageUpload
+                  value={fields.map((field) => field.url)}
+                  disabled={isSubmitting}
+                  onChange={(url) => {
+                    const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg');
+                    append({ url, type: isVideo ? "video" : "image" });
+                  }}
+                  onRemove={(url) => {
+                    const index = fields.findIndex((field) => field.url === url);
+                    if (index !== -1) remove(index);
+                  }}
+                />
               </div>
               <FormMessage>
                 {form.formState.errors.media?.root?.message ||
