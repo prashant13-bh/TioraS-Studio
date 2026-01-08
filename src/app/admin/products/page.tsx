@@ -66,6 +66,7 @@ export default async function AdminProductsPage() {
                 </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Stock</TableHead>
                 <TableHead className="hidden md:table-cell">Status</TableHead>
                 <TableHead className="text-right">Price</TableHead>
                 <TableHead>
@@ -97,6 +98,11 @@ export default async function AdminProductsPage() {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    <Badge variant={(product.stock || 0) < 10 ? 'destructive' : 'secondary'}>
+                      {product.stock || 0}
+                    </Badge>
+                  </TableCell>
                    <TableCell className="hidden md:table-cell">
                      {product.isNew ? (
                         <Badge>New</Badge>

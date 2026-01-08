@@ -59,6 +59,8 @@ const formSchema = z.object({
   colors: z.string().min(1, "Please enter comma-separated hex color codes."),
   media: z.array(mediaSchema).min(1, "Add at least one image or video."),
   isNew: z.boolean(),
+  stock: z.coerce.number().min(0, "Stock must be a positive number."),
+  sku: z.string().optional(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -83,6 +85,8 @@ export function ProductForm({ product }: ProductFormProps) {
         sizes: product.sizes.join(", "),
         colors: product.colors.join(", "),
         media: product.media,
+        stock: product.stock || 0,
+        sku: product.sku || "",
       }
     : {
         name: "",
@@ -98,6 +102,8 @@ export function ProductForm({ product }: ProductFormProps) {
           },
         ],
         isNew: true,
+        stock: 0,
+        sku: "",
       };
 
   const form = useForm<ProductFormValues>({
@@ -124,6 +130,8 @@ export function ProductForm({ product }: ProductFormProps) {
         .split(",")
         .map((c) => c.trim())
         .filter(Boolean),
+      stock: data.stock || 0,
+      sku: data.sku || `SKU-${Date.now()}`,
     };
 
     try {
@@ -334,10 +342,38 @@ export function ProductForm({ product }: ProductFormProps) {
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price</FormLabel>
+                  <FormLabel>Price (₹)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="2499" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="stock"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stock Quantity</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="100" {...field} />
+                  </FormControl>
+                  <FormDescription>Initial inventory count</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>SKU (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="SKU-12345" {...field} />
+                  </FormControl>
+                  <FormDescription>Unique product identifier for barcode</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
