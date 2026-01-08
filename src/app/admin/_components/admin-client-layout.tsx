@@ -8,6 +8,8 @@ import {
   Palette,
   Shirt,
   Users,
+  Warehouse,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +25,8 @@ const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
   { href: '/admin/orders', icon: Package, label: 'Orders' },
   { href: '/admin/products', icon: Shirt, label: 'Products' },
+  { href: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
+  { href: '/admin/invoices', icon: FileText, label: 'Invoices' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
 ];
