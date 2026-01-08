@@ -71,8 +71,8 @@ export async function fetchUserDashboardData(userId: string) {
   const { firestore: db } = initializeFirebase();
   try {
     // Fetch user's designs
-    const designsRef = collection(db, 'designs');
-    const designsQuery = query(designsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const designsRef = collection(db, 'users', userId, 'designs');
+    const designsQuery = query(designsRef, orderBy('createdAt', 'desc'));
     const designsSnapshot = await getDocs(designsQuery);
     const savedDesigns = designsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Design));
 

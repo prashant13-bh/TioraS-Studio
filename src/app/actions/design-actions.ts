@@ -4,8 +4,8 @@
 import { z } from 'zod';
 import { generateCustomDesign as generateCustomDesignFlow } from '@/ai/flows/generate-custom-designs';
 import { revalidatePath } from 'next/cache';
-import type { Design } from '@/lib/types';
-import { addDesign } from './admin-actions'; // Using mock admin action
+import { getServerFirestore } from '@/lib/firebase-server';
+import { collection, addDoc } from 'firebase/firestore';
 
 const generateSchema = z.object({
   prompt: z.string().min(3, 'Prompt must be at least 3 characters long.'),
@@ -79,9 +79,9 @@ export async function saveDesignAction(
     }
 
     try {
+        const db = getServerFirestore();
         const now = new Date();
-        const newDesign: Design = {
-            id: `des_${Date.now()}`,
+        const designData = {
             name,
             prompt,
             product: productType,
@@ -92,11 +92,9 @@ export async function saveDesignAction(
             userId,
         };
         
-        // Use the mock `addDesign` function
-        await addDesign(newDesign);
+        await addDoc(collection(db, 'users', userId, 'designs'), designData);
 
-        revalidatePath('/admin/reviews');
-        revalidatePath('/dashboard');
+        revalidatePath('/dashboard/designs');
         return { success: true, message: 'Design saved successfully!' };
     } catch (error) {
         console.error('Failed to save design:', error);
