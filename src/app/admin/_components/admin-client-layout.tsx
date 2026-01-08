@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/card';
 import { TiorasLogo } from '@/components/icons';
 
+const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
   { href: '/admin/orders', icon: Package, label: 'Orders' },
   { href: '/admin/products', icon: Shirt, label: 'Products' },
