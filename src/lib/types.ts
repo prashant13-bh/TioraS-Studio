@@ -30,6 +30,21 @@ export type CartItem = {
   selectedColor: string;
 };
 
+export type Address = {
+  id: string;
+  userId: string;
+  label: string; // e.g., "Home", "Work"
+  name: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+  createdAt: string;
+};
+
 export type ShippingAddress = {
   name: string;
   email: string;
