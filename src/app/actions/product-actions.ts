@@ -17,7 +17,7 @@ import {
   limit as firestoreLimit,
   Timestamp 
 } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { getServerFirestore } from '@/lib/firebase-server';
 
 // Validation schemas
 const mediaSchema = z.object({
@@ -46,7 +46,7 @@ export async function getProducts({
   limit?: number;
 }): Promise<{ products: Product[] }> {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     let productsQuery = query(
       collection(db, 'products'),
       orderBy('createdAt', 'desc')
@@ -81,7 +81,7 @@ export async function getProducts({
 
 export async function getProductById(id: string): Promise<Product | null> {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const productRef = doc(db, 'products', id);
     const productSnap = await getDoc(productRef);
     
@@ -108,7 +108,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
       return { success: false, error: validation.error.errors[0].message };
     }
 
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const productData = {
       ...data,
       stock: data.stock || 0,
@@ -136,7 +136,7 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
       return { success: false, error: validation.error.errors[0].message };
     }
 
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const productRef = doc(db, 'products', id);
     
     await updateDoc(productRef, {
@@ -156,7 +156,7 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
 
 export async function deleteProduct(id: string) {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const productRef = doc(db, 'products', id);
     await deleteDoc(productRef);
     
@@ -172,7 +172,7 @@ export async function deleteProduct(id: string) {
 // Get product categories
 export async function getCategories(): Promise<string[]> {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const snapshot = await getDocs(collection(db, 'products'));
     const categories = new Set<string>();
     snapshot.docs.forEach(doc => {
@@ -189,7 +189,7 @@ export async function getCategories(): Promise<string[]> {
 // Update stock
 export async function updateProductStock(productId: string, newStock: number) {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = getServerFirestore();
     const productRef = doc(db, 'products', productId);
     await updateDoc(productRef, {
       stock: newStock,
