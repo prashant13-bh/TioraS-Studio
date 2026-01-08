@@ -2,9 +2,9 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { getServerFirestore } from '@/lib/firebase-server';
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, writeBatch } from 'firebase/firestore';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { Address } from '@/lib/types';
+import { verifySession } from '@/app/actions/auth-actions';
 
 const addressSchema = z.object({
   userId: z.string().min(1),
@@ -20,6 +20,11 @@ const addressSchema = z.object({
 });
 
 export async function addAddressAction(data: Omit<Address, 'id' | 'createdAt'>) {
+  const session = await verifySession();
+  if (!session || session.uid !== data.userId) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   const validated = addressSchema.safeParse(data);
   
   if (!validated.success) {
@@ -27,14 +32,13 @@ export async function addAddressAction(data: Omit<Address, 'id' | 'createdAt'>) 
   }
 
   try {
-    const db = getServerFirestore();
-    const addressesRef = collection(db, 'users', data.userId, 'addresses');
+    const db = getAdminFirestore();
+    const addressesRef = db.collection('users').doc(data.userId).collection('addresses');
 
     // If setting as default, unset other defaults
     if (data.isDefault) {
-      const q = query(addressesRef, where('isDefault', '==', true));
-      const snapshot = await getDocs(q);
-      const batch = writeBatch(db);
+      const snapshot = await addressesRef.where('isDefault', '==', true).get();
+      const batch = db.batch();
       snapshot.docs.forEach((d) => {
         batch.update(d.ref, { isDefault: false });
       });
@@ -46,7 +50,7 @@ export async function addAddressAction(data: Omit<Address, 'id' | 'createdAt'>) 
       createdAt: new Date().toISOString(),
     };
 
-    await addDoc(addressesRef, newAddress);
+    await addressesRef.add(newAddress);
     revalidatePath('/dashboard/addresses');
     return { success: true, message: 'Address added successfully' };
   } catch (error) {
@@ -56,16 +60,20 @@ export async function addAddressAction(data: Omit<Address, 'id' | 'createdAt'>) 
 }
 
 export async function updateAddressAction(userId: string, addressId: string, data: Partial<Address>) {
+  const session = await verifySession();
+  if (!session || session.uid !== userId) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   try {
-    const db = getServerFirestore();
-    const addressRef = doc(db, 'users', userId, 'addresses', addressId);
-    const addressesRef = collection(db, 'users', userId, 'addresses');
+    const db = getAdminFirestore();
+    const addressRef = db.collection('users').doc(userId).collection('addresses').doc(addressId);
+    const addressesRef = db.collection('users').doc(userId).collection('addresses');
 
     // If setting as default, unset other defaults
     if (data.isDefault) {
-      const q = query(addressesRef, where('isDefault', '==', true));
-      const snapshot = await getDocs(q);
-      const batch = writeBatch(db);
+      const snapshot = await addressesRef.where('isDefault', '==', true).get();
+      const batch = db.batch();
       snapshot.docs.forEach((d) => {
         if (d.id !== addressId) {
             batch.update(d.ref, { isDefault: false });
@@ -74,7 +82,7 @@ export async function updateAddressAction(userId: string, addressId: string, dat
       await batch.commit();
     }
 
-    await updateDoc(addressRef, data);
+    await addressRef.update(data);
     revalidatePath('/dashboard/addresses');
     return { success: true, message: 'Address updated successfully' };
   } catch (error) {
@@ -84,10 +92,14 @@ export async function updateAddressAction(userId: string, addressId: string, dat
 }
 
 export async function deleteAddressAction(userId: string, addressId: string) {
+  const session = await verifySession();
+  if (!session || session.uid !== userId) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   try {
-    const db = getServerFirestore();
-    const addressRef = doc(db, 'users', userId, 'addresses', addressId);
-    await deleteDoc(addressRef);
+    const db = getAdminFirestore();
+    await db.collection('users').doc(userId).collection('addresses').doc(addressId).delete();
     revalidatePath('/dashboard/addresses');
     return { success: true, message: 'Address deleted successfully' };
   } catch (error) {
@@ -95,3 +107,5 @@ export async function deleteAddressAction(userId: string, addressId: string) {
     return { success: false, message: 'Failed to delete address' };
   }
 }
+
+

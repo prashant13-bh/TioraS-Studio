@@ -2,11 +2,11 @@
 'use server';
 
 import { z } from 'zod';
-import type { CartItem, ShippingAddress, Order, OrderItem } from '@/lib/types';
+import type { CartItem, ShippingAddress, OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { customAlphabet } from 'nanoid';
-import { initializeFirebase } from '@/firebase';
-import { collection, addDoc, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
+import { getAdminFirestore } from '@/lib/firebase-admin';
+import { verifySession } from '@/app/actions/auth-actions';
 
 const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
 
@@ -43,6 +43,11 @@ export async function createOrderAction(
   total: number,
   shippingAddr: ShippingAddress
 ): Promise<{ success: boolean; message?: string; orderId?: string }> {
+  const session = await verifySession();
+  if (!session || session.uid !== userId) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
   const validation = createOrderSchema.safeParse({
     userId,
     items,
@@ -55,14 +60,14 @@ export async function createOrderAction(
     return { success: false, message: 'Invalid order data.' };
   }
 
-  const { firestore: db } = initializeFirebase();
+  const db = getAdminFirestore();
 
   try {
     const orderNumber = `ORD-${nanoid()}`;
-    const batch = writeBatch(db);
+    const batch = db.batch();
 
     // 1. Create Order Document
-    const orderRef = doc(collection(db, 'orders'));
+    const orderRef = db.collection('orders').doc();
     const orderData = {
         userId,
         orderNumber,
@@ -78,7 +83,7 @@ export async function createOrderAction(
 
     // 2. Add Order Items to subcollection
     items.forEach((item) => {
-        const itemRef = doc(collection(orderRef, 'orderItems'));
+        const itemRef = orderRef.collection('orderItems').doc();
         const itemData: OrderItem = {
             id: itemRef.id,
             orderId: orderRef.id,

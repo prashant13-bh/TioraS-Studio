@@ -3,21 +3,9 @@
 import type { Product } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { 
-  collection, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  query, 
-  where, 
-  orderBy, 
-  limit as firestoreLimit,
-  Timestamp 
-} from 'firebase/firestore';
-import { getServerFirestore } from '@/lib/firebase-server';
+import { getAdminFirestore } from '@/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
+import { verifySession } from '@/app/actions/auth-actions';
 
 // Validation schemas
 const mediaSchema = z.object({
@@ -46,30 +34,23 @@ export async function getProducts({
   limit?: number;
 }): Promise<{ products: Product[] }> {
   try {
-    const db = getServerFirestore();
-    let productsQuery = query(
-      collection(db, 'products'),
-      orderBy('createdAt', 'desc')
-    );
+    const db = getAdminFirestore();
+    let productsQuery = db.collection('products').orderBy('createdAt', 'desc');
 
     if (category && category !== 'All') {
-      productsQuery = query(
-        collection(db, 'products'),
-        where('category', '==', category),
-        orderBy('createdAt', 'desc')
-      );
+      productsQuery = productsQuery.where('category', '==', category);
     }
 
     if (limit) {
-      productsQuery = query(productsQuery, firestoreLimit(limit));
+      productsQuery = productsQuery.limit(limit);
     }
 
-    const snapshot = await getDocs(productsQuery);
+    const snapshot = await productsQuery.get();
     const products = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-      updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      createdAt: (doc.data().createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (doc.data().updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
     })) as Product[];
 
     return { products };
@@ -81,19 +62,19 @@ export async function getProducts({
 
 export async function getProductById(id: string): Promise<Product | null> {
   try {
-    const db = getServerFirestore();
-    const productRef = doc(db, 'products', id);
-    const productSnap = await getDoc(productRef);
+    const db = getAdminFirestore();
+    const productDoc = await db.collection('products').doc(id).get();
     
-    if (!productSnap.exists()) {
+    if (!productDoc.exists) {
       return null;
     }
 
+    const data = productDoc.data();
     return {
-      id: productSnap.id,
-      ...productSnap.data(),
-      createdAt: productSnap.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-      updatedAt: productSnap.data().updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      id: productDoc.id,
+      ...data,
+      createdAt: (data?.createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (data?.updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
     } as Product;
   } catch (error) {
     console.error('Error fetching product:', error);
@@ -102,13 +83,18 @@ export async function getProductById(id: string): Promise<Product | null> {
 }
 
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+  const session = await verifySession();
+  if (!session || !session.isAdmin) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
   try {
     const validation = productSchema.safeParse(data);
     if (!validation.success) {
       return { success: false, error: validation.error.errors[0].message };
     }
 
-    const db = getServerFirestore();
+    const db = getAdminFirestore();
     const productData = {
       ...data,
       stock: data.stock || 0,
@@ -118,7 +104,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
       updatedAt: Timestamp.now(),
     };
 
-    const docRef = await addDoc(collection(db, 'products'), productData);
+    const docRef = await db.collection('products').add(productData);
     
     revalidatePath('/admin/products');
     revalidatePath('/catalog');
@@ -130,16 +116,19 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
 }
 
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
+  const session = await verifySession();
+  if (!session || !session.isAdmin) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
   try {
     const validation = productSchema.safeParse(data);
     if (!validation.success) {
       return { success: false, error: validation.error.errors[0].message };
     }
 
-    const db = getServerFirestore();
-    const productRef = doc(db, 'products', id);
-    
-    await updateDoc(productRef, {
+    const db = getAdminFirestore();
+    await db.collection('products').doc(id).update({
       ...data,
       updatedAt: Timestamp.now(),
     });
@@ -155,10 +144,14 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
 }
 
 export async function deleteProduct(id: string) {
+  const session = await verifySession();
+  if (!session || !session.isAdmin) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
   try {
-    const db = getServerFirestore();
-    const productRef = doc(db, 'products', id);
-    await deleteDoc(productRef);
+    const db = getAdminFirestore();
+    await db.collection('products').doc(id).delete();
     
     revalidatePath('/admin/products');
     revalidatePath('/catalog');
@@ -172,8 +165,8 @@ export async function deleteProduct(id: string) {
 // Get product categories
 export async function getCategories(): Promise<string[]> {
   try {
-    const db = getServerFirestore();
-    const snapshot = await getDocs(collection(db, 'products'));
+    const db = getAdminFirestore();
+    const snapshot = await db.collection('products').get();
     const categories = new Set<string>();
     snapshot.docs.forEach(doc => {
       const category = doc.data().category;
@@ -188,10 +181,14 @@ export async function getCategories(): Promise<string[]> {
 
 // Update stock
 export async function updateProductStock(productId: string, newStock: number) {
+  const session = await verifySession();
+  if (!session || !session.isAdmin) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
   try {
-    const db = getServerFirestore();
-    const productRef = doc(db, 'products', productId);
-    await updateDoc(productRef, {
+    const db = getAdminFirestore();
+    await db.collection('products').doc(productId).update({
       stock: newStock,
       updatedAt: Timestamp.now(),
     });
@@ -204,3 +201,5 @@ export async function updateProductStock(productId: string, newStock: number) {
     return { success: false, error: 'Failed to update stock' };
   }
 }
+
+

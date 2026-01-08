@@ -1,45 +1,51 @@
-import { initializeFirebase } from '@/firebase';
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  Timestamp,
-  doc,
-  getDoc
-} from 'firebase/firestore';
-import type { AdminDashboardData, Design, Order, UserProfile } from '@/lib/types';
-import { format, subDays } from 'date-fns';
+'use server';
 
-// Remove top-level initialization
-// const { firestore: db } = initializeFirebase();
+import { getAdminFirestore } from '@/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
+import type { AdminDashboardData, Design, Order } from '@/lib/types';
+import { format, subDays } from 'date-fns';
+import { verifySession } from '@/app/actions/auth-actions';
 
 export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
-  const { firestore: db } = initializeFirebase();
+  const session = await verifySession();
+  if (!session || !session.isAdmin) {
+    // Return empty data for unauthorized access, or throw error
+    console.error('Unauthorized access to admin dashboard data');
+    return {
+      totalRevenue: 0,
+      totalOrders: 0,
+      pendingOrders: 0,
+      activeUsers: 0,
+      recentOrders: [],
+      salesByDay: [],
+    };
+  }
+
+  const db = getAdminFirestore();
   try {
     // Fetch all orders to calculate revenue and stats
-    // In a production app, use aggregation queries or Cloud Functions
-    const ordersRef = collection(db, 'orders');
-    const ordersSnapshot = await getDocs(ordersRef);
-    const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+    const ordersSnapshot = await db.collection('orders').get();
+    const orders = ordersSnapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data(),
+      createdAt: (doc.data().createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (doc.data().updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Order));
 
     const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
     const totalOrders = orders.length;
     const pendingOrders = orders.filter(order => order.status === 'Pending').length;
 
     // Fetch users count
-    const usersRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersRef);
+    const usersSnapshot = await db.collection('users').get();
     const activeUsers = usersSnapshot.size;
 
-    // Get recent orders (already have all orders, just sort and slice)
+    // Get recent orders
     const recentOrders = [...orders]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
 
-    // Mock sales chart data for now as it requires complex aggregation
+    // Mock sales chart data
     const salesByDay = Array.from({ length: 7 }, (_, i) => ({
         name: format(subDays(new Date(), i), 'MMM d'),
         total: Math.floor(Math.random() * 5000) + 1000,
@@ -55,7 +61,6 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
-    // Return empty/default data on error to prevent crash
     return {
       totalRevenue: 0,
       totalOrders: 0,
@@ -68,19 +73,38 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
 }
 
 export async function fetchUserDashboardData(userId: string) {
-  const { firestore: db } = initializeFirebase();
+  const session = await verifySession();
+  if (!session || session.uid !== userId) {
+    console.error('Unauthorized access to user dashboard data');
+    return { savedDesigns: [], orderHistory: [] };
+  }
+
+  const db = getAdminFirestore();
   try {
     // Fetch user's designs
-    const designsRef = collection(db, 'users', userId, 'designs');
-    const designsQuery = query(designsRef, orderBy('createdAt', 'desc'));
-    const designsSnapshot = await getDocs(designsQuery);
-    const savedDesigns = designsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Design));
+    const designsSnapshot = await db.collection('users').doc(userId).collection('designs')
+      .orderBy('createdAt', 'desc')
+      .get();
+      
+    const savedDesigns = designsSnapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data(),
+      createdAt: (doc.data().createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (doc.data().updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Design));
 
     // Fetch user's orders
-    const ordersRef = collection(db, 'orders');
-    const ordersQuery = query(ordersRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
-    const ordersSnapshot = await getDocs(ordersQuery);
-    const orderHistory = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+    const ordersSnapshot = await db.collection('orders')
+      .where('userId', '==', userId)
+      .orderBy('createdAt', 'desc')
+      .get();
+      
+    const orderHistory = ordersSnapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data(),
+      createdAt: (doc.data().createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (doc.data().updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Order));
 
     return {
       savedDesigns,
@@ -93,13 +117,26 @@ export async function fetchUserDashboardData(userId: string) {
 }
 
 export async function fetchOrderById(orderId: string): Promise<Order | null> {
-  const { firestore: db } = initializeFirebase();
-  try {
-    const orderRef = doc(db, 'orders', orderId);
-    const orderSnap = await getDoc(orderRef);
+  const session = await verifySession();
+  if (!session) return null;
 
-    if (orderSnap.exists()) {
-      return { id: orderSnap.id, ...orderSnap.data() } as Order;
+  const db = getAdminFirestore();
+  try {
+    const orderDoc = await db.collection('orders').doc(orderId).get();
+
+    if (orderDoc.exists) {
+      const data = orderDoc.data();
+      // Ensure user owns the order or is admin
+      if (data?.userId !== session.uid && !session.isAdmin) {
+         return null;
+      }
+
+      return { 
+        id: orderDoc.id, 
+        ...data,
+        createdAt: (data?.createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+        updatedAt: (data?.updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      } as Order;
     } else {
       return null;
     }

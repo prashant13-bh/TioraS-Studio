@@ -4,6 +4,7 @@
 import {useEffect, useState} from 'react';
 import {onAuthStateChanged, User} from 'firebase/auth';
 import {useAuth as useFirebaseAuth} from '@/firebase/provider';
+import { createSession, removeSession } from '@/app/actions/auth-actions';
 
 export const useUser = () => {
   const {auth, isLoading: isAuthLoading} = useFirebaseAuth();
@@ -23,9 +24,16 @@ export const useUser = () => {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false);
+
+      if (user) {
+        const token = await user.getIdToken();
+        await createSession(token);
+      } else {
+        await removeSession();
+      }
     });
 
     return () => unsubscribe();

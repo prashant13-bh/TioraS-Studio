@@ -4,8 +4,8 @@
 import { z } from 'zod';
 import { generateCustomDesign as generateCustomDesignFlow } from '@/ai/flows/generate-custom-designs';
 import { revalidatePath } from 'next/cache';
-import { getServerFirestore } from '@/lib/firebase-server';
-import { collection, addDoc } from 'firebase/firestore';
+import { getAdminFirestore } from '@/lib/firebase-admin';
+import { verifySession } from '@/app/actions/auth-actions';
 
 const generateSchema = z.object({
   prompt: z.string().min(3, 'Prompt must be at least 3 characters long.'),
@@ -13,6 +13,16 @@ const generateSchema = z.object({
 });
 
 export async function generateDesignAction(prevState: any, formData: FormData) {
+  const session = await verifySession();
+  if (!session) {
+    return {
+      message: 'You must be logged in to generate designs.',
+      imageUrl: null,
+      prompt: formData.get('prompt'),
+      productType: formData.get('productType'),
+    };
+  }
+
   const validatedFields = generateSchema.safeParse({
     prompt: formData.get('prompt'),
     productType: formData.get('productType'),
@@ -39,10 +49,11 @@ export async function generateDesignAction(prevState: any, formData: FormData) {
       prompt,
       productType,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI design generation failed:', error);
+    console.error('Error details:', error.message, error.stack);
     return {
-      message: 'Failed to generate design. Please try again later.',
+      message: `Failed to generate design: ${error.message || 'Unknown error'}`,
       imageUrl: null,
       prompt,
       productType,
@@ -66,6 +77,11 @@ export async function saveDesignAction(
     productType: string,
     imageUrl: string
 ) {
+    const session = await verifySession();
+    if (!session || session.uid !== userId) {
+        return { success: false, message: 'Unauthorized: You can only save designs to your own profile.' };
+    }
+
     const validatedFields = saveSchema.safeParse({
         userId,
         name,
@@ -79,20 +95,20 @@ export async function saveDesignAction(
     }
 
     try {
-        const db = getServerFirestore();
-        const now = new Date();
+        const db = getAdminFirestore();
+        const now = new Date().toISOString();
         const designData = {
             name,
             prompt,
             product: productType,
             imageUrl,
             status: 'Draft',
-            createdAt: now.toISOString(),
-            updatedAt: now.toISOString(),
+            createdAt: now,
+            updatedAt: now,
             userId,
         };
         
-        await addDoc(collection(db, 'users', userId, 'designs'), designData);
+        await db.collection('users').doc(userId).collection('designs').add(designData);
 
         revalidatePath('/dashboard/designs');
         return { success: true, message: 'Design saved successfully!' };
@@ -101,3 +117,5 @@ export async function saveDesignAction(
         return { success: false, message: 'Failed to save design to database.' };
     }
 }
+
+
