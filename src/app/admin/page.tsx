@@ -15,7 +15,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Download,
-  BarChart3
+  BarChart3,
+  Calendar,
+  Settings
 } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit, where, Timestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
@@ -302,29 +304,41 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Button asChild className="h-20">
-          <Link href="/admin/products/new" className="flex flex-col gap-1">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <Button asChild className="h-24">
+          <Link href="/admin/products/new" className="flex flex-col gap-2">
             <Package className="h-6 w-6" />
             Add Product
           </Link>
         </Button>
-        <Button asChild variant="outline" className="h-20">
-          <Link href="/admin/inventory" className="flex flex-col gap-1">
-            <BarChart3 className="h-6 w-6" />
-            Manage Inventory
+        <Button asChild variant="outline" className="h-24">
+          <Link href="/admin/products" className="flex flex-col gap-2">
+            <ShoppingCart className="h-6 w-6" />
+            Manage Products
           </Link>
         </Button>
-        <Button asChild variant="outline" className="h-20">
-          <Link href="/admin/invoices/new" className="flex flex-col gap-1">
+        <Button asChild variant="outline" className="h-24">
+          <Link href="/admin/inventory" className="flex flex-col gap-2">
+            <BarChart3 className="h-6 w-6" />
+            Inventory
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-24">
+          <Link href="/admin/invoices/new" className="flex flex-col gap-2">
             <DollarSign className="h-6 w-6" />
             Create Invoice
           </Link>
         </Button>
-        <Button asChild variant="outline" className="h-20">
-          <Link href="/admin/orders" className="flex flex-col gap-1">
-            <ShoppingCart className="h-6 w-6" />
-            View Orders
+        <Button asChild variant="outline" className="h-24">
+          <Link href="/admin/calendar" className="flex flex-col gap-2">
+            <Calendar className="h-6 w-6" />
+            Calendar
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-24">
+          <Link href="/admin/settings" className="flex flex-col gap-2">
+            <Settings className="h-6 w-6" />
+            Settings
           </Link>
         </Button>
       </div>

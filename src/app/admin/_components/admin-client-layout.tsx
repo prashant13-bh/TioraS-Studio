@@ -10,6 +10,9 @@ import {
   Users,
   Warehouse,
   FileText,
+  Calendar,
+  User,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,14 +24,16 @@ import {
 } from '@/components/ui/card';
 import { TiorasLogo } from '@/components/icons';
 
-const navItems = [
   { href: '/admin', icon: Home, label: 'Dashboard' },
   { href: '/admin/orders', icon: Package, label: 'Orders' },
   { href: '/admin/products', icon: Shirt, label: 'Products' },
   { href: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
   { href: '/admin/invoices', icon: FileText, label: 'Invoices' },
+  { href: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
+  { href: '/admin/profile', icon: User, label: 'Profile' },
+  { href: '/admin/settings', icon: Settings, label: 'Settings' },
   { href: '/admin/seed', icon: Package, label: 'Seed Data' },
 ];
 
