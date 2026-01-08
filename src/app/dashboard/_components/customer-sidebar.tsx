@@ -13,9 +13,8 @@ import {
   Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth/auth-context"; // Assuming we have this or similar
+import { useAuth } from "@/firebase/provider";
 import { signOut } from "firebase/auth";
-import { auth } from "@/firebase";
 import { useRouter } from "next/navigation";
 
 const sidebarItems = [
@@ -54,8 +53,10 @@ const sidebarItems = [
 export function CustomerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { auth } = useAuth();
 
   const handleSignOut = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
       router.push("/login");
