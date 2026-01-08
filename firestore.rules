@@ -14,14 +14,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Simplified admin check - allows any authenticated user for now
-    // TODO: Add role-based check once user documents have role field
+    // Strict Admin Check based on Email
     function isAdmin() {
-      return isSignedIn();
-    }
-
-    function isResourceOwner() {
-      return isSignedIn() && resource.data.userId == request.auth.uid;
+      return isSignedIn() && (
+        request.auth.token.email == 'ph293815@gmail.com' ||
+        request.auth.token.email == 'tyoras9686@gmail.com' ||
+        request.auth.token.email == 'dsmullam@gmail.com'
+      );
     }
 
     // -------------------------------------------------------------------------
@@ -29,23 +28,25 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
-      allow get: if isOwner(userId) || isSignedIn();
-      allow list: if isSignedIn(); 
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isSignedIn();
-      allow delete: if isSignedIn();
+      // Admins can read/write all users
+      // Users can read/write their own profile
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); 
+      allow create: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
-    // Products (/products) - ALLOW ALL AUTHENTICATED WRITES
+    // Products (/products)
     // -------------------------------------------------------------------------
 
     match /products/{productId} {
       // Public read access
       allow read: if true;
       
-      // Any authenticated user can write (for testing - tighten later)
-      allow create, update, delete: if isSignedIn();
+      // Only Admins can write
+      allow create, update, delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
@@ -53,9 +54,8 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /stockMovements/{movementId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
@@ -63,10 +63,8 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /invoices/{invoiceId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn();
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
@@ -74,9 +72,10 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /addresses/{addressId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
+      // Users can read/write their own addresses
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // -------------------------------------------------------------------------
@@ -84,10 +83,14 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /orders/{orderId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn();
+      // Users can read their own orders, Admins can read all
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Users can create orders
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      // Only Admins can update status (e.g. to 'Shipped'), Users can't modify after creation usually
+      // But for now allow users to update if needed (e.g. cancel)
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
@@ -95,9 +98,9 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /designs/{designId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // -------------------------------------------------------------------------
@@ -105,7 +108,7 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /carts/{cartId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isSignedIn() && (request.auth.uid == cartId || isAdmin());
     }
 
     // -------------------------------------------------------------------------
@@ -113,7 +116,7 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /wishlists/{wishlistId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isSignedIn() && (request.auth.uid == wishlistId || isAdmin());
     }
 
     // -------------------------------------------------------------------------
@@ -123,16 +126,7 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-
-    // -------------------------------------------------------------------------
-    // Catch-all for any other collections (for development)
-    // -------------------------------------------------------------------------
-
-    match /{document=**} {
-      allow read: if true;
-      allow write: if isSignedIn();
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
   }
 }
