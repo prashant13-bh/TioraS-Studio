@@ -71,7 +71,7 @@ export function AdminClientLayout({
     return null; // Will redirect
   }
 
-  return (
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
