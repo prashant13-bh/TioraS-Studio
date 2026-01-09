@@ -45,7 +45,7 @@ const navItems = [
 import { useUser } from '@/firebase';
 import { isAdminEmail } from '@/lib/admin-config';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function AdminClientLayout({
   children,
@@ -72,8 +72,11 @@ export function AdminClientLayout({
   }
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:block">
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  return (
+    <div className={`grid min-h-screen w-full transition-all duration-300 ${isSidebarOpen ? "md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]" : "md:grid-cols-[0px_1fr]"}`}>
+      <div className={`hidden border-r bg-muted/40 md:block overflow-hidden ${!isSidebarOpen && 'hidden'}`}>
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -113,6 +116,23 @@ export function AdminClientLayout({
         </div>
       </div>
       <div className="flex flex-col">
+        {/* Desktop Header */}
+        <header className="hidden md:flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px]">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+          <div className="flex-1">
+             <span className="font-semibold">Admin Dashboard</span>
+          </div>
+        </header>
+
+        {/* Mobile Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden">
           <Sheet>
             <SheetTrigger asChild>

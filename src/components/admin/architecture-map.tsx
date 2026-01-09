@@ -56,48 +56,50 @@ export default function ArchitectureMap() {
 
     subgraph Public ["🛍️ Public Storefront"]
         direction TB
-        Home("🏠 Home / Catalog<br/>[Filter: Vibe/Size/Color]<br/>[Search]<br/>[Sort]"):::public
-        ProdDetail("👕 Product Details<br/>[Select Size/Color]<br/>[Add to Cart]<br/>[Add to Wishlist]"):::public
-        Cart("🛒 Cart<br/>[Update Qty]<br/>[Remove Item]<br/>[Checkout Btn]"):::public
-        Checkout("💳 Checkout<br/>[Address Form]<br/>[Payment]<br/>[Place Order]"):::public
-        Auth("🔐 Auth<br/>[Login]<br/>[Register]<br/>[Google Sign-In]"):::public
+        Home("🏠 Home / Catalog<br/>[Filter: Vibe/Size/Color]<br/>[Search]<br/>[Sort]<br/>[Vibe Switcher]"):::public
+        ProdDetail("👕 Product Details<br/>[Select Size/Color]<br/>[Add to Cart]<br/>[Add to Wishlist]<br/>[Reviews]"):::public
+        Cart("🛒 Cart<br/>[Update Qty]<br/>[Remove Item]<br/>[Checkout Btn]<br/>[Apply Coupon]"):::public
+        Checkout("💳 Checkout<br/>[Address Form]<br/>[Payment]<br/>[Place Order]<br/>[Order Summary]"):::public
+        Auth("🔐 Auth<br/>[Login]<br/>[Register]<br/>[Google Sign-In]<br/>[Forgot Password]"):::public
     end
 
     subgraph Customer ["👤 Customer Area"]
         direction TB
-        Profile("👤 Profile<br/>[Edit Info]<br/>[View Stats]"):::customer
-        Orders("📦 My Orders<br/>[Filter Status]<br/>[Track Order]"):::customer
-        OrderDetail("📄 Order Details<br/>[View Items]<br/>[Download Invoice]"):::customer
-        Wishlist("❤️ Wishlist<br/>[Move to Cart]<br/>[Remove]"):::customer
-        Addresses("📍 Addresses<br/>[Add New]<br/>[Edit/Delete]"):::customer
+        Profile("👤 Profile<br/>[Edit Info]<br/>[View Stats]<br/>[Change Password]"):::customer
+        Orders("📦 My Orders<br/>[Filter Status]<br/>[Track Order]<br/>[Reorder]"):::customer
+        OrderDetail("📄 Order Details<br/>[View Items]<br/>[Download Invoice]<br/>[Return Item]"):::customer
+        Wishlist("❤️ Wishlist<br/>[Move to Cart]<br/>[Remove]<br/>[Share]"):::customer
+        Addresses("📍 Addresses<br/>[Add New]<br/>[Edit/Delete]<br/>[Set Default]"):::customer
     end
 
     subgraph AIStudio ["✨ AI Design Studio"]
         direction TB
-        Canvas("🎨 Design Canvas<br/>[Text-to-Image]<br/>[Tools: Brush/Eraser]<br/>[Layers]"):::ai
-        Gallery("🖼️ Gallery<br/>[Save Design]<br/>[Share]<br/>[Apply to Product]"):::ai
+        Canvas("🎨 Design Canvas<br/>[Text-to-Image]<br/>[Tools: Brush/Eraser]<br/>[Layers]<br/>[Undo/Redo]"):::ai
+        Gallery("🖼️ Gallery<br/>[Save Design]<br/>[Share]<br/>[Apply to Product]<br/>[Delete]"):::ai
     end
 
     subgraph Admin ["🛡️ Admin Dashboard"]
         direction TB
-        Dashboard("📊 Dashboard<br/>[Sales Chart]<br/>[Low Stock Alert]<br/>[Recent Orders]"):::admin
+        Dashboard("📊 Dashboard<br/>[Sales Chart]<br/>[Low Stock Alert]<br/>[Recent Orders]<br/>[Export Report]"):::admin
         
         subgraph AdminProducts ["Products & Inventory"]
-            ProdList("📋 Product List<br/>[Search/Filter]<br/>[Edit/Delete]<br/>[Export CSV]"):::admin
-            ProdCreate("➕ Add/Edit Product<br/>[Upload Images]<br/>[Set Vibe/SKU]<br/>[Manage Stock]"):::admin
-            Inventory("📦 Inventory<br/>[Stock In/Out]<br/>[Barcode Scan]"):::admin
+            ProdList("📋 Product List<br/>[Search/Filter]<br/>[Edit/Delete]<br/>[Export CSV]<br/>[Bulk Actions]"):::admin
+            ProdCreate("➕ Add/Edit Product<br/>[Upload Images/Video]<br/>[Set Vibe/SKU]<br/>[Manage Stock]<br/>[Variants]"):::admin
+            Inventory("📦 Inventory<br/>[Stock In/Out]<br/>[Barcode Scan]<br/>[Low Stock Filter]<br/>[History]"):::admin
         end
 
         subgraph AdminSales ["Sales & Users"]
-            OrderList("📦 Order List<br/>[Update Status]<br/>[Filter]"):::admin
-            AdminOrderDetail("📄 Order Details<br/>[Print Invoice]<br/>[Customer Info]"):::admin
-            CustomerList("👥 Customers<br/>[View History]<br/>[Block User]"):::admin
-            Invoices("🧾 Invoices<br/>[Generate PDF]"):::admin
+            OrderList("📦 Order List<br/>[Update Status]<br/>[Filter Date/Status]<br/>[Export]"):::admin
+            AdminOrderDetail("📄 Order Details<br/>[Print Invoice]<br/>[Customer Info]<br/>[Refund/Cancel]"):::admin
+            CustomerList("👥 Customers<br/>[View History]<br/>[Block User]<br/>[Email User]"):::admin
+            Invoices("🧾 Invoices<br/>[Generate PDF]<br/>[Filter Date]"):::admin
         end
 
         subgraph AdminTools ["Tools"]
-            Calendar("📅 Calendar<br/>[Add Event]"):::admin
-            Settings("⚙️ Settings<br/>[Store Config]"):::admin
+            Calendar("📅 Calendar<br/>[Add Event]<br/>[View Month/Week]"):::admin
+            Settings("⚙️ Settings<br/>[Store Config]<br/>[Payment Methods]<br/>[Shipping Rates]"):::admin
+            Seed("🌱 Seed Data<br/>[Reset DB]<br/>[Populate Mock Data]"):::admin
+            Sitemap("🗺️ Sitemap<br/>[Interactive Map]<br/>[Full View]"):::admin
         end
     end
 
@@ -132,6 +134,8 @@ export default function ArchitectureMap() {
     
     Dashboard --> Calendar
     Dashboard --> Settings
+    Dashboard --> Seed
+    Dashboard --> Sitemap
   `;
 
   return (
