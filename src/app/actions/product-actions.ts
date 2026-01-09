@@ -24,6 +24,7 @@ const productSchema = z.object({
   isNew: z.boolean().optional(),
   stock: z.coerce.number().min(0).optional(),
   sku: z.string().optional(),
+  vibe: z.enum(['Gen Z', 'Luxury', 'Professional']).optional(),
 });
 
 export async function getProducts({

@@ -291,47 +291,51 @@ export default function ProductsTablePage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <div className="max-w-full overflow-x-auto">
+            <div className="min-w-[1000px]">
+              <Table>
+                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id} className="px-5 py-3 font-medium text-gray-500 text-start dark:text-gray-400">
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
                   ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center py-8">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableHeader>
+                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="text-center py-8">
+                        Loading...
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center py-8">
-                    No products found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </TableRow>
+                  ) : table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="px-5 py-4 sm:px-6 text-start">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="text-center py-8">
+                        No products found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
 
         {/* Pagination */}

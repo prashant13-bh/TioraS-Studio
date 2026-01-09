@@ -23,20 +23,14 @@ import { collection, getDocs, query, orderBy, limit, where, Timestamp } from 'fi
 import { initializeFirebase } from '@/firebase';
 import Link from 'next/link';
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
+  ResponsiveContainer,
+  Tooltip,
 } from 'recharts';
 import * as XLSX from 'xlsx';
+import LineChartOne from '@/components/admin/charts/line-chart-one';
 
 interface DashboardStats {
   totalProducts: number;
@@ -254,21 +248,10 @@ export default function AdminDashboardPage() {
             <CardDescription>Daily sales for the last 7 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={salesData}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value: number) => [`₹${value}`, 'Sales']} />
-                <Area type="monotone" dataKey="sales" stroke="#8884d8" fillOpacity={1} fill="url(#colorSales)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            <LineChartOne 
+              series={[{ name: 'Sales', data: salesData.map(d => d.sales) }]} 
+              categories={salesData.map(d => d.name)} 
+            />
           </CardContent>
         </Card>
 

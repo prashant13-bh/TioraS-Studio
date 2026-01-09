@@ -52,6 +52,7 @@ const formSchema = z.object({
   isNew: z.boolean(),
   stock: z.coerce.number().min(0, "Stock must be a positive number."),
   sku: z.string().optional(),
+  vibe: z.enum(["Gen Z", "Luxury", "Professional"]).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -90,6 +91,7 @@ export function ProductForm({ product }: ProductFormProps) {
         isNew: true,
         stock: 0,
         sku: "",
+        vibe: "Gen Z" as const,
       };
 
   const form = useForm<ProductFormValues>({
@@ -319,6 +321,34 @@ export function ProductForm({ product }: ProductFormProps) {
                     <Input placeholder="#000000, #FFFFFF" {...field} />
                   </FormControl>
                   <FormDescription>Comma-separated hex codes.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="vibe"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vibe / Style</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a vibe" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Gen Z">Gen Z</SelectItem>
+                      <SelectItem value="Luxury">Luxury</SelectItem>
+                      <SelectItem value="Professional">Professional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Determines which store mode this product appears in.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

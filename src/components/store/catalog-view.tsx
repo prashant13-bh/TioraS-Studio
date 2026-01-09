@@ -15,19 +15,7 @@ import { initializeFirebase } from '@/firebase';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useStore } from '@/lib/store-context';
 import { StoreSwitcher } from './store-switcher';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  sizes: string[];
-  colors: string[];
-  media: { type: string; url: string }[];
-  isNew?: boolean;
-  stock?: number;
-}
+import type { Product } from '@/lib/types';
 
 const CATEGORIES = ['All', 'T-Shirt', 'Hoodie', 'Jacket', 'Cap'];
 const SORT_OPTIONS = [
@@ -42,10 +30,18 @@ export function CatalogView() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState([0, 20000]);
+
+  // Derived filter options
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
 
   // Fetch products from Firestore
   useEffect(() => {
@@ -63,6 +59,17 @@ export function CatalogView() {
         })) as Product[];
         setProducts(productsData);
         setFilteredProducts(productsData);
+
+        // Extract unique sizes and colors
+        const sizes = new Set<string>();
+        const colors = new Set<string>();
+        productsData.forEach(p => {
+          p.sizes.forEach(s => sizes.add(s));
+          p.colors.forEach(c => colors.add(c));
+        });
+        setAvailableSizes(Array.from(sizes).sort());
+        setAvailableColors(Array.from(colors).sort());
+
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -77,17 +84,28 @@ export function CatalogView() {
   useEffect(() => {
     let result = [...products];
 
-    // Vibe Filter (Mock logic for now - could be real tags later)
-    // For now, we'll just use the vibe to maybe sort or highlight, 
-    // or we could filter if we add a 'style' field to products.
-    // Let's just say 'Luxury' filters for higher price for demo purposes?
-    if (vibe === 'luxury') {
-       // result = result.filter(p => p.price > 2000); // Example logic
+    // Vibe Filter
+    // If a product has a vibe set, it must match the current store vibe.
+    // If it doesn't have a vibe, we might show it in all or default to Gen Z?
+    // Let's assume strict filtering: Show if vibe matches OR if product has no vibe (legacy).
+    // Or better: Show if vibe matches.
+    if (vibe) {
+       result = result.filter(p => !p.vibe || p.vibe === vibe);
     }
 
     // Category filter
     if (selectedCategory !== 'All') {
       result = result.filter(p => p.category === selectedCategory);
+    }
+
+    // Size filter
+    if (selectedSize) {
+      result = result.filter(p => p.sizes.includes(selectedSize));
+    }
+
+    // Color filter
+    if (selectedColor) {
+      result = result.filter(p => p.colors.includes(selectedColor));
     }
 
     // Search filter
@@ -118,10 +136,12 @@ export function CatalogView() {
     }
 
     setFilteredProducts(result);
-  }, [products, selectedCategory, searchQuery, sortBy, priceRange, vibe]);
+  }, [products, selectedCategory, selectedSize, selectedColor, searchQuery, sortBy, priceRange, vibe]);
 
   const clearFilters = () => {
     setSelectedCategory('All');
+    setSelectedSize(null);
+    setSelectedColor(null);
     setSearchQuery('');
     setSortBy('newest');
     setPriceRange([0, 20000]);
@@ -129,12 +149,15 @@ export function CatalogView() {
 
   const activeFiltersCount = [
     selectedCategory !== 'All',
+    selectedSize !== null,
+    selectedColor !== null,
     searchQuery !== '',
     priceRange[0] > 0 || priceRange[1] < 20000,
   ].filter(Boolean).length;
 
   const FilterContent = () => (
     <div className="space-y-6">
+      {/* Categories */}
       <div>
         <h3 className="font-semibold mb-3">Categories</h3>
         <div className="flex flex-wrap gap-2">
@@ -151,6 +174,44 @@ export function CatalogView() {
         </div>
       </div>
 
+      {/* Sizes */}
+      {availableSizes.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-3">Sizes</h3>
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.map(size => (
+              <Badge
+                key={size}
+                variant={selectedSize === size ? 'default' : 'outline'}
+                className="cursor-pointer hover:bg-primary/80 w-8 h-8 flex items-center justify-center p-0"
+                onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+              >
+                {size}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Colors */}
+      {availableColors.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-3">Colors</h3>
+          <div className="flex flex-wrap gap-2">
+            {availableColors.map(color => (
+              <div
+                key={color}
+                className={`w-6 h-6 rounded-full cursor-pointer border ${selectedColor === color ? 'ring-2 ring-primary ring-offset-2' : 'border-input'}`}
+                style={{ backgroundColor: color }}
+                onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+                title={color}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Price Range */}
       <div>
         <h3 className="font-semibold mb-3">Price Range</h3>
         <Slider
@@ -266,7 +327,7 @@ export function CatalogView() {
               <Filter className="h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold">No Products Found</h2>
               <p className="mt-2 text-muted-foreground text-sm">
-                Try adjusting your filters.
+                Try adjusting your filters or switching vibes.
               </p>
               <Button onClick={clearFilters} variant="link" className="mt-2">
                 Clear Filters
