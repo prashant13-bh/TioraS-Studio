@@ -13,6 +13,7 @@ import {
   Calendar,
   User,
   Settings,
+  Map as MapIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +39,7 @@ const navItems = [
   { href: '/admin/profile', icon: User, label: 'Profile' },
   { href: '/admin/settings', icon: Settings, label: 'Settings' },
   { href: '/admin/seed', icon: Package, label: 'Seed Data' },
+  { href: '/admin/sitemap', icon: MapIcon, label: 'Sitemap' },
 ];
 
 import { useUser } from '@/firebase';
