@@ -82,7 +82,7 @@ export default function CustomerDashboardLayout({
         <aside className="hidden w-[200px] flex-col md:flex">
           <CustomerSidebar />
         </aside>
-        <main className="flex w-full flex-1 flex-col overflow-hidden">
+        <main className="flex w-full flex-1 flex-col overflow-hidden pb-24 md:pb-0">
           {children}
         </main>
       </div>

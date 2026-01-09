@@ -4,6 +4,8 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { ClientLayout } from '@/components/layout/client-layout';
 import { ThemeProvider } from "@/components/theme-provider"
+import { StoreProvider } from '@/lib/store-context';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -43,9 +45,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <ClientLayout>
-              {children}
-            </ClientLayout>
+            <StoreProvider>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+              <BottomNav />
+            </StoreProvider>
           </ThemeProvider>
       </body>
     </html>

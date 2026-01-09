@@ -27,7 +27,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     const loadWishlist = async () => {
       if (user) {
         const { firestore: db } = initializeFirebase();
-        const wishlistRef = collection(db, 'wishlist');
+        const wishlistRef = collection(db, 'wishlists');
         const q = query(wishlistRef, where('userId', '==', user.uid));
         const snap = await getDocs(q);
         const wishlistItems = snap.docs.map(doc => doc.data().product as Product);
@@ -54,7 +54,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { firestore: db } = initializeFirebase();
       const wishId = `${user.uid}_${product.id}`;
-      await setDoc(doc(db, 'wishlist', wishId), {
+      await setDoc(doc(db, 'wishlists', wishId), {
         userId: user.uid,
         productId: product.id,
         product: product,
@@ -82,7 +82,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { firestore: db } = initializeFirebase();
       const wishId = `${user.uid}_${productId}`;
-      await deleteDoc(doc(db, 'wishlist', wishId));
+      await deleteDoc(doc(db, 'wishlists', wishId));
 
       setItems(prev => prev.filter(item => item.id !== productId));
       toast({

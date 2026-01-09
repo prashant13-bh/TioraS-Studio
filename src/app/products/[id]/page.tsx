@@ -48,7 +48,7 @@ export default async function ProductPage({ params: p }: { params: { id: string 
   const filteredRelatedProducts = relatedProducts.filter(p => p.id !== product.id).slice(0, 4);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-8 pb-24 md:pb-8">
       <Breadcrumb className="mb-4 md:mb-8">
         <BreadcrumbList>
           <BreadcrumbItem>
