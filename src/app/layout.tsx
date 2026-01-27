@@ -18,11 +18,33 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'TioraS AI Menswear',
-  description: 'Premium AI-powered men\'s clothing e-commerce platform.',
+  title: 'TioraS Studio - AI Apparel Design',
+  description: 'AI-powered custom apparel design platform with inventory management',
+  applicationName: 'TioraS Studio',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'TioraS',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'TioraS Studio',
+    title: 'TioraS Studio - AI Apparel Design',
+    description: 'Create custom apparel designs with AI',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'TioraS Studio',
+    description: 'AI-powered apparel design platform',
+  },
   icons: {
     icon: '/favicon.ico',
+    apple: '/icon-192.png',
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
