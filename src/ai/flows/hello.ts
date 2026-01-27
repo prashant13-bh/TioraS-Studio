@@ -10,7 +10,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 export async function hello(name: string): Promise<string> {
-    const { output } = await helloFlow(name);
+    const output = await helloFlow(name);
     if (!output) {
         throw new Error("The flow did not return an output.");
     }
