@@ -1,23 +1,20 @@
 'use server';
 
-import { auth } from 'firebase-admin';
-import { getFirebaseAdminApp } from '@/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-// Initialize Firebase Admin
-const adminApp = getFirebaseAdminApp();
-
 export async function checkAdminAccess() {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session')?.value;
+  const sessionCookie = cookieStore.get('__session')?.value;
 
   if (!sessionCookie) {
     return false;
   }
 
   try {
-    const decodedClaims = await auth(adminApp).verifySessionCookie(sessionCookie, true);
+    const auth = getAdminAuth();
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
     return decodedClaims.admin === true;
   } catch (error) {
     return false;
@@ -26,7 +23,8 @@ export async function checkAdminAccess() {
 
 export async function setAdminRole(uid: string) {
   try {
-    await auth(adminApp).setCustomUserClaims(uid, { admin: true });
+    const auth = getAdminAuth();
+    await auth.setCustomUserClaims(uid, { admin: true });
     return { success: true };
   } catch (error) {
     console.error('Error setting admin role:', error);
@@ -36,7 +34,8 @@ export async function setAdminRole(uid: string) {
 
 export async function removeAdminRole(uid: string) {
   try {
-    await auth(adminApp).setCustomUserClaims(uid, { admin: false });
+    const auth = getAdminAuth();
+    await auth.setCustomUserClaims(uid, { admin: false });
     return { success: true };
   } catch (error) {
     console.error('Error removing admin role:', error);
