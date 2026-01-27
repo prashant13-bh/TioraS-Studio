@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { fabric } from "fabric";
+import type { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
 import {  
   Download,
@@ -31,37 +31,44 @@ export function FabricEditor({
   const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
   const [selectedTool, setSelectedTool] = useState<string>("select");
   const [layers, setLayers] = useState<fabric.Object[]>([]);
+  const [fabricLoaded, setFabricLoaded] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Initialize fabric canvas
-    const canvas = new fabric.Canvas(canvasRef.current, {
-      width,
-      height,
-      backgroundColor: "#f0f0f0",
+    // Dynamically import fabric to avoid SSR issues
+    import("fabric").then((fabricModule) => {
+      const fabric = fabricModule.fabric;
+
+      // Initialize fabric canvas
+      const canvas = new fabric.Canvas(canvasRef.current!, {
+        width,
+        height,
+        backgroundColor: "#f0f0f0",
+      });
+
+      fabricCanvasRef.current = canvas;
+      setFabricLoaded(true);
+
+      // Load initial image if provided
+      if (initialImage) {
+        fabric.Image.fromURL(initialImage, (img) => {
+          img.scaleToWidth(width * 0.8);
+          canvas.centerObject(img);
+          canvas.add(img);
+          canvas.renderAll();
+          updateLayers();
+        });
+      }
+
+      // Update layers when canvas changes
+      canvas.on("object:added", updateLayers);
+      canvas.on("object:removed", updateLayers);
+      canvas.on("object:modified", updateLayers);
     });
 
-    fabricCanvasRef.current = canvas;
-
-    // Load initial image if provided
-    if (initialImage) {
-      fabric.Image.fromURL(initialImage, (img) => {
-        img.scaleToWidth(width * 0.8);
-        canvas.centerObject(img);
-        canvas.add(img);
-        canvas.renderAll();
-        updateLayers();
-      });
-    }
-
-    // Update layers when canvas changes
-    canvas.on("object:added", updateLayers);
-    canvas.on("object:removed", updateLayers);
-    canvas.on("object:modified", updateLayers);
-
     return () => {
-      canvas.dispose();
+      fabricCanvasRef.current?.dispose();
     };
   }, [initialImage, width, height]);
 
