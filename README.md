@@ -12,7 +12,7 @@
 
 **Transform ideas into custom apparel with AI-powered design generation**
 
-[🚀 Live Demo](#) • [📖 Documentation](#features) • [🐛 Report Bug](https://github.com/YOUR_USERNAME/TioraS-Studio/issues) • [✨ Request Feature](https://github.com/YOUR_USERNAME/TioraS-Studio/issues)
+[🚀 Live Demo](#) • [📖 Documentation](#features) • [🐛 Report Bug](https://github.com/prashant13-bh/TioraS-Studio/issues) • [✨ Request Feature](https://github.com/prashant13-bh/TioraS-Studio/issues)
 
 </div>
 
@@ -120,7 +120,7 @@
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/TioraS-Studio.git
+git clone https://github.com/prashant13-bh/TioraS-Studio.git
 cd TioraS-Studio
 ```
 
@@ -337,26 +337,27 @@ SOFTWARE.
 
 ## 📞 Contact & Support
 
-- **Email**: support@tiorasstudio.com
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/TioraS-Studio/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/TioraS-Studio/discussions)
+- **Email**: ph293815@gmail.com
+- **LinkedIn**: [Prashant Hiremath](https://www.linkedin.com/in/prashant-hiremath-13pbh/)
+- **Issues**: [GitHub Issues](https://github.com/prashant13-bh/TioraS-Studio/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/prashant13-bh/TioraS-Studio/discussions)
 - **Twitter**: [@TioraS_Studio](https://twitter.com/tiorasstudio)
 
 ---
 
 ## 📊 Project Stats
 
-![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/TioraS-Studio?style=social)
-![GitHub forks](https://img.shields.io/github/forks/YOUR_USERNAME/TioraS-Studio?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/YOUR_USERNAME/TioraS-Studio?style=social)
-![GitHub last commit](https://img.shields.io/github/last-commit/YOUR_USERNAME/TioraS-Studio)
-![GitHub contributors](https://img.shields.io/github/contributors/YOUR_USERNAME/TioraS-Studio)
+![GitHub stars](https://img.shields.io/github/stars/prashant13-bh/TioraS-Studio?style=social)
+![GitHub forks](https://img.shields.io/github/forks/prashant13-bh/TioraS-Studio?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/prashant13-bh/TioraS-Studio?style=social)
+![GitHub last commit](https://img.shields.io/github/last-commit/prashant13-bh/TioraS-Studio)
+![GitHub contributors](https://img.shields.io/github/contributors/prashant13-bh/TioraS-Studio)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [Your Name]**
+**Made with ❤️ by [Prashant Hiremath](https://www.linkedin.com/in/prashant-hiremath-13pbh/)**
 
 If you found this project helpful, please give it a ⭐!
 
