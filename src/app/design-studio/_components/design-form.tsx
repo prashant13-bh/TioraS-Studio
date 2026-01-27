@@ -16,11 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Bot, Download, Edit, Loader2, Save, Wand2 } from 'lucide-react';
+import { Bot, Download, Loader2, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUser } from '@/firebase';
-import Link from 'next/link';
 
 const initialState = {
   message: '',

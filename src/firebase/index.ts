@@ -16,13 +16,25 @@ export function initializeFirebase() {
     try {
       // Attempt to initialize via Firebase App Hosting environment variables
       firebaseApp = initializeApp();
+      console.log('Firebase initialized via App Hosting environment variables');
     } catch (e) {
       // Only warn in production because it's normal to use the firebaseConfig to initialize
       // during development
       if (process.env.NODE_ENV === "production") {
         console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
       }
-      firebaseApp = initializeApp(firebaseConfig);
+      
+      try {
+        firebaseApp = initializeApp(firebaseConfig);
+        console.log('Firebase initialized successfully with config object');
+      } catch (configError) {
+        console.error('Firebase initialization failed:', configError);
+        throw new Error(
+          `Failed to initialize Firebase. This is likely due to missing environment variables. ` +
+          `Please ensure all NEXT_PUBLIC_FIREBASE_* variables are configured in your deployment environment. ` +
+          `Original error: ${configError instanceof Error ? configError.message : String(configError)}`
+        );
+      }
     }
 
     return getSdks(firebaseApp);

@@ -54,6 +54,7 @@ export function AdminClientLayout({
 }) {
   const { user, loading } = useUser();
   const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!loading) {
@@ -70,9 +71,6 @@ export function AdminClientLayout({
   if (!user || !isAdminEmail(user.email)) {
     return null; // Will redirect
   }
-
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
     <div className={`grid min-h-screen w-full transition-all duration-300 ${isSidebarOpen ? "md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]" : "md:grid-cols-[0px_1fr]"}`}>
