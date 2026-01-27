@@ -18,15 +18,23 @@
 
 ---
 
+![Hero Banner](./docs/images/hero-banner.jpg)
+
+---
+
 ## 📸 Screenshots
 
-> **Note**: Screenshots coming soon! Run the app locally to see the beautiful UI in action.
+### AI Design Studio
 
-<!--
-![Hero Banner](./docs/images/hero-banner.png)
 ![AI Design Studio](./docs/images/ai-design-studio.png)
+
+### Admin Dashboard
+
 ![Admin Dashboard](./docs/images/admin-dashboard.png)
--->
+
+### Modern Tech Stack
+
+![Tech Stack](./docs/images/tech-stack.png)
 
 ---
 
