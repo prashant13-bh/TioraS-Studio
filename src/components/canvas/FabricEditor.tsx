@@ -78,8 +78,11 @@ export function FabricEditor({
     }
   };
 
-  const addText = () => {
-    if (!fabricCanvasRef.current) return;
+  const addText = async () => {
+    if (!fabricCanvasRef.current || !fabricLoaded) return;
+
+    const fabricModule = await import("fabric");
+    const fabric = fabricModule.fabric;
 
     const text = new fabric.IText("Edit text", {
       left: 100,
@@ -95,8 +98,11 @@ export function FabricEditor({
     setSelectedTool("select");
   };
 
-  const addRectangle = () => {
-    if (!fabricCanvasRef.current) return;
+  const addRectangle = async () => {
+    if (!fabricCanvasRef.current || !fabricLoaded) return;
+
+    const fabricModule = await import("fabric");
+    const fabric = fabricModule.fabric;
 
     const rect = new fabric.Rect({
       left: 150,
@@ -114,8 +120,11 @@ export function FabricEditor({
     setSelectedTool("select");
   };
 
-  const addCircle = () => {
-    if (!fabricCanvasRef.current) return;
+  const addCircle = async () => {
+    if (!fabricCanvasRef.current || !fabricLoaded) return;
+
+    const fabricModule = await import("fabric");
+    const fabric = fabricModule.fabric;
 
     const circle = new fabric.Circle({
       left: 200,
