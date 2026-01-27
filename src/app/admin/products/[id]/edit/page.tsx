@@ -15,7 +15,7 @@ export const metadata = {
     description: 'Edit an existing product.',
 };
 
-export default async function EditProductPage({ params: p }: { params: { id: string } }) {
+export default async function EditProductPage({ params: p }: { params: Promise<{ id: string }> }) {
   const params = await p;
   const product = await getProductById(params.id);
 

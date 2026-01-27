@@ -17,7 +17,7 @@ import { AddToCartForm } from './_components/add-to-cart-form';
 import { ProductImageGallery } from './_components/product-image-gallery';
 import { ProductReviews } from './_components/product-reviews';
 
-export async function generateMetadata({ params: p }: { params: { id: string } }) {
+export async function generateMetadata({ params: p }: { params: Promise<{ id: string }> }) {
   const params = await p;
   const product = await getProductById(params.id);
   if (!product) {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params: p }: { params: { id: string } }
   };
 }
 
-export default async function ProductPage({ params: p }: { params: { id: string } }) {
+export default async function ProductPage({ params: p }: { params: Promise<{ id: string }> }) {
   const params = await p;
   const product = await getProductById(params.id);
 
