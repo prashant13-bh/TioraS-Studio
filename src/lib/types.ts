@@ -17,6 +17,8 @@ export type Product = {
   media: ProductMedia[];
   isNew: boolean;
   vibe?: 'Gen Z' | 'Luxury' | 'Professional';
+  stock?: number;
+  sku?: string;
   createdAt: string;
   updatedAt: string;
 };
