@@ -42,7 +42,7 @@ const generateCustomDesignFlow = ai.defineFlow(
       prompt: `A clean, isolated vector design for a ${input.productType} featuring: ${input.prompt}. The design should be on a solid white background, suitable for printing on apparel. The style should be modern, professional, and high-quality. Do not include the apparel item itself in the image, only the design graphic.`,
     });
 
-    if (!media.url) {
+    if (!media || !media.url) {
         throw new Error("Image generation failed to return a URL.");
     }
 
