@@ -10,42 +10,19 @@ export default function ArchitectureMap() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [svgContent, setSvgContent] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     mermaid.initialize({ 
-      startOnLoad: true, 
+      startOnLoad: false, // Important: Disable auto-load to prevent React conflicts
       theme: 'dark',
       securityLevel: 'loose',
     });
-    mermaid.contentLoaded();
-  }, []);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = -e.deltaY;
-    const newScale = delta > 0 ? scale * 1.1 : scale / 1.1;
-    setScale(Math.min(Math.max(0.1, newScale), 5));
-  };
-
-  const graphDefinition = `
+    const renderMap = async () => {
+      try {
+        const graphDefinition = `
     graph TD
     
     %% Styles
@@ -136,7 +113,41 @@ export default function ArchitectureMap() {
     Dashboard --> Settings
     Dashboard --> Seed
     Dashboard --> Sitemap
-  `;
+        `;
+        
+        const { svg } = await mermaid.render('architecture-diagram', graphDefinition);
+        setSvgContent(svg);
+      } catch (error) {
+        console.error('Mermaid render error:', error);
+      }
+    };
+
+    renderMap();
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = -e.deltaY;
+    const newScale = delta > 0 ? scale * 1.1 : scale / 1.1;
+    setScale(Math.min(Math.max(0.1, newScale), 5));
+  };
 
   return (
     <div className="relative w-full h-[calc(100vh-100px)] overflow-hidden bg-[#0f0f0f] rounded-lg border border-gray-800">
@@ -179,13 +190,12 @@ export default function ArchitectureMap() {
         onWheel={handleWheel}
       >
         <div 
-          className="mermaid transition-transform duration-75 ease-out origin-center"
+          className="transition-transform duration-75 ease-out origin-center"
           style={{ 
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})` 
           }}
-        >
-          {graphDefinition}
-        </div>
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
       </div>
     </div>
   );
