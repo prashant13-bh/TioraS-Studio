@@ -11,10 +11,11 @@ import type { Order } from '@/lib/types';
 import { OrderTable } from './_components/order-table';
 
 export default async function AdminOrdersPage({
-    searchParams,
+    searchParams: sp,
 }: {
-    searchParams?: { query?: string };
+    searchParams?: Promise<{ query?: string }>;
 }) {
+  const searchParams = await sp;
   const query = searchParams?.query || '';
   // The page now fetches all orders, and the client component handles filtering.
   const orders: Order[] = await getAllOrders({});

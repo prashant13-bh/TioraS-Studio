@@ -16,11 +16,12 @@ export const metadata = {
     description: 'Review and approve AI-generated designs.',
 };
 
-export default async function DesignReviewsPage({ searchParams }: {
-    searchParams?: {
+export default async function DesignReviewsPage({ searchParams: sp }: {
+    searchParams?: Promise<{
         status?: Design['status'] | 'All';
-    }
+    }>;
 }) {
+  const searchParams = await sp;
   const status = searchParams?.status || 'All';
   const designs = await getAllDesigns({ status });
 
