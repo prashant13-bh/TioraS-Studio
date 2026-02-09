@@ -68,8 +68,12 @@ export function PhoneAuthForm({ onVerify }: PhoneAuthFormProps) {
       console.error("Error sending OTP", error);
       toast({ title: 'Error', description: `Failed to send OTP: ${error.message}`, variant: 'destructive' });
       // Only reset if grecaptcha is available on window
-      if (window.grecaptcha && typeof window.grecaptcha.reset === 'function' && window.recaptchaVerifier) {
-          window.grecaptcha.reset(window.recaptchaVerifier.widgetId);
+      try {
+        if (window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+          window.grecaptcha.reset();
+        }
+      } catch (resetError) {
+        // Ignore reset errors
       }
     } finally {
       setIsSendingOtp(false);

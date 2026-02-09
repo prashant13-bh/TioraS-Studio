@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (item: Omit<CartItem, "quantity">) => void;
+  addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeFromCart: (id: string, size: string, color: string) => void;
   updateQuantity: (
     id: string,

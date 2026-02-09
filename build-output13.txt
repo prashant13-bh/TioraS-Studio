@@ -1,0 +1,61 @@
+﻿
+> nextn@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.7
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+ Γ£ô Compiled successfully in 2.2min
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Failed to compile  
+  .:String) [], RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+
+./src/components/canvas/Needle.tsx
+:11:18
+Type error: Expected 1 arguments, 
+but got 0.
+
+[0m [90m  9 |[39m
+ [90m 10 |[39m [36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m 
+[33mNeedle[39m() {
+[31m[1m>[22m[39m[90m 11 
+|[39m   [36mconst[39m needle 
+[33m=[39m useRef[33m<[39m[33m
+any[39m[33m>[39m()[33m;[39m
+ [90m    |[39m                  
+[31m[1m^[22m[39m
+ [90m 12 |[39m
+ [90m 13 |[39m   useEffect(() 
+[33m=>[39m {
+ [90m 14 |[39m     
+[36mconst[39m path [33m=[39m 
+[36mnew[39m [33mTHREE[39m[33m
+.[39m[33mCatmullRomCurve3[39m([
+[0m
+Next.js build worker exited with 
+code: 1 and signal: null

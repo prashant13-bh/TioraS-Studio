@@ -52,7 +52,7 @@ const formSchema = z.object({
   isNew: z.boolean(),
   stock: z.coerce.number().min(0, "Stock must be a positive number."),
   sku: z.string().optional(),
-  vibe: z.enum(["Gen Z", "Luxury", "Professional"]).optional(),
+  vibe: z.enum(["gen-z", "luxury", "professional"]).optional(),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -71,7 +71,6 @@ export function ProductForm({ product }: ProductFormProps) {
         ...product,
         sizes: product.sizes.join(", "),
         colors: product.colors.join(", "),
-        media: product.media,
         stock: product.stock || 0,
         sku: product.sku || "",
       }
@@ -84,14 +83,14 @@ export function ProductForm({ product }: ProductFormProps) {
         colors: "#000000, #FFFFFF",
         media: [
           {
-            type: "image",
+            type: "image" as const,
             url: "https://picsum.photos/seed/placeholder/600/800",
           },
         ],
         isNew: true,
         stock: 0,
         sku: "",
-        vibe: "Gen Z" as const,
+        vibe: "gen-z" as const,
       };
 
   const form = useForm<ProductFormValues>({
@@ -132,7 +131,7 @@ export function ProductForm({ product }: ProductFormProps) {
             description: `"${data.name}" has been successfully updated.`,
           });
         } else {
-          throw new Error(result.message || "Update failed");
+          throw new Error(result.error || "Update failed");
         }
       } else {
         result = await createProduct(
@@ -144,7 +143,7 @@ export function ProductForm({ product }: ProductFormProps) {
             description: `New product "${data.name}" has been added.`,
           });
         } else {
-          throw new Error(result.message || "Creation failed");
+          throw new Error(result.error || "Creation failed");
         }
       }
 
@@ -341,9 +340,9 @@ export function ProductForm({ product }: ProductFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Gen Z">Gen Z</SelectItem>
-                      <SelectItem value="Luxury">Luxury</SelectItem>
-                      <SelectItem value="Professional">Professional</SelectItem>
+                      <SelectItem value="gen-z">Gen Z</SelectItem>
+                      <SelectItem value="luxury">Luxury</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>

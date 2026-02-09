@@ -9,18 +9,8 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
+import type { Product } from '@/lib/types';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  sizes: string[];
-  colors: string[];
-  media: { type: string; url: string }[];
-  isNew?: boolean;
-}
 
 export function TrendingCarousel() {
   const [products, setProducts] = useState<Product[]>([]);

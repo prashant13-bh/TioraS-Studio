@@ -116,7 +116,7 @@ export default function OrderDetailPage() {
               <CardTitle>Items</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {order.items.map((item, index) => (
+              {(order.items ?? []).map((item, index) => (
                 <div key={index} className="flex items-start gap-4">
                   <div className="relative h-16 w-16 overflow-hidden rounded border bg-muted">
                     {/* Placeholder image logic since item might not have image URL directly stored if simplified */}
@@ -137,14 +137,6 @@ export default function OrderDetailPage() {
               ))}
               <Separator className="my-4" />
               <div className="space-y-1.5 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>₹{order.subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tax</span>
-                  <span>₹{order.tax.toFixed(2)}</span>
-                </div>
                 <div className="flex justify-between font-bold text-lg pt-2">
                   <span>Total</span>
                   <span>₹{order.total.toFixed(2)}</span>
@@ -165,11 +157,11 @@ export default function OrderDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
-              <div className="font-medium">{order.shippingAddress?.name || user?.displayName}</div>
+              <div className="font-medium">{order.shippingAddr?.name || user?.displayName}</div>
               <div className="text-muted-foreground mt-1">
-                {order.shippingAddress?.line1}<br />
-                {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.pincode}<br />
-                {order.shippingAddress?.country || "India"}
+                {order.shippingAddr?.address}<br />
+                {order.shippingAddr?.city}, {order.shippingAddr?.state} {order.shippingAddr?.zip}<br />
+                India
               </div>
             </CardContent>
           </Card>

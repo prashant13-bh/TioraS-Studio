@@ -307,17 +307,17 @@ export function CatalogView() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 md:grid-cols-3 lg:grid-cols-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="space-y-3">
-                  <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+                  <Skeleton className="aspect-[3/4] w-full rounded-2xl" />
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>
               ))}
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 md:grid-cols-3 lg:grid-cols-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

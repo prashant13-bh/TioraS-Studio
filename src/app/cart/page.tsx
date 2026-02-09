@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotal } = useCart();
+  const { items, removeFromCart, updateQuantity, total } = useCart();
 
   if (items.length === 0) {
     return (
@@ -77,7 +77,7 @@ export default function CartPage() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => removeItem(item.id, item.selectedSize, item.selectedColor)}
+                    onClick={() => removeFromCart(item.id, item.selectedSize, item.selectedColor)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -93,7 +93,7 @@ export default function CartPage() {
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
@@ -103,7 +103,7 @@ export default function CartPage() {
             <Separator className="my-4" />
             <div className="flex justify-between font-bold mb-6">
               <span>Total</span>
-              <span>₹{subtotal.toFixed(2)}</span>
+              <span>₹{total.toFixed(2)}</span>
             </div>
             <Button className="w-full" size="lg" asChild>
               <Link href="/checkout">Proceed to Checkout</Link>

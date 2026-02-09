@@ -6,6 +6,8 @@ import { ClientLayout } from '@/components/layout/client-layout';
 import { ThemeProvider } from "@/components/theme-provider"
 import { StoreProvider } from '@/lib/store-context';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav';
+
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,7 +63,7 @@ export default function RootLayout({
           spaceGrotesk.variable
         )}
       >
-        <ThemeProvider
+          <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
@@ -72,6 +74,7 @@ export default function RootLayout({
                 {children}
               </ClientLayout>
               <BottomNav />
+              <MobileBottomNav />
             </StoreProvider>
           </ThemeProvider>
       </body>

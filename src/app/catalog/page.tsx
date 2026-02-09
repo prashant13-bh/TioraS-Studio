@@ -12,20 +12,9 @@ import ProductCard from '@/components/product-card';
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react';
 import { collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
+import type { Product } from '@/lib/types';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  sizes: string[];
-  colors: string[];
-  media: { type: string; url: string }[];
-  isNew?: boolean;
-  stock?: number;
-}
 
 const CATEGORIES = ['All', 'T-Shirt', 'Hoodie', 'Jacket', 'Cap'];
 const SORT_OPTIONS = [

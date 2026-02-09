@@ -1,0 +1,67 @@
+﻿
+> nextn@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.7
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+ Γ£ô Compiled successfully in 2.3min
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Failed to compile  
+  .:String) [], RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+
+./src/app/admin/products/_componen
+ts/product-form.tsx:136:34
+Type error: Property 'message' 
+does not exist on type '{ 
+success: boolean; error: string; 
+} | { success: boolean; error?: 
+undefined; }'.
+  Property 'message' does not 
+exist on type '{ success: 
+boolean; error: string; }'.
+
+[0m [90m 134 |[39m           
+})[33m;[39m
+ [90m 135 |[39m         } 
+[36melse[39m {
+[31m[1m>[22m[39m[90m 136 
+|[39m           [36mthrow[39m 
+[36mnew[39m [33mError[39m(resu
+lt[33m.[39mmessage [33m||[39m 
+[32m"Update 
+failed"[39m)[33m;[39m
+ [90m     |[39m                 
+                 
+[31m[1m^[22m[39m
+ [90m 137 |[39m         }
+ [90m 138 |[39m       } 
+[36melse[39m {
+ [90m 139 |[39m         result 
+[33m=[39m [36mawait[39m 
+createProduct([0m
+Next.js build worker exited with 
+code: 1 and signal: null

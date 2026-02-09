@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Needle() {
-  const needle = useRef<any>();
+  const needle = useRef<any>(null);
 
   useEffect(() => {
     const path = new THREE.CatmullRomCurve3([

@@ -1,0 +1,157 @@
+﻿
+> nextn@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.7
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+ Γ£ô Compiled successfully in 2.2min
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Failed to compile  
+  .:String) [], RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+
+./src/app/design-studio/_component
+s/design-form.tsx:52:31
+Type error: No overload matches 
+this call.
+  Overload 1 of 2, '(action: 
+(state: { message: string; 
+imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; errors?: undefined; } | { 
+...; } | { ...; }) => { ...; } | 
+... 2 more ... | Promise<...>, 
+initialState: { ...; } | ... 1 
+more ... | { ...; }, permalink?: 
+string | undefined): [state: 
+...]', gave the following error.
+    Argument of type '(prevState: 
+any, formData: FormData) => 
+Promise<{ message: string; 
+imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; errors?: undefined; } | { 
+...; } | { ...; }>' is not 
+assignable to parameter of type 
+'(state: { message: string; 
+imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; errors?: undefined; } | { 
+...; } | { ...; }) => { ...; } | 
+... 2 more ... | Promise<...>'.
+      Target signature provides 
+too few arguments. Expected 2 or 
+more, but got 1.
+  Overload 2 of 2, '(action: 
+(state: { message: string; 
+imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; errors?: undefined; } | { 
+...; } | { ...; }, payload: 
+FormData) => { ...; } | ... 2 
+more ... | Promise<...>, 
+initialState: { ...; } | ... 1 
+more ... | { ...; }, permalink?: 
+string | undefined): [state: 
+...]', gave the following error.
+    Argument of type '{ message: 
+string; errors: null; imageUrl: 
+null; prompt: string; 
+productType: string; }' is not 
+assignable to parameter of type 
+'{ message: string; imageUrl: 
+null; prompt: FormDataEntryValue 
+| null; productType: 
+FormDataEntryValue | null; 
+errors?: undefined; } | { 
+message: string; errors: { ...; 
+}; imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; } | { ...; }'.
+      Type '{ message: string; 
+errors: null; imageUrl: null; 
+prompt: string; productType: 
+string; }' is not assignable to 
+type '{ message: string; 
+imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; errors?: undefined; } | { 
+message: string; errors: { ...; 
+}; imageUrl: null; prompt: 
+FormDataEntryValue | null; 
+productType: FormDataEntryValue | 
+null; }'.
+        Type '{ message: string; 
+errors: null; imageUrl: null; 
+prompt: string; productType: 
+string; }' is not assignable to 
+type '{ message: string; errors: 
+{ prompt?: string[] | undefined; 
+productType?: string[] | 
+undefined; }; imageUrl: null; 
+prompt: FormDataEntryValue | 
+null; productType: 
+FormDataEntryValue | null; }'.
+          Types of property 
+'errors' are incompatible.
+            Type 'null' is not 
+assignable to type '{ prompt?: 
+string[] | undefined; 
+productType?: string[] | 
+undefined; }'.
+
+[0m [90m 50 |[39m
+ [90m 51 |[39m [36mexport[39m 
+[36mfunction[39m 
+[33mDesignForm[39m() {
+[31m[1m>[22m[39m[90m 52 
+|[39m   [36mconst[39m 
+[state[33m,[39m formAction] 
+[33m=[39m useActionState(generat
+eDesignAction[33m,[39m 
+initialState)[33m;[39m
+ [90m    |[39m                  
+             [31m[1m^[22m[39m
+ [90m 53 |[39m   
+[36mconst[39m { user[33m,[39m 
+loading[33m:[39m userLoading } 
+[33m=[39m useUser()[33m;[39m
+ [90m 54 |[39m   
+[36mconst[39m { toast } 
+[33m=[39m useToast()[33m;[39m
+ [90m 55 |[39m   
+[36mconst[39m formRef 
+[33m=[39m useRef[33m<[39m[33m
+HTMLFormElement[39m[33m>[39m([
+36mnull[39m)[33m;[39m[0m
+Next.js build worker exited with 
+code: 1 and signal: null

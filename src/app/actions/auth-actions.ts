@@ -62,7 +62,7 @@ export async function verifySession() {
       uid: decodedClaims.uid,
       email: decodedClaims.email,
       picture: decodedClaims.picture,
-      isAdmin: decodedClaims.email === 'ph293815@gmail.com' || decodedClaims.email === 'tyoras9686@gmail.com' || decodedClaims.email === 'dsmullam@gmail.com'
+      isAdmin: decodedClaims.admin === true
     };
   } catch (error) {
     // Session verification failed (expired, invalid, etc.)

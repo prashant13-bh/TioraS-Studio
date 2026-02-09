@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function StitchThread() {
-  const meshRef = useRef<any>();
+  const meshRef = useRef<any>(null);
 
   useEffect(() => {
     const curve = new THREE.CatmullRomCurve3([

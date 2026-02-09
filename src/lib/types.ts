@@ -1,22 +1,21 @@
-
-
+import type { StoreVibe } from './store-context';
 
 export type ProductMedia = {
-    type: 'image' | 'video';
-    url: string;
-}
+  type: "image" | "video";
+  url: string;
+};
 
 export type Product = {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: string;
+  category: "T-Shirt" | "Hoodie" | "Jacket" | "Cap";
   sizes: string[];
   colors: string[];
   media: ProductMedia[];
   isNew: boolean;
-  vibe?: 'Gen Z' | 'Luxury' | 'Professional';
+  vibe?: StoreVibe;
   stock?: number;
   sku?: string;
   createdAt: string;
@@ -59,45 +58,44 @@ export type ShippingAddress = {
 };
 
 export type OrderItem = {
-    id: string;
-    orderId: string;
-    productId: string;
-    quantity: number;
-    size: string;
-    color: string;
-    price: number;
-    // Denormalized fields for easier display
-    name: string;
-    image: string;
+  id: string;
+  orderId: string;
+  productId: string;
+  quantity: number;
+  size: string;
+  color: string;
+  price: number;
+  // Denormalized fields for easier display
+  name: string;
+  image: string;
 };
 
 export type Order = {
-    id: string;
-    userId: string;
-    orderNumber: string;
-    total: number;
-    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
-    shippingAddr: ShippingAddress;
-    createdAt: string;
-    updatedAt: string;
-    items?: OrderItem[];
-    itemCount: number;
+  id: string;
+  userId: string;
+  orderNumber: string;
+  total: number;
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  shippingAddr: ShippingAddress;
+  createdAt: string;
+  updatedAt: string;
+  items?: OrderItem[];
+  itemCount: number;
 };
 
 export type Design = {
-    id: string;
-    name: string;
-    prompt: string;
-    product: string;
-    imageUrl: string;
-    status: 'Draft' | 'Approved' | 'Rejected';
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
+  id: string;
+  name: string;
+  prompt: string;
+  product: string;
+  imageUrl: string;
+  status: "Draft" | "Approved" | "Rejected";
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
 };
 
-
-export type Category = 'All' | 'T-Shirt' | 'Hoodie' | 'Jacket' | 'Cap';
+export type Category = "All" | "T-Shirt" | "Hoodie" | "Jacket" | "Cap";
 
 export type SalesData = {
   name: string;

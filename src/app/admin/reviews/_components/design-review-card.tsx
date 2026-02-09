@@ -36,7 +36,7 @@ export function DesignReviewCard({ design }: { design: Design }) {
     } else {
       toast({
         title: 'Update Failed',
-        description: dbResult.message,
+        description: 'Failed to update design status. Please try again.',
         variant: 'destructive',
       });
     }

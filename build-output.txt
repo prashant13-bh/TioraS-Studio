@@ -1,0 +1,125 @@
+﻿
+> nextn@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.7
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\prashant B hiremath\.gemini\antigravity\scratch\Tioras Studio\TioraS-Studio\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+ Γ£ô Compiled successfully in 105s
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : Not 
+   Specified: (Failed to compile  
+  .:String) [], RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+
+./src/app/admin/products/_componen
+ts/product-form.tsx:99:5
+Type error: Type '{ sizes: 
+string; colors: string; media: 
+ProductMedia[]; stock: number; 
+sku: string; id: string; name: 
+string; description: string; 
+price: number; category: string; 
+isNew: boolean; vibe?: "Gen Z" | 
+... 2 more ... | undefined; 
+createdAt: string; updatedAt: 
+string; } | { ...; }' is not 
+assignable to type 
+'AsyncDefaultValues<{ media: { 
+url: string; type: "image" | 
+"video"; }[]; colors: string; 
+name: string; description: 
+string; price: number; category: 
+"T-Shirt" | "Hoodie" | "Jacket" | 
+"Cap"; sizes: string; isNew: 
+boolean; stock: number; sku?: 
+string | undefined; vibe?: "Gen 
+Z" | ... 2 more ... | undefined; 
+}> | { ......'.
+  Type '{ sizes: string; colors: 
+string; media: ProductMedia[]; 
+stock: number; sku: string; id: 
+string; name: string; 
+description: string; price: 
+number; category: string; isNew: 
+boolean; vibe?: "Gen Z" | 
+"Luxury" | "Professional"; 
+createdAt: string; updatedAt: 
+string; }' is not assignable to 
+type 'AsyncDefaultValues<{ media: 
+{ url: string; type: "image" | 
+"video"; }[]; colors: string; 
+name: string; description: 
+string; price: number; category: 
+"T-Shirt" | "Hoodie" | "Jacket" | 
+"Cap"; sizes: string; isNew: 
+boolean; stock: number; sku?: 
+string | undefined; vibe?: "Gen 
+Z" | ... 2 more ... | undefined; 
+}> | { ......'.
+    Type '{ sizes: string; 
+colors: string; media: 
+ProductMedia[]; stock: number; 
+sku: string; id: string; name: 
+string; description: string; 
+price: number; category: string; 
+isNew: boolean; vibe?: "Gen Z" | 
+"Luxury" | "Professional"; 
+createdAt: string; updatedAt: 
+string; }' is not assignable to 
+type '{ media?: ({ url?: string | 
+undefined; type?: "image" | 
+"video" | undefined; } | 
+undefined)[] | undefined; 
+colors?: string | undefined; 
+name?: string | undefined; 
+description?: string | undefined; 
+... 6 more ...; vibe?: "Gen Z" | 
+... 2 more ... | undefined; }'.
+      Types of property 
+'category' are incompatible.
+        Type 'string' is not 
+assignable to type '"T-Shirt" | 
+"Hoodie" | "Jacket" | "Cap" | 
+undefined'.
+
+[0m [90m  97 |[39m   
+[36mconst[39m form [33m=[39m u
+seForm[33m<[39m[33mProductFormV
+alues[39m[33m>[39m({
+ [90m  98 |[39m     
+resolver[33m:[39m 
+zodResolver(formSchema)[33m,[39m
+[31m[1m>[22m[39m[90m  99 
+|[39m     
+defaultValues[33m,[39m
+ [90m     |[39m     
+[31m[1m^[22m[39m
+ [90m 100 |[39m     
+mode[33m:[39m 
+[32m"onChange"[39m[33m,[39m
+ [90m 101 |[39m   })[33m;[39m
+ [90m 102 |[39m[0m
+Next.js build worker exited with 
+code: 1 and signal: null
