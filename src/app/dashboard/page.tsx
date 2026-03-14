@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { fetchUserDashboardData } from "@/lib/firestore-actions";
+import { getUserDesigns } from '@/lib/firebase/designs';
+import { getUserOrders } from '@/lib/firebase/orders';
 import { format } from "date-fns";
 import { useUser } from "@/firebase";
 import { useEffect, useState } from "react";
@@ -22,9 +23,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      fetchUserDashboardData(user.uid).then((data) => {
-        setDashboardData(data);
-        setIsDataLoading(false);
+      Promise.all([
+          getUserDesigns(user.uid),
+          getUserOrders(user.uid)
+      ]).then(([designsData, ordersData]) => {
+          setDashboardData({
+              savedDesigns: designsData,
+              orderHistory: ordersData
+          });
+          setIsDataLoading(false);
       });
     }
   }, [user]);
@@ -111,7 +118,7 @@ export default function DashboardPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">₹{order.total.toFixed(2)}</div>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(order.createdAt || order.date), "PPP")}
+                    {format(new Date(order.createdAt), "PPP")}
                   </p>
                 </CardContent>
               </Card>

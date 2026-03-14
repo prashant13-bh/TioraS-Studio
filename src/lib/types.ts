@@ -120,3 +120,38 @@ export type UserProfile = {
   createdAt: string;
   isAdmin?: boolean;
 };
+
+export type VendorProfile = {
+  id: string; // Ties to UserProfile ID
+  storeName: string;
+  storeSlug: string;
+  description: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  status: "Pending" | "Active" | "Suspended";
+  contactEmail: string;
+  contactPhone: string;
+  address: Address;
+  capabilities: {
+    dtfPrinting: boolean;
+    embroidery: boolean;
+    cutAndSew: boolean;
+  };
+  metrics: {
+    totalSales: number;
+    totalOrders: number;
+    rating: number;
+    reviewCount: number;
+  };
+  payoutSettings: PayoutSettings;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PayoutSettings = {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  ifscCode: string;
+  upiId?: string;
+};

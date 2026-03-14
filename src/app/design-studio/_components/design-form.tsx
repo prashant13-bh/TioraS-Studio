@@ -1,59 +1,77 @@
-'use client';
+"use client";
 
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-import Image from 'next/image';
-import { generateDesignAction, saveDesignAction } from '@/app/actions/design-actions';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import Image from "next/image";
+import {
+  generateDesignAction,
+  saveDesignAction,
+} from "@/app/actions/design-actions";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Bot, Download, Loader2, Save, Wand2, Sparkles, Lightbulb, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import React, { useEffect, useRef, useState } from 'react';
-import { useUser } from '@/firebase';
-import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
+} from "@/components/ui/select";
+import {
+  Bot,
+  Download,
+  Loader2,
+  Save,
+  Wand2,
+  Sparkles,
+  Lightbulb,
+  Zap,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import React, { useEffect, useRef, useState } from "react";
+import { useUser } from "@/firebase";
+import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 
 const initialState = {
-  message: '',
+  message: "",
   errors: undefined,
   imageUrl: null,
-  prompt: '',
-  productType: 'T-Shirt',
+  prompt: "",
+  productType: "T-Shirt",
 };
 
 const PRODUCT_TYPES = [
-  { value: 'T-Shirt', icon: '👕', label: 'T-Shirt' },
-  { value: 'Hoodie', icon: '🧥', label: 'Hoodie' },
-  { value: 'Jacket', icon: '🧥', label: 'Jacket' },
-  { value: 'Cap', icon: '🧢', label: 'Cap' },
+  { value: "T-Shirt", icon: "👕", label: "T-Shirt" },
+  { value: "Hoodie", icon: "🧥", label: "Hoodie" },
+  { value: "Jacket", icon: "🧥", label: "Jacket" },
+  { value: "Cap", icon: "🧢", label: "Cap" },
 ];
 
 const PROMPT_EXAMPLES = [
-  'A majestic lion wearing a crown',
-  'Geometric mountain landscape at sunset',
-  'Abstract space nebula with vibrant colors',
-  'Vintage retro wave sunset design',
-  'Minimalist japanese wave art',
-  'Cyberpunk neon city skyline',
+  "A majestic lion wearing a crown",
+  "Geometric mountain landscape at sunset",
+  "Abstract space nebula with vibrant colors",
+  "Vintage retro wave sunset design",
+  "Minimalist japanese wave art",
+  "Cyberpunk neon city skyline",
 ];
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button 
-      type="submit" 
-      disabled={pending} 
-      size="lg" 
+    <Button
+      type="submit"
+      disabled={pending}
+      size="lg"
       className="w-full font-bold text-base rounded-2xl h-12 md:h-14 bg-gradient-to-r from-primary via-primary to-secondary hover:opacity-90 shadow-lg"
     >
       {pending ? (
@@ -72,65 +90,87 @@ function SubmitButton() {
 }
 
 export function DesignForm() {
-  const [state, formAction] = useActionState(generateDesignAction, initialState);
+  const [state, formAction] = useActionState(
+    generateDesignAction,
+    initialState,
+  );
   const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState(state.prompt || '');
+  const [selectedPrompt, setSelectedPrompt] = useState<string>(
+    (state.prompt as string) || "",
+  );
 
   useEffect(() => {
     if (state.message && state.imageUrl === null && !state.errors) {
       toast({
-        title: 'Generation Error',
+        title: "Generation Error",
         description: state.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   }, [state.message, state.imageUrl, state.errors, toast]);
-  
+
   const handleSave = async () => {
     if (!user) {
-        toast({ title: "Please log in", description: "You must be logged in to save a design.", variant: 'destructive'});
-        return;
+      toast({
+        title: "Please log in",
+        description: "You must be logged in to save a design.",
+        variant: "destructive",
+      });
+      return;
     }
     if (state.imageUrl && state.prompt && state.productType) {
-        setIsSaving(true);
-        const designName = name || `AI Design - ${new Date().toLocaleString()}`;
-        const result = await saveDesignAction(user.uid, designName, state.prompt, state.productType, state.imageUrl);
-        if (result.success) {
-            toast({ title: "✨ Success!", description: result.message });
-        } else {
-            toast({ title: "Error", description: result.message, variant: 'destructive' });
-        }
-        setIsSaving(false);
+      setIsSaving(true);
+      const designName = name || `AI Design - ${new Date().toLocaleString()}`;
+      const result = await saveDesignAction(
+        user.uid,
+        designName,
+        state.prompt,
+        state.productType,
+        state.imageUrl,
+      );
+      if (result.success) {
+        toast({ title: "✨ Success!", description: result.message });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      setIsSaving(false);
     }
   };
 
   const handleDownload = () => {
     if (state.imageUrl) {
-        const link = document.createElement('a');
-        link.href = state.imageUrl;
-        link.download = `tioras-design-${Date.now()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast({ title: '⬇️ Downloaded!', description: 'Design saved to your device' });
+      const link = document.createElement("a");
+      link.href = state.imageUrl;
+      link.download = `tioras-design-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast({
+        title: "⬇️ Downloaded!",
+        description: "Design saved to your device",
+      });
     }
   };
 
   const usePromptExample = (example: string) => {
     setSelectedPrompt(example);
     // Focus on the textarea after setting the example
-    const textarea = formRef.current?.querySelector('textarea');
+    const textarea = formRef.current?.querySelector("textarea");
     if (textarea) textarea.focus();
   };
 
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-2 md:space-y-3"
@@ -143,7 +183,8 @@ export function DesignForm() {
           <Sparkles className="size-6 md:size-8 text-secondary animate-pulse" />
         </div>
         <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-          Transform your ideas into stunning apparel designs with the power of AI ✨
+          Transform your ideas into stunning apparel designs with the power of
+          AI ✨
         </p>
       </motion.div>
 
@@ -165,19 +206,36 @@ export function DesignForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 md:space-y-6">
-              <form ref={formRef} action={formAction} className="space-y-5 md:space-y-6">
+              <form
+                ref={formRef}
+                action={formAction}
+                className="space-y-5 md:space-y-6"
+              >
                 {/* Product Type */}
                 <div className="space-y-3">
-                  <Label htmlFor="productType" className="text-sm md:text-base font-semibold flex items-center gap-2">
+                  <Label
+                    htmlFor="productType"
+                    className="text-sm md:text-base font-semibold flex items-center gap-2"
+                  >
                     Select Product
                   </Label>
-                  <Select name="productType" defaultValue={state.productType?.toString() || 'T-Shirt'}>
-                    <SelectTrigger id="productType" className="h-12 md:h-14 rounded-xl border-2 text-base">
+                  <Select
+                    name="productType"
+                    defaultValue={state.productType?.toString() || "T-Shirt"}
+                  >
+                    <SelectTrigger
+                      id="productType"
+                      className="h-12 md:h-14 rounded-xl border-2 text-base"
+                    >
                       <SelectValue placeholder="Select a product" />
                     </SelectTrigger>
                     <SelectContent>
                       {PRODUCT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value} className="text-base">
+                        <SelectItem
+                          key={type.value}
+                          value={type.value}
+                          className="text-base"
+                        >
                           <span className="flex items-center gap-2">
                             <span className="text-xl">{type.icon}</span>
                             <span>{type.label}</span>
@@ -190,7 +248,10 @@ export function DesignForm() {
 
                 {/* Prompt Input */}
                 <div className="space-y-3">
-                  <Label htmlFor="prompt" className="text-sm md:text-base font-semibold flex items-center gap-2">
+                  <Label
+                    htmlFor="prompt"
+                    className="text-sm md:text-base font-semibold flex items-center gap-2"
+                  >
                     <Lightbulb className="size-4 text-primary" />
                     Design Prompt
                   </Label>
@@ -203,7 +264,9 @@ export function DesignForm() {
                     className="min-h-[100px] md:min-h-[120px] resize-none rounded-xl border-2 text-sm md:text-base p-3 md:p-4"
                   />
                   {state.errors?.prompt && (
-                    <p className="text-sm text-destructive">{state.errors.prompt}</p>
+                    <p className="text-sm text-destructive">
+                      {state.errors.prompt}
+                    </p>
                   )}
                 </div>
 
@@ -252,7 +315,7 @@ export function DesignForm() {
             <CardContent className="flex-1 flex flex-col items-center justify-center p-4 md:p-6">
               <AnimatePresence mode="wait">
                 {state.imageUrl ? (
-                  <motion.div 
+                  <motion.div
                     key="image"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -260,49 +323,53 @@ export function DesignForm() {
                     className="flex w-full flex-col items-center gap-4"
                   >
                     <div className="relative aspect-square w-full max-w-sm md:max-w-md overflow-hidden rounded-2xl shadow-2xl ring-4 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
-                        <Image
-                            src={state.imageUrl}
-                            alt={state.prompt || 'Generated AI design'}
-                            fill
-                            sizes="(max-width: 768px) 90vw, 50vw"
-                            className="object-cover"
-                            priority
-                        />
-                        {/* Mobile Gesture Hint */}
-                        <div className="absolute bottom-2 left-2 right-2 md:hidden">
-                          <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-full text-center">
-                            Tap to view full size
-                          </div>
+                      <Image
+                        src={state.imageUrl}
+                        alt={state.prompt || "Generated AI design"}
+                        fill
+                        sizes="(max-width: 768px) 90vw, 50vw"
+                        className="object-cover"
+                        priority
+                      />
+                      {/* Mobile Gesture Hint */}
+                      <div className="absolute bottom-2 left-2 right-2 md:hidden">
+                        <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-full text-center">
+                          Tap to view full size
                         </div>
+                      </div>
                     </div>
-                    <Input 
-                        type="text" 
-                        placeholder="Give your design a name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full max-w-sm md:max-w-md h-11 md:h-12 rounded-xl border-2 text-sm md:text-base"
+                    <Input
+                      type="text"
+                      placeholder="Give your design a name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full max-w-sm md:max-w-md h-11 md:h-12 rounded-xl border-2 text-sm md:text-base"
                     />
-                    <div className='flex flex-col sm:flex-row gap-2 md:gap-3 w-full max-w-sm md:max-w-md'>
-                        <Button 
-                          onClick={handleSave} 
-                          variant="secondary" 
-                          className="flex-1 h-11 md:h-12 rounded-xl font-semibold text-sm md:text-base shadow-lg" 
-                          disabled={isSaving || userLoading}
-                        >
-                            {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
-                             Save to Gallery
-                        </Button>
-                        <Button 
-                          onClick={handleDownload} 
-                          className="flex-1 h-11 md:h-12 rounded-xl font-semibold text-sm md:text-base bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-lg"
-                        >
-                          <Download className="mr-2 size-4" /> 
-                          Download
-                        </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full max-w-sm md:max-w-md">
+                      <Button
+                        onClick={handleSave}
+                        variant="secondary"
+                        className="flex-1 h-11 md:h-12 rounded-xl font-semibold text-sm md:text-base shadow-lg"
+                        disabled={isSaving || userLoading}
+                      >
+                        {isSaving ? (
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                        ) : (
+                          <Save className="mr-2 size-4" />
+                        )}
+                        Save to Gallery
+                      </Button>
+                      <Button
+                        onClick={handleDownload}
+                        className="flex-1 h-11 md:h-12 rounded-xl font-semibold text-sm md:text-base bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-lg"
+                      >
+                        <Download className="mr-2 size-4" />
+                        Download
+                      </Button>
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="empty"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -317,7 +384,8 @@ export function DesignForm() {
                       Ready to Create?
                     </h3>
                     <p className="text-xs md:text-sm max-w-xs mx-auto leading-relaxed">
-                      Enter a creative prompt and click Generate Design to see AI magic in action! ✨
+                      Enter a creative prompt and click Generate Design to see
+                      AI magic in action! ✨
                     </p>
                   </motion.div>
                 )}

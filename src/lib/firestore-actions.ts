@@ -82,7 +82,8 @@ export async function fetchUserDashboardData(userId: string) {
   const db = getAdminFirestore();
   try {
     // Fetch user's designs
-    const designsSnapshot = await db.collection('users').doc(userId).collection('designs')
+    const designsSnapshot = await db.collection('designs')
+      .where('userId', '==', userId)
       .orderBy('createdAt', 'desc')
       .get();
       
@@ -131,9 +132,17 @@ export async function fetchOrderById(orderId: string): Promise<Order | null> {
          return null;
       }
 
+      // Fetch order items subcollection
+      const itemsSnapshot = await db.collection('orders').doc(orderId).collection('orderItems').get();
+      const items = itemsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
       return { 
         id: orderDoc.id, 
         ...data,
+        items,
         createdAt: (data?.createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
         updatedAt: (data?.updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
       } as Order;

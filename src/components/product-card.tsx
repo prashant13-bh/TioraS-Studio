@@ -95,7 +95,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   ✨ New
                 </Badge>
               )}
-              {product.stock < 10 && (
+              {(product.stock ?? 0) < 10 && (
                 <Badge className="text-[10px] md:text-xs px-2 py-0.5 bg-gradient-to-r from-orange-500 to-red-500 font-bold shadow-lg backdrop-blur-sm border-0">
                   🔥 Low Stock
                 </Badge>
@@ -167,13 +167,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div
                   className={cn(
                     "size-1.5 md:size-2 rounded-full",
-                    product.stock > 10 ? "bg-green-500" : "bg-orange-500",
+                    (product.stock ?? 0) > 10 ? "bg-green-500" : "bg-orange-500",
                   )}
                 />
                 <span className="text-[10px] md:text-xs text-muted-foreground">
-                  {product.stock > 10
+                  {(product.stock ?? 0) > 10
                     ? "In Stock"
-                    : `Only ${product.stock} left`}
+                    : `Only ${product.stock ?? 0} left`}
                 </span>
               </div>
             </div>

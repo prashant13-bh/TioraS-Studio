@@ -108,7 +108,7 @@ export async function saveDesignAction(
             userId,
         };
         
-        await db.collection('users').doc(userId).collection('designs').add(designData);
+        await db.collection('designs').add(designData);
 
         revalidatePath('/dashboard/designs');
         return { success: true, message: 'Design saved successfully!' };

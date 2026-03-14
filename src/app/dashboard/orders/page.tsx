@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { fetchUserDashboardData } from "@/lib/firestore-actions";
+import { getUserOrders } from '@/lib/firebase/orders';
 import { format } from "date-fns";
 import { useUser } from "@/firebase";
 import { useEffect, useState } from "react";
@@ -19,8 +19,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (user) {
-      fetchUserDashboardData(user.uid).then((data) => {
-        setOrders(data.orderHistory);
+      getUserOrders(user.uid).then((data) => {
+        setOrders(data);
         setIsDataLoading(false);
       });
     }
@@ -69,7 +69,7 @@ export default function OrdersPage() {
                 {orders.map((order: any) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">#{order.orderNumber}</TableCell>
-                    <TableCell>{format(new Date(order.createdAt || order.date), "PPP")}</TableCell>
+                    <TableCell>{format(new Date(order.createdAt), "PPP")}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                     </TableCell>

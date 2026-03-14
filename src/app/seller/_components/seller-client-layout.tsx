@@ -1,20 +1,14 @@
-
 'use client';
 
 import Link from 'next/link';
 import {
   Home,
   Package,
-  Palette,
-  Shirt,
-  Users,
-  Warehouse,
   FileText,
-  Calendar,
   User,
   Settings,
-  Map as MapIcon,
   Store,
+  KanbanSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,27 +23,20 @@ import { TiorasLogo } from '@/components/icons';
 import { Menu } from 'lucide-react';
 
 const navItems = [
-  { href: '/admin', icon: Home, label: 'Dashboard' },
-  { href: '/admin/orders', icon: Package, label: 'Orders' },
-  { href: '/admin/products', icon: Shirt, label: 'Products' },
-  { href: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
-  { href: '/admin/invoices', icon: FileText, label: 'Invoices' },
-  { href: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-  { href: '/admin/users', icon: Users, label: 'Users' },
-  { href: '/admin/vendors', icon: Store, label: 'Vendors' },
-  { href: '/admin/reviews', icon: Palette, label: 'Design Reviews' },
-  { href: '/admin/profile', icon: User, label: 'Profile' },
-  { href: '/admin/settings', icon: Settings, label: 'Settings' },
-  { href: '/admin/seed', icon: Package, label: 'Seed Data' },
-  { href: '/admin/sitemap', icon: MapIcon, label: 'Sitemap' },
+  { href: '/seller', icon: Home, label: 'Dashboard' },
+  { href: '/seller/orders', icon: KanbanSquare, label: 'Order Fulfillment' },
+  { href: '/seller/syog', icon: Package, label: 'SYOG Processing' },
+  { href: '/seller/invoices', icon: FileText, label: 'Invoices & Payouts' },
+  { href: '/seller/store', icon: Store, label: 'Store Profile' },
+  { href: '/seller/settings', icon: Settings, label: 'Settings' },
 ];
 
 import { useUser } from '@/firebase';
-import { isAdminEmail } from '@/lib/admin-config';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { checkVendorStatus } from '@/app/actions/vendor-actions';
 
-export function AdminClientLayout({
+export function SellerClientLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -57,21 +44,29 @@ export function AdminClientLayout({
   const { user, loading } = useUser();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [vendorCheck, setVendorCheck] = useState<{ isVendor: boolean; status: string | null } | null>(null);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user || !isAdminEmail(user.email)) {
-        router.push('/');
-      }
+    async function verify() {
+        if (!loading && user) {
+            const res = await checkVendorStatus();
+            setVendorCheck(res);
+            if (!res.isVendor || res.status !== 'Active') {
+               router.push('/become-a-seller');
+            }
+        } else if (!loading && !user) {
+             router.push('/login');
+        }
     }
+    verify();
   }, [user, loading, router]);
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center">Loading admin panel...</div>;
+  if (loading || !vendorCheck) {
+    return <div className="flex h-screen items-center justify-center">Loading seller portal...</div>;
   }
 
-  if (!user || !isAdminEmail(user.email)) {
-    return null; // Will redirect
+  if (!user || vendorCheck.status !== 'Active') {
+    return null; // Layout.tsx should handle this on the server, but client backup
   }
 
   return (
@@ -81,16 +76,16 @@ export function AdminClientLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <TiorasLogo className="size-6 text-primary" />
-              <span className="font-headline">TioraS Admin</span>
+              <span className="font-headline tracking-tighter">Vendor Central</span>
             </Link>
           </div>
           <div className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4 mt-4">
               {navItems.map(({ href, icon: Icon, label }) => (
                 <Link
                   key={label}
                   href={href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-secondary/50"
                 >
                   <Icon className="h-4 w-4" />
                   {label}
@@ -103,12 +98,12 @@ export function AdminClientLayout({
               <CardHeader className="p-2 pt-0 md:p-4">
                 <CardTitle>Go to Storefront</CardTitle>
                 <CardDescription>
-                  View the live site as your customers see it.
+                  View the live customer-facing site.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                <Button size="sm" className="w-full" asChild>
-                  <Link href="/">View Store</Link>
+                <Button size="sm" variant="outline" className="w-full" asChild>
+                  <Link href="/">Exit Portal</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -117,18 +112,22 @@ export function AdminClientLayout({
       </div>
       <div className="flex flex-col">
         {/* Desktop Header */}
-        <header className="hidden md:flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px]">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="shrink-0"
-          >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
-          <div className="flex-1">
-             <span className="font-semibold">Admin Dashboard</span>
+        <header className="hidden md:flex h-14 items-center justify-between gap-4 border-b bg-muted/40 px-6 lg:h-[60px]">
+          <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="shrink-0"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle sidebar</span>
+              </Button>
+              <span className="font-semibold text-lg font-headline tracking-tight text-muted-foreground">Seller Dashboard</span>
+          </div>
+          <div className="flex items-center gap-2">
+               <span className="text-sm font-medium pr-2 border-r">{user.email}</span>
+               <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold ml-2">ACTIVE SELER</span>
           </div>
         </header>
 
@@ -152,7 +151,7 @@ export function AdminClientLayout({
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
                   <TiorasLogo className="size-6 text-primary" />
-                  <span className="font-headline">TioraS Admin</span>
+                  <span className="font-headline tracking-tighter">Vendor Central</span>
                 </Link>
                 {navItems.map(({ href, icon: Icon, label }) => (
                   <Link
@@ -168,14 +167,14 @@ export function AdminClientLayout({
               <div className="mt-auto">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Go to Storefront</CardTitle>
+                    <CardTitle>Exit Portal</CardTitle>
                     <CardDescription>
                       View the live site.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button size="sm" className="w-full" asChild>
-                      <Link href="/">View Store</Link>
+                    <Button size="sm" variant="outline" className="w-full" asChild>
+                      <Link href="/">Back to Shop</Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -183,7 +182,7 @@ export function AdminClientLayout({
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
-             <span className="font-semibold">Admin Dashboard</span>
+             <span className="font-semibold font-headline">Seller Dashboard</span>
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">

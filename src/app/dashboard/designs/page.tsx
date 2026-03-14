@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchUserDashboardData } from "@/lib/firestore-actions";
+import { getUserDesigns } from '@/lib/firebase/designs';
 import { useUser } from "@/firebase";
 import { useEffect, useState } from "react";
 import type { Design } from "@/lib/types";
@@ -17,8 +17,8 @@ export default function DesignsPage() {
 
   useEffect(() => {
     if (user) {
-      fetchUserDashboardData(user.uid).then((data) => {
-        setDesigns(data.savedDesigns);
+      getUserDesigns(user.uid).then((data) => {
+        setDesigns(data);
         setIsDataLoading(false);
       });
     }
