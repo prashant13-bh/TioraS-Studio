@@ -65,29 +65,79 @@ const PROMPT_EXAMPLES = [
   "Cyberpunk neon city skyline",
 ];
 
+const AI_LOADING_MESSAGES = [
+  "Analyzing your creative vision...",
+  "Threading the digital needle...",
+  "Mixing pigments in AI color lab...",
+  "Rendering fabric textures...",
+  "Applying artistic filters...",
+  "Perfecting the final details...",
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    if (!pending) { setMsgIndex(0); return; }
+    const interval = setInterval(() => {
+      setMsgIndex(prev => (prev + 1) % AI_LOADING_MESSAGES.length);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, [pending]);
+
   return (
-    <Button
-      type="submit"
-      disabled={pending}
-      size="lg"
-      className="w-full font-bold text-base rounded-2xl h-12 md:h-14 bg-gradient-to-r from-primary via-primary to-secondary hover:opacity-90 shadow-lg"
-    >
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 size-5 animate-spin" />
-          Creating Magic...
-        </>
-      ) : (
-        <>
-          <Wand2 className="mr-2 size-5" />
-          Generate Design
-        </>
+    <>
+      <Button
+        type="submit"
+        disabled={pending}
+        size="lg"
+        className="w-full font-bold text-base rounded-2xl h-12 md:h-14 bg-gradient-to-r from-primary via-primary to-secondary hover:opacity-90 shadow-lg"
+      >
+        {pending ? (
+          <>
+            <Loader2 className="mr-2 size-5 animate-spin" />
+            {AI_LOADING_MESSAGES[msgIndex]}
+          </>
+        ) : (
+          <>
+            <Wand2 className="mr-2 size-5" />
+            Generate Design
+          </>
+        )}
+      </Button>
+      {/* Immersive Loading Overlay */}
+      {pending && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/90 backdrop-blur-md"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-3xl opacity-30 animate-pulse" />
+            <Sparkles className="relative size-16 text-primary animate-bounce" />
+          </div>
+          <motion.p
+            key={msgIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-lg md:text-xl font-headline font-bold mt-8 text-foreground"
+          >
+            {AI_LOADING_MESSAGES[msgIndex]}
+          </motion.p>
+          <div className="flex gap-1.5 mt-6">
+            {AI_LOADING_MESSAGES.map((_, i) => (
+              <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === msgIndex ? 'w-8 bg-primary' : 'w-1.5 bg-muted-foreground/30'}`} />
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground mt-4">This usually takes 3-5 seconds</p>
+        </motion.div>
       )}
-    </Button>
+    </>
   );
 }
+
 
 export function DesignForm() {
   const [state, formAction] = useActionState(

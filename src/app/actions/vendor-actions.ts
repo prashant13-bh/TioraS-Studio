@@ -172,3 +172,75 @@ export async function updateVendorStatusAction(vendorId: string, status: "Pendin
       return { success: false, message: error.message || 'Failed to update vendor status.' };
   }
 }
+
+// ─── Order Fulfillment Actions ──────────────────────────────
+
+const VALID_ORDER_STATUSES = ['pre-press', 'printing', 'packing', 'shipped'] as const;
+type OrderFulfillmentStatus = typeof VALID_ORDER_STATUSES[number];
+
+export async function updateOrderStatusAction(orderId: string, newStatus: string) {
+  const session = await verifySession();
+  if (!session) {
+      return { success: false, message: 'Unauthorized.' };
+  }
+
+  if (!VALID_ORDER_STATUSES.includes(newStatus as OrderFulfillmentStatus)) {
+      return { success: false, message: 'Invalid order status.' };
+  }
+
+  const db = getAdminFirestore();
+
+  try {
+      // Map kanban status to a user-facing order status
+      const displayStatusMap: Record<string, string> = {
+          'pre-press': 'Processing',
+          'printing': 'Printing',
+          'packing': 'Packing',
+          'shipped': 'Shipped',
+      };
+
+      await db.collection('orders').doc(orderId).update({
+          fulfillmentStatus: newStatus,
+          status: displayStatusMap[newStatus] || 'Processing',
+          updatedAt: new Date().toISOString()
+      });
+
+      revalidatePath('/seller/orders');
+      return { success: true, message: `Order moved to ${newStatus}.` };
+  } catch(error: any) {
+      console.error("Error updating order status:", error);
+      return { success: false, message: error.message || 'Failed to update order status.' };
+  }
+}
+
+export async function getVendorOrders() {
+  const session = await verifySession();
+  if (!session) return [];
+
+  const db = getAdminFirestore();
+  
+  try {
+      // For now, fetch all orders (in production, filter by vendorId assignment)
+      const snapshot = await db.collection('orders')
+          .orderBy('createdAt', 'desc')
+          .limit(50)
+          .get();
+
+      return snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+              id: doc.id,
+              orderNumber: data.orderNumber || doc.id,
+              product: data.items?.[0]?.name || 'Custom Order',
+              customer: data.shippingAddr?.name || 'Customer',
+              status: data.fulfillmentStatus || 'pre-press',
+              priority: data.isSyog ? 'high' : 'normal',
+              type: data.isSyog ? 'syog' : 'dtf',
+              total: data.total || 0,
+          };
+      });
+  } catch (error) {
+      console.error("Error fetching vendor orders:", error);
+      return [];
+  }
+}

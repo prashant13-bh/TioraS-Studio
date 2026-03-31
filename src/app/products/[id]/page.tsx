@@ -1,5 +1,8 @@
 
 import { notFound } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+const ModelViewer = dynamic(() => import('@/components/model-viewer'), { ssr: false });
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProductById, getProducts } from '@/app/actions/product-actions';
@@ -75,6 +78,10 @@ export default async function ProductPage({ params: p }: { params: Promise<{ id:
            {product.isNew && (
             <Badge className="absolute left-4 top-4 font-bold bg-primary">New Arrival</Badge>
           )}
+          {/* 3D Interactive Preview */}
+          <div className="mt-4">
+            <ModelViewer />
+          </div>
         </div>
 
         <div className="md:col-span-1 flex flex-col">
