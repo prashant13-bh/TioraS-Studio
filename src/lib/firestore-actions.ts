@@ -18,6 +18,9 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
       activeUsers: 0,
       recentOrders: [],
       salesByDay: [],
+      totalProducts: 0,
+      lowStockCount: 0,
+      categoryDistribution: [],
     };
   }
 
@@ -58,6 +61,9 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
       activeUsers,
       recentOrders,
       salesByDay,
+      totalProducts: 0,
+      lowStockCount: 0,
+      categoryDistribution: [],
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
@@ -68,6 +74,9 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
       activeUsers: 0,
       recentOrders: [],
       salesByDay: [],
+      totalProducts: 0,
+      lowStockCount: 0,
+      categoryDistribution: [],
     };
   }
 }
