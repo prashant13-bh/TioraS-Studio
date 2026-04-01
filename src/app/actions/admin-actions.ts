@@ -100,7 +100,7 @@ export async function getAllOrders({ query }: { query?: string }): Promise<Order
     try {
         let ordersQuery: any = db.collection('orders').orderBy('createdAt', 'desc');
         const snapshot = await ordersQuery.get();
-        let orders = snapshot.docs.map(doc => ({
+        let orders = snapshot.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data(),
         })) as Order[];
@@ -127,7 +127,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
     const db = getAdminFirestore();
     try {
         const snapshot = await db.collection('users').get();
-        return snapshot.docs.map(doc => ({
+        return snapshot.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data(),
         })) as UserProfile[];
@@ -151,7 +151,7 @@ export async function getAllDesigns({ status }: { status?: Design['status'] | 'A
         }
 
         const snapshot = await designsQuery.get();
-        return snapshot.docs.map(doc => ({
+        return snapshot.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data(),
         })) as Design[];
@@ -254,7 +254,7 @@ export async function getOrderById(orderId: string, userId: string): Promise<(Or
         if (!orderDoc.exists) return null;
 
         const itemsSnap = await orderDoc.ref.collection('orderItems').get();
-        const items = itemsSnap.docs.map(doc => ({
+        const items = itemsSnap.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data()
         })) as OrderItem[];
@@ -277,7 +277,7 @@ export async function getAllVendors(): Promise<VendorProfile[]> {
     const db = getAdminFirestore();
     try {
         const snapshot = await db.collection('vendors').where('status', '==', 'Active').get();
-        return snapshot.docs.map(doc => ({
+        return snapshot.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data()
         })) as VendorProfile[];

@@ -53,7 +53,7 @@ export async function getProducts({
     }
 
     const snapshot = await productsQuery.get();
-    const products = snapshot.docs.map(doc => ({
+    const products = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: (doc.data().createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
@@ -67,7 +67,22 @@ export async function getProducts({
   }
 }
 
-// ... getProductById remains unchanged ...
+export async function getProductById(id: string): Promise<Product | null> {
+  try {
+    const db = getAdminFirestore();
+    const doc = await db.collection('products').doc(id).get();
+    if (!doc.exists) return null;
+    return {
+      id: doc.id,
+      ...doc.data(),
+      createdAt: (doc.data()?.createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+      updatedAt: (doc.data()?.updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
+    } as Product;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
+}
 
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
   const session = await verifySession();
@@ -177,7 +192,7 @@ export async function getCategories(): Promise<string[]> {
     const db = getAdminFirestore();
     const snapshot = await db.collection('products').get();
     const categories = new Set<string>();
-    snapshot.docs.forEach(doc => {
+    snapshot.docs.forEach((doc: any) => {
       const category = doc.data().category;
       if (category) categories.add(category);
     });
