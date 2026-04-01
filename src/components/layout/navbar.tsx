@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { isAdminEmail } from '@/lib/admin-config';
+import { removeSession } from '@/app/actions/auth-actions';
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -52,6 +53,7 @@ export function Navbar() {
   const handleLogout = async () => {
     if (auth) {
       await auth.signOut();
+      await removeSession();
       setIsAdmin(false); // Reset admin status on logout
       router.push('/');
     }

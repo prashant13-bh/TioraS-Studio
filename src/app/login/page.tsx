@@ -27,6 +27,7 @@ import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 import { isAdminEmail } from '@/lib/admin-config';
 import { Suspense } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { createSession } from '@/app/actions/auth-actions';
 
 // ... imports
 
@@ -46,27 +47,41 @@ function LoginContent() {
     const currentUser = user || auth?.currentUser;
     if (!currentUser) return;
 
-    const db = getFirestore();
-    const userDocRef = doc(db, 'users', currentUser.uid);
-    const userDoc = await getDoc(userDocRef);
-    
-    const userData = userDoc.data();
-    const isAdmin = userData?.role === 'admin' || isAdminEmail(currentUser.email);
-    
-    // Check if user is also an active vendor
-    const vendorDocRef = doc(db, 'vendors', currentUser.uid);
-    const vendorDoc = await getDoc(vendorDocRef);
-    const isVendor = vendorDoc.exists() && vendorDoc.data()?.status === 'Active';
+    try {
+      // Create the Next.js session cookie
+      const idToken = await currentUser.getIdToken();
+      const sessionResult = await createSession(idToken);
+      
+      if (!sessionResult.success) {
+        toast({ title: 'Session Error', description: sessionResult.error || 'Failed to initialize session.', variant: 'destructive' });
+        return;
+      }
 
-    const redirectUrl = searchParams.get('redirect');
-    if (redirectUrl) {
-      router.push(redirectUrl);
-    } else if (isAdmin) {
-      router.push('/admin');
-    } else if (isVendor) {
-      router.push('/seller');
-    } else {
-      router.push('/dashboard');
+      const db = getFirestore();
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      const userData = userDoc.data();
+      const isAdmin = userData?.role === 'admin' || isAdminEmail(currentUser.email);
+      
+      // Check if user is also an active vendor
+      const vendorDocRef = doc(db, 'vendors', currentUser.uid);
+      const vendorDoc = await getDoc(vendorDocRef);
+      const isVendor = vendorDoc.exists() && vendorDoc.data()?.status === 'Active';
+
+      const redirectUrl = searchParams.get('redirect');
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (isAdmin) {
+        router.push('/admin');
+      } else if (isVendor) {
+        router.push('/seller');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+        console.error("Redirect logic failed:", err);
+        router.push('/dashboard'); // fallback
     }
   };
 

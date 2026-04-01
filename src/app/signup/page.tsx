@@ -25,6 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneAuthForm } from '@/components/auth/phone-auth-form';
 import { isAdminEmail } from '@/lib/admin-config';
+import { createSession } from '@/app/actions/auth-actions';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -36,7 +37,16 @@ export default function SignupPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRedirect = () => {
+  const handleRedirect = async (user?: any) => {
+    const currentUser = user || auth?.currentUser;
+    if (currentUser) {
+      try {
+        const idToken = await currentUser.getIdToken();
+        await createSession(idToken);
+      } catch (err) {
+        console.error("Session creation failed", err);
+      }
+    }
     router.push('/dashboard');
   };
 
@@ -67,7 +77,7 @@ export default function SignupPage() {
         });
       }
       toast({ title: 'Success', description: 'Your account has been created.' });
-      handleRedirect();
+      await handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Sign Up Failed',
@@ -109,7 +119,7 @@ export default function SignupPage() {
       }, { merge: true });
 
       toast({ title: 'Success', description: "You've been signed in with Google." });
-      handleRedirect();
+      await handleRedirect(userCredential.user);
     } catch (error: any) {
       toast({
         title: 'Google Sign-In Failed',
