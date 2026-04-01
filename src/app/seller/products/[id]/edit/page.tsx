@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { SellerProductForm } from '../../_components/product-form';
+import { SellerProductForm } from '../../../_components/product-form';
 
 export const metadata = {
     title: 'Edit Product | Vendor Central',

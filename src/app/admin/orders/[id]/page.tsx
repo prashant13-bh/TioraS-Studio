@@ -38,6 +38,39 @@ const getStatusVariant = (status: string) => {
       case 'Pending': default: return 'destructive';
     }
 };
+
+export default async function OrderDetailsPage({ params: p }: { params: Promise<{ id: string }> }) {
+  const params = await p;
+  const order = await getOrderById(params.id);
+  const vendors = await getAllVendors();
+
+  if (!order) {
+    notFound();
+  }
+
+  return (
+    <div className="flex-1 space-y-4 p-4 pt-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/admin/orders">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Order {order.orderNumber}</h2>
+            <div className="flex items-center gap-2">
+              <Badge variant={getStatusVariant(order.status)}>
+                {order.status}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                Placed on {format(new Date(order.createdAt), 'PPP')}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-[1fr_300px] lg:grid-cols-3 lg:gap-8">
         <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
           {/* Main Content (Items Table) unchanged ... */}
