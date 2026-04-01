@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
+import { isAdminEmail } from '@/lib/admin-config';
 
 const SESSION_COOKIE_NAME = '__session';
 const EXPIRES_IN = 60 * 60 * 24 * 5 * 1000; // 5 days
@@ -63,12 +64,23 @@ export async function verifySession() {
     const vendorDoc = await db.collection('vendors').doc(decodedClaims.uid).get();
     const isVendor = vendorDoc.exists && vendorDoc.data()?.status === 'Active';
     
+    // Check if user is an admin
+    let isAdmin = decodedClaims.admin === true;
+    if (!isAdmin) {
+      if (isAdminEmail(decodedClaims.email)) {
+        isAdmin = true;
+      } else {
+        const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
+        isAdmin = userDoc.exists && userDoc.data()?.role === 'admin';
+      }
+    }
+    
     return {
       uid: decodedClaims.uid,
       email: decodedClaims.email,
       picture: decodedClaims.picture,
-      isAdmin: decodedClaims.admin === true,
-      isVendor: isVendor
+      isAdmin,
+      isVendor
     };
   } catch (error) {
     // Session verification failed (expired, invalid, etc.)

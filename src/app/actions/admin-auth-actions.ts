@@ -1,8 +1,9 @@
 'use server';
 
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { isAdminEmail } from '@/lib/admin-config';
 
 export async function checkAdminAccess() {
   const cookieStore = await cookies();
@@ -15,7 +16,17 @@ export async function checkAdminAccess() {
   try {
     const auth = getAdminAuth();
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    return decodedClaims.admin === true;
+    
+    // 1. Check direct config email match
+    if (isAdminEmail(decodedClaims.email)) return true;
+    
+    // 2. Check custom user claims
+    if (decodedClaims.admin === true) return true;
+    
+    // 3. Check Firestore document role
+    const db = getAdminFirestore();
+    const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
+    return userDoc.exists && userDoc.data()?.role === 'admin';
   } catch (error) {
     return false;
   }
