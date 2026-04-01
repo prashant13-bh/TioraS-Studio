@@ -1,0 +1,7 @@
+specVersion: v1alpha
+serviceId: tioras-studio-service
+location: us-central1
+schema:
+  source: ./schema
+connectorDirs:
+  - ./connector

@@ -14,7 +14,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Strict Admin Check based on Email
+    // Role-based check: Strict Admin by Email
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'ph293815@gmail.com' ||
@@ -23,8 +23,10 @@ service cloud.firestore {
       );
     }
 
+    // Role-based check: Active Vendor check in the 'vendors' collection
     function isVendor() {
-      return isSignedIn() && exists(/databases/$(database)/documents/vendors/$(request.auth.uid)) && 
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/vendors/$(request.auth.uid)) && 
              get(/databases/$(database)/documents/vendors/$(request.auth.uid)).data.status == 'Active';
     }
 
@@ -35,7 +37,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin(); 
-      allow create: if isSignedIn(); // Allow any signed in user to create their initial profile
+      allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
@@ -45,10 +47,11 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /vendors/{vendorId} {
-      allow get: if isSignedIn(); // Allow customers to see vendor profiles
+      // Public can see active store profiles; Admins see all
+      allow get: if (resource.data.status == 'Active') || isOwner(vendorId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isSignedIn() && request.auth.uid == vendorId; // Allow users to apply
-      allow update: if isAdmin(); // Only admin can approve/suspend
+      allow create: if isSignedIn() && request.auth.uid == vendorId; 
+      allow update: if isAdmin() || (isOwner(vendorId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']));
       allow delete: if isAdmin();
     }
 
@@ -57,39 +60,11 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /products/{productId} {
-      allow read: if true;
+      allow read: if true; // Products are public
+      
+      // Vendors can create/edit/delete their own products; Admins can do anything
       allow create: if isAdmin() || (isVendor() && request.resource.data.vendorId == request.auth.uid);
-      allow update: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
-      allow delete: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
-    }
-
-    // -------------------------------------------------------------------------
-    // Stock Movements (/stockMovements)
-    // -------------------------------------------------------------------------
-
-    match /stockMovements/{movementId} {
-      allow read: if isAdmin() || isVendor(); // Vendors can see their own stock movements if we add vendorId filtering
-      allow create: if isAdmin() || isVendor();
-      allow update, delete: if isAdmin();
-    }
-
-    // -------------------------------------------------------------------------
-    // Invoices (/invoices)
-    // -------------------------------------------------------------------------
-
-    match /invoices/{invoiceId} {
-      allow read: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
-      allow create, update, delete: if isAdmin();
-    }
-
-    // -------------------------------------------------------------------------
-    // Addresses (/addresses)
-    // -------------------------------------------------------------------------
-
-    match /addresses/{addressId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
     }
 
     // -------------------------------------------------------------------------
@@ -97,12 +72,14 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /orders/{orderId} {
-      allow read: if isSignedIn() && (
-        resource.data.userId == request.auth.uid || 
-        isAdmin() || 
-        (isVendor() && resource.data.vendorId == request.auth.uid)
-      );
+      // Users see their own; Vendors see assigned; Admins see all
+      allow read: if isAdmin() || 
+                     (isSignedIn() && resource.data.userId == request.auth.uid) ||
+                     (isVendor() && resource.data.vendorId == request.auth.uid);
+      
       allow create: if isSignedIn();
+      
+      // Status updates only by Admin or the assigned Vendor
       allow update: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
       allow delete: if isAdmin();
     }
@@ -112,37 +89,37 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /designs/{designId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     // -------------------------------------------------------------------------
-    // Carts (/carts)
+    // Private Collections (Admins & Owners Only)
     // -------------------------------------------------------------------------
+
+    match /addresses/{addressId} {
+      allow read, write: if isOwner(resource.data.userId) || isOwner(request.resource.data.userId) || isAdmin();
+    }
 
     match /carts/{cartId} {
-      allow read, write: if isSignedIn() && (request.auth.uid == cartId || isAdmin());
+      allow read, write: if isOwner(cartId) || isAdmin();
+    }
+
+    match /invoices/{invoiceId} {
+      // Vendors see invoices for their orders; Admins see all
+      allow read: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow write: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
-    // Wishlists (/wishlists)
-    // -------------------------------------------------------------------------
-
-    match /wishlists/{wishlistId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-    }
-
-    // -------------------------------------------------------------------------
-    // Reviews (/reviews)
+    // Public Collections
     // -------------------------------------------------------------------------
 
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
     }
   }
 }

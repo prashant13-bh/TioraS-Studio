@@ -1,0 +1,132 @@
+# TioraS Studio Data Connect Schema
+
+type UserProfile @table {
+  firebaseUid: String! @unique
+  email: String! @unique
+  createdAt: Timestamp!
+  displayName: String
+  shippingAddress: String
+  billingAddress: String
+  isAdmin: Boolean @default(value: false)
+  isVendor: Boolean @default(value: false)
+  stripeCustomerId: String
+  preferences: String
+}
+
+type VendorProfile @table {
+  userProfile: UserProfile! @unique
+  storeName: String!
+  status: String!
+  capabilities: [String]
+  createdAt: Timestamp!
+  description: String
+  logoUrl: String
+  contactEmail: String
+  stripeAccountId: String
+  shippingPolicy: String
+  returnPolicy: String
+}
+
+type Design @table {
+  userProfile: UserProfile!
+  designUrl: String!
+  promptUsed: String!
+  createdAt: Timestamp!
+  name: String
+  isPublic: Boolean @default(value: false)
+  moderationStatus: String @default(value: "pending")
+  moderationNotes: String
+  viewCount: Int @default(value: 0)
+}
+
+type VendorProduct @table {
+  vendorProfile: VendorProfile!
+  name: String!
+  price: Float!
+  stockQuantity: Int!
+  createdAt: Timestamp!
+  description: String
+  imageUrl: String
+  category: String
+  availableSizes: [String]
+  availableColors: [String]
+  isActive: Boolean @default(value: true)
+  salesCount: Int @default(value: 0)
+}
+
+type Order @table {
+  userProfile: UserProfile!
+  vendorProfile: VendorProfile
+  orderDate: Timestamp!
+  totalAmount: Float!
+  status: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  shippingAddress: String
+  billingAddress: String
+  invoiceUrl: String
+  trackingNumber: String
+  shippingCarrier: String
+  paymentIntentId: String
+  paymentStatus: String!
+  expectedDeliveryDate: Timestamp
+  customerNotes: String
+  vendorNotes: String
+  assignedAdmin: UserProfile
+}
+
+type OrderItem @table(key: ["order", "vendorProduct", "design"]) {
+  order: Order!
+  vendorProduct: VendorProduct!
+  design: Design!
+  quantity: Int!
+  unitPrice: Float!
+  appliedSize: String
+  appliedColor: String
+  notes: String
+  snapshotProductName: String!
+  snapshotProductImageUrl: String
+  snapshotProductDescription: String
+  itemStatus: String @default(value: "pending")
+}
+
+type Transaction @table {
+  order: Order!
+  vendorProfile: VendorProfile
+  transactionType: String!
+  amount: Float!
+  currency: String! @default(value: "USD")
+  transactionDate: Timestamp!
+  status: String!
+  externalRefId: String
+  notes: String
+  platformFee: Float @default(value: 0.0)
+}
+
+type Review @table {
+  userProfile: UserProfile!
+  vendorProduct: VendorProduct
+  vendorProfile: VendorProfile
+  rating: Int!
+  comment: String
+  createdAt: Timestamp!
+  isApproved: Boolean @default(value: false)
+}
+
+type Notification @table {
+  userProfile: UserProfile!
+  message: String!
+  type: String!
+  isRead: Boolean @default(value: false)
+  createdAt: Timestamp!
+  link: String
+}
+
+type AuditLog @table {
+  userProfile: UserProfile
+  action: String!
+  entityType: String!
+  entityId: UUID!
+  timestamp: Timestamp!
+  details: String
+}

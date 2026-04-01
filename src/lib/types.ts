@@ -104,14 +104,17 @@ export type SalesData = {
   total: number;
 };
 
-export type AdminDashboardData = {
-  totalRevenue: number;
-  totalOrders: number;
-  pendingOrders: number;
-  activeUsers: number;
-  recentOrders: Order[];
-  salesByDay: SalesData[];
-};
+export interface AdminDashboardData {
+    totalRevenue: number;
+    totalOrders: number;
+    totalProducts: number;
+    pendingOrders: number;
+    activeUsers: number;
+    lowStockCount: number;
+    recentOrders: Order[];
+    salesByDay: { name: string; sales: number; orders: number }[];
+    categoryDistribution: { name: string; value: number }[];
+}
 
 export type UserProfile = {
   id: string;

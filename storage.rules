@@ -16,12 +16,13 @@ service firebase.storage {
     // Publicly readable product images
     match /products/{allPaths=**} {
       allow read: if true;
-      allow write: if isSignedIn(); // Restrict to vendors/admins in firestore if needed
+      allow write: if isSignedIn(); // In production, consider checking for vendor status
     }
 
-    // User personal files
+    // User personal files (Designs, profile pics)
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth.uid == userId || isAdmin();
+      allow read: if true; // Designs might be shared
+      allow write: if request.auth.uid == userId || isAdmin();
     }
 
     // Vendor specific files (logos, banners, etc)
@@ -30,7 +31,7 @@ service firebase.storage {
       allow write: if request.auth.uid == vendorId || isAdmin();
     }
 
-    // Default catch-all (legacy or other)
+    // Default catch-all
     match /{allPaths=**} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

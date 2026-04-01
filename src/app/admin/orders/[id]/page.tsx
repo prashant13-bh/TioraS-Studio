@@ -1,6 +1,5 @@
-
-import { getOrderById, updateOrderStatus } from '@/app/actions/admin-actions';
-import { notFound, redirect } from 'next/navigation';
+import { getOrderById, getAllVendors } from '@/app/actions/admin-actions';
+import { notFound } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -24,12 +23,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { OrderVendorAssignment } from '../_components/vendor-assignment';
 
 export const metadata = {
   title: 'Order Details | TioraS Admin',
@@ -44,49 +38,9 @@ const getStatusVariant = (status: string) => {
       case 'Pending': default: return 'destructive';
     }
 };
-
-export default async function AdminOrderDetailPage({
-  params: p,
-  searchParams: sp,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ userId?: string }>;
-}) {
-  const params = await p;
-  const searchParams = await sp;
-  
-  if (!searchParams.userId) {
-    // In a real app, you might want a more graceful error, but for now, this is clear.
-    throw new Error('User ID is required to view an order.');
-  }
-
-  const order = await getOrderById(params.id, searchParams.userId);
-
-  if (!order) {
-    notFound();
-  }
-
-  return (
-    <div className="grid gap-4 auto-rows-max">
-        <div className='flex items-center gap-4'>
-            <Button variant="outline" size="icon" className="h-7 w-7" asChild>
-                <Link href="/admin/orders">
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="sr-only">Back</span>
-                </Link>
-            </Button>
-            <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                Order {order.orderNumber}
-            </h1>
-            <Badge variant={getStatusVariant(order.status)} className="ml-auto sm:ml-0">
-                {order.status}
-            </Badge>
-            <div className="hidden items-center gap-2 md:ml-auto md:flex">
-                 {/* Future actions can go here */}
-            </div>
-        </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
+      <div className="grid gap-4 md:grid-cols-[1fr_300px] lg:grid-cols-3 lg:gap-8">
         <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+          {/* Main Content (Items Table) unchanged ... */}
           <Card>
             <CardHeader>
               <CardTitle>Order Items ({order.itemCount})</CardTitle>
@@ -136,6 +90,21 @@ export default async function AdminOrderDetailPage({
           </Card>
         </div>
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+          {/* Vendor Assignment Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Fulfillment</CardTitle>
+              <CardDescription>Assign this order to a partner vendor.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OrderVendorAssignment 
+                orderId={order.id} 
+                currentVendorId={order.vendorId} 
+                vendors={vendors} 
+              />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Customer Details</CardTitle>
@@ -162,7 +131,7 @@ export default async function AdminOrderDetailPage({
                 </div>
             </CardContent>
           </Card>
-           <Card>
+          <Card>
             <CardHeader>
               <CardTitle>Order Information</CardTitle>
             </CardHeader>

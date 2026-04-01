@@ -20,8 +20,8 @@ import {
   Calendar,
   Settings
 } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit, where, Timestamp } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { getAdminDashboardData } from '@/app/actions/admin-actions';
+import type { AdminDashboardData } from '@/lib/types';
 import Link from 'next/link';
 import {
   PieChart,
@@ -33,69 +33,17 @@ import {
 import * as XLSX from 'xlsx';
 import LineChartOne from '@/components/admin/charts/line-chart-one';
 
-interface DashboardStats {
-  totalProducts: number;
-  totalOrders: number;
-  totalRevenue: number;
-  totalCustomers: number;
-  lowStockProducts: number;
-  recentOrders: any[];
-}
-
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00C49F'];
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [salesData, setSalesData] = useState<any[]>([]);
-  const [categoryData, setCategoryData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const { firestore: db } = initializeFirebase();
-
-        // Fetch products
-        const productsSnap = await getDocs(collection(db, 'products'));
-        const products = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const lowStock = products.filter((p: any) => (p.stock || 0) < 10).length;
-
-        // Count by category
-        const categoryCount: Record<string, number> = {};
-        products.forEach((p: any) => {
-          const cat = p.category || 'Other';
-          categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-        });
-        setCategoryData(Object.entries(categoryCount).map(([name, value]) => ({ name, value })));
-
-        // Fetch orders
-        const ordersSnap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(10)));
-        const orders = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
-
-        // Fetch users
-        const usersSnap = await getDocs(collection(db, 'users'));
-
-        // Generate mock sales data for chart
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return {
-            name: date.toLocaleDateString('en-US', { weekday: 'short' }),
-            sales: Math.floor(Math.random() * 10000) + 5000,
-            orders: Math.floor(Math.random() * 20) + 5,
-          };
-        });
-        setSalesData(last7Days);
-
-        setStats({
-          totalProducts: products.length,
-          totalOrders: orders.length,
-          totalRevenue,
-          totalCustomers: usersSnap.size,
-          lowStockProducts: lowStock,
-          recentOrders: orders.slice(0, 5),
-        });
+        const data = await getAdminDashboardData();
+        setStats(data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -113,8 +61,8 @@ export default function AdminDashboardPage() {
       { Metric: 'Total Products', Value: stats.totalProducts },
       { Metric: 'Total Orders', Value: stats.totalOrders },
       { Metric: 'Total Revenue', Value: `₹${stats.totalRevenue.toFixed(2)}` },
-      { Metric: 'Total Customers', Value: stats.totalCustomers },
-      { Metric: 'Low Stock Products', Value: stats.lowStockProducts },
+      { Metric: 'Total Customers', Value: stats.activeUsers },
+      { Metric: 'Low Stock Products', Value: stats.lowStockCount },
     ];
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -170,7 +118,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: 'Total Customers',
-      value: stats?.totalCustomers || 0,
+      value: stats?.activeUsers || 0,
       icon: Users,
       trend: '+2.1%',
       trendUp: true,
@@ -221,7 +169,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Low Stock Alert */}
-      {(stats?.lowStockProducts || 0) > 0 && (
+      {(stats?.lowStockCount || 0) > 0 && (
         <Card className="border-orange-500/50 bg-orange-500/5">
           <CardContent className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
@@ -229,7 +177,7 @@ export default function AdminDashboardPage() {
               <div>
                 <p className="font-semibold text-orange-500">Low Stock Alert</p>
                 <p className="text-sm text-muted-foreground">
-                  {stats?.lowStockProducts} products are running low on stock
+                  {stats?.lowStockCount} products are running low on stock
                 </p>
               </div>
             </div>
@@ -250,8 +198,8 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <LineChartOne 
-              series={[{ name: 'Sales', data: salesData.map(d => d.sales) }]} 
-              categories={salesData.map(d => d.name)} 
+              series={[{ name: 'Sales', data: stats?.salesByDay.map(d => d.sales) || [] }]} 
+              categories={stats?.salesByDay.map(d => d.name) || []} 
             />
           </CardContent>
         </Card>
@@ -266,7 +214,7 @@ export default function AdminDashboardPage() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={categoryData}
+                  data={stats?.categoryDistribution || []}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -276,7 +224,7 @@ export default function AdminDashboardPage() {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
-                  {categoryData.map((entry, index) => (
+                  {(stats?.categoryDistribution || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
