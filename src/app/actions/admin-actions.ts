@@ -20,17 +20,17 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
             db.collection('orders').where('status', '==', 'Pending').get()
         ]);
 
-        const totalRevenue = ordersSnap.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
+        const totalRevenue = ordersSnap.docs.reduce((sum: number, doc: any) => sum + (doc.data().total || 0), 0);
         const totalOrders = ordersSnap.size;
         const totalProducts = productsSnap.size;
         const pendingOrders = pendingOrdersSnap.size;
         const activeUsers = usersSnap.size;
 
-        const lowStockCount = productsSnap.docs.filter(doc => (doc.data().stock || 0) < 10).length;
+        const lowStockCount = productsSnap.docs.filter((doc: any) => (doc.data().stock || 0) < 10).length;
 
         // Category Distribution
         const categoryCount: Record<string, number> = {};
-        productsSnap.docs.forEach(doc => {
+        productsSnap.docs.forEach((doc: any) => {
             const cat = doc.data().category || 'Other';
             categoryCount[cat] = (categoryCount[cat] || 0) + 1;
         });
@@ -41,7 +41,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
             .limit(5)
             .get();
 
-        const recentOrders = recentOrdersSnap.docs.map(doc => ({
+        const recentOrders = recentOrdersSnap.docs.map((doc: any) => ({
             id: doc.id,
             ...doc.data(),
             createdAt: typeof doc.data().createdAt === 'string' ? doc.data().createdAt : (doc.data().createdAt as Timestamp).toDate().toISOString(),
@@ -60,7 +60,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
             
             return {
                 name: date.toLocaleDateString('en-US', { weekday: 'short' }),
-                sales: snap.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0),
+                sales: snap.docs.reduce((sum: number, doc: any) => sum + (doc.data().total || 0), 0),
                 orders: snap.size
             };
         }));
