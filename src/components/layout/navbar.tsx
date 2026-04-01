@@ -14,6 +14,15 @@ import { useEffect, useState } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { isAdminEmail } from '@/lib/admin-config';
 import { removeSession } from '@/app/actions/auth-actions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Store, UserCircle } from "lucide-react";
 
 const navLinks = [
   { title: 'Catalog', href: '/catalog' },
@@ -29,22 +38,30 @@ export function Navbar() {
   const { auth } = useAuth();
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isVendor, setIsVendor] = useState(false);
   
   useEffect(() => {
     const checkUserRole = async () => {
       if (user && !loading) {
         try {
           const db = getFirestore();
+          
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           const userData = userDoc.data();
           const isAdm = userData?.role === 'admin' || isAdminEmail(user.email);
           setIsAdmin(isAdm);
+
+          const vendorDoc = await getDoc(doc(db, 'vendors', user.uid));
+          const isVen = vendorDoc.exists() && vendorDoc.data()?.status === 'Active';
+          setIsVendor(isVen);
         } catch (error) {
           console.error("Error fetching user role:", error);
           setIsAdmin(false);
+          setIsVendor(false);
         }
       } else if (!user && !loading) {
         setIsAdmin(false);
+        setIsVendor(false);
       }
     };
     checkUserRole();
@@ -55,6 +72,7 @@ export function Navbar() {
       await auth.signOut();
       await removeSession();
       setIsAdmin(false); // Reset admin status on logout
+      setIsVendor(false);
       router.push('/');
     }
   };
@@ -85,30 +103,45 @@ export function Navbar() {
           {!loading &&
             (user ? (
               <>
-                {isAdmin ? (
-                  <Button variant="ghost" asChild className="hidden md:inline-flex">
-                    <Link href="/admin">
-                      <Shield className="mr-2 size-4" />
-                      Admin Dashboard
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button variant="ghost" asChild className="hidden md:inline-flex">
-                    <Link href="/dashboard">
-                      <User className="mr-2 size-4" />
-                      My Dashboard
-                    </Link>
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="hidden md:inline-flex">
-                  <LogOut className="size-5" />
-                </Button>
-                <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
-                  <Link href="/profile">
-                    <User className="size-5" />
-                    <span className="sr-only">Profile</span>
-                  </Link>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hidden md:inline-flex">
+                       <UserCircle className="size-5" />
+                       <span className="sr-only">User Menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="cursor-pointer">
+                        <User className="mr-2 size-4" />
+                        My Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    {isVendor && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/seller" className="cursor-pointer">
+                          <Store className="mr-2 size-4" />
+                          Seller Portal
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer">
+                          <Shield className="mr-2 size-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-700">
+                      <LogOut className="mr-2 size-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <>
@@ -127,7 +160,7 @@ export function Navbar() {
           </Button>
           <ModeToggle />
           <CartSheet />
-          <MobileNav navLinks={navLinks} isAdmin={isAdmin} />
+          <MobileNav navLinks={navLinks} isAdmin={isAdmin} isVendor={isVendor} />
         </div>
       </div>
     </header>

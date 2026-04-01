@@ -57,27 +57,11 @@ function LoginContent() {
         return;
       }
 
-      const db = getFirestore();
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      const userData = userDoc.data();
-      const isAdmin = userData?.role === 'admin' || isAdminEmail(currentUser.email);
-      
-      // Check if user is also an active vendor
-      const vendorDocRef = doc(db, 'vendors', currentUser.uid);
-      const vendorDoc = await getDoc(vendorDocRef);
-      const isVendor = vendorDoc.exists() && vendorDoc.data()?.status === 'Active';
-
       const redirectUrl = searchParams.get('redirect');
       if (redirectUrl) {
         router.push(redirectUrl);
-      } else if (isAdmin) {
-        router.push('/admin');
-      } else if (isVendor) {
-        router.push('/seller');
       } else {
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (err: any) {
         console.error("Redirect logic failed:", err);

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { LogOut, Menu, User, Shield } from 'lucide-react';
+import { LogOut, Menu, User, Shield, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -19,9 +19,10 @@ import { useRouter } from 'next/navigation';
 interface MobileNavProps {
   navLinks: { title: string; href: string }[];
   isAdmin: boolean;
+  isVendor: boolean;
 }
 
-export function MobileNav({ navLinks, isAdmin }: MobileNavProps) {
+export function MobileNav({ navLinks, isAdmin, isVendor }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useUser();
   const { auth } = useAuth();
@@ -64,21 +65,29 @@ export function MobileNav({ navLinks, isAdmin }: MobileNavProps) {
           <hr className="my-4 border-muted" />
           {!loading && user ? (
             <>
-              {isAdmin ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="size-5" /> My Dashboard
+              </Link>
+              {isVendor && (
+                <Link
+                  href="/seller"
+                  className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Store className="size-5" /> Seller Portal
+                </Link>
+              )}
+              {isAdmin && (
                 <Link
                   href="/admin"
                   className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
                   onClick={() => setIsOpen(false)}
                 >
                   <Shield className="size-5" /> Admin Dashboard
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <User className="size-5" /> My Dashboard
                 </Link>
               )}
               <Link

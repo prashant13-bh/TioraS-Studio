@@ -16,17 +16,17 @@ export function ClientLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdminPage = pathname?.startsWith('/admin');
+  const isPortalPage = pathname?.startsWith('/admin') || pathname?.startsWith('/seller');
 
   return (
     <FirebaseClientProvider>
       <CartProvider>
         <WishlistProvider>
           <div className="flex min-h-screen flex-col">
-            <Navbar />
+            {!isPortalPage && <Navbar />}
             <FirebaseErrorListener />
             <main className="flex-1">{children}</main>
-            {!isAdminPage && <Footer />}
+            {!isPortalPage && <Footer />}
           </div>
           <Toaster />
           <Analytics />

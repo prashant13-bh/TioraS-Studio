@@ -47,7 +47,7 @@ export default function SignupPage() {
         console.error("Session creation failed", err);
       }
     }
-    router.push('/dashboard');
+    router.push('/');
   };
 
   const handleSignUp = async () => {
