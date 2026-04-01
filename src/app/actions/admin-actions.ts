@@ -244,7 +244,7 @@ export async function revokeAdminRole(userId: string) {
     }
 }
 
-export async function getOrderById(orderId: string, userId: string): Promise<(Order & {items: OrderItem[]}) | null> {
+export async function getOrderById(orderId: string): Promise<(Order & {items: OrderItem[]}) | null> {
     const session = await verifySession();
     if (!session || !session.isAdmin) return null;
 
