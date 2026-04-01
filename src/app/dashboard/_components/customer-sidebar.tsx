@@ -50,10 +50,22 @@ const sidebarItems = [
   },
 ];
 
+import { useEffect, useState } from "react";
+import { checkVendorStatus } from "@/app/actions/vendor-actions";
+
 export function CustomerSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { auth } = useAuth();
+  const [isVendor, setIsVendor] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    async function check() {
+      const res = await checkVendorStatus();
+      setIsVendor(res.isVendor);
+    }
+    check();
+  }, []);
 
   const handleSignOut = async () => {
     if (!auth) return;
@@ -65,9 +77,24 @@ export function CustomerSidebar() {
     }
   };
 
+  const navItems = [...sidebarItems];
+  if (isVendor === false) {
+    navItems.push({
+      title: "Become a Seller",
+      href: "/become-a-seller",
+      icon: LayoutDashboard,
+    });
+  } else if (isVendor === true) {
+    navItems.push({
+      title: "Seller Portal",
+      href: "/seller",
+      icon: LayoutDashboard,
+    });
+  }
+
   return (
     <nav className="grid items-start gap-2">
-      {sidebarItems.map((item, index) => {
+      {navItems.map((item, index) => {
         const Icon = item.icon;
         return (
           <Link

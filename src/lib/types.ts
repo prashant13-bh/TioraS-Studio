@@ -18,6 +18,7 @@ export type Product = {
   vibe?: StoreVibe;
   stock?: number;
   sku?: string;
+  vendorId?: string; // ID of the seller who owns this product
   createdAt: string;
   updatedAt: string;
 };
@@ -73,6 +74,7 @@ export type OrderItem = {
 export type Order = {
   id: string;
   userId: string;
+  vendorId?: string; // ID of the seller assigned to fulfill this order
   orderNumber: string;
   total: number;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";

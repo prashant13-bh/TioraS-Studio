@@ -53,11 +53,18 @@ function LoginContent() {
     const userData = userDoc.data();
     const isAdmin = userData?.role === 'admin' || isAdminEmail(currentUser.email);
     
+    // Check if user is also an active vendor
+    const vendorDocRef = doc(db, 'vendors', currentUser.uid);
+    const vendorDoc = await getDoc(vendorDocRef);
+    const isVendor = vendorDoc.exists() && vendorDoc.data()?.status === 'Active';
+
     const redirectUrl = searchParams.get('redirect');
     if (redirectUrl) {
       router.push(redirectUrl);
     } else if (isAdmin) {
       router.push('/admin');
+    } else if (isVendor) {
+      router.push('/seller');
     } else {
       router.push('/dashboard');
     }

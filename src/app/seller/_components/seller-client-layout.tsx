@@ -25,6 +25,7 @@ import { Menu } from 'lucide-react';
 const navItems = [
   { href: '/seller', icon: Home, label: 'Dashboard' },
   { href: '/seller/orders', icon: KanbanSquare, label: 'Order Fulfillment' },
+  { href: '/seller/products', icon: Package, label: 'Manage Products' },
   { href: '/seller/syog', icon: Package, label: 'SYOG Processing' },
   { href: '/seller/invoices', icon: FileText, label: 'Invoices & Payouts' },
   { href: '/seller/store', icon: Store, label: 'Store Profile' },

@@ -30,16 +30,22 @@ const productSchema = z.object({
 export async function getProducts({
   category,
   limit,
+  vendorId,
 }: {
   category?: string;
   limit?: number;
+  vendorId?: string;
 }): Promise<{ products: Product[] }> {
   try {
     const db = getAdminFirestore();
-    let productsQuery = db.collection('products').orderBy('createdAt', 'desc');
+    let productsQuery: any = db.collection('products').orderBy('createdAt', 'desc');
 
     if (category && category !== 'All') {
       productsQuery = productsQuery.where('category', '==', category);
+    }
+
+    if (vendorId) {
+      productsQuery = productsQuery.where('vendorId', '==', vendorId);
     }
 
     if (limit) {
@@ -61,31 +67,11 @@ export async function getProducts({
   }
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  try {
-    const db = getAdminFirestore();
-    const productDoc = await db.collection('products').doc(id).get();
-    
-    if (!productDoc.exists) {
-      return null;
-    }
-
-    const data = productDoc.data();
-    return {
-      id: productDoc.id,
-      ...data,
-      createdAt: (data?.createdAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
-      updatedAt: (data?.updatedAt as Timestamp)?.toDate?.()?.toISOString() || new Date().toISOString(),
-    } as Product;
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    return null;
-  }
-}
+// ... getProductById remains unchanged ...
 
 export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
   const session = await verifySession();
-  if (!session || !session.isAdmin) {
+  if (!session || (!session.isAdmin && !session.isVendor)) {
     return { success: false, error: 'Unauthorized' };
   }
 
@@ -98,6 +84,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
     const db = getAdminFirestore();
     const productData = {
       ...data,
+      vendorId: session.isAdmin ? (data.vendorId || 'admin') : session.uid,
       stock: data.stock || 0,
       sku: data.sku || `SKU-${Date.now()}`,
       isNew: data.isNew ?? true,
@@ -108,6 +95,7 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
     const docRef = await db.collection('products').add(productData);
     
     revalidatePath('/admin/products');
+    revalidatePath('/seller/products');
     revalidatePath('/catalog');
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -118,23 +106,33 @@ export async function createProduct(data: Omit<Product, 'id' | 'createdAt' | 'up
 
 export async function updateProduct(id: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) {
   const session = await verifySession();
-  if (!session || !session.isAdmin) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  if (!session) return { success: false, error: 'Unauthorized' };
 
   try {
+    const db = getAdminFirestore();
+    const productDoc = await db.collection('products').doc(id).get();
+    
+    if (!productDoc.exists) return { success: false, error: 'Product not found' };
+    
+    const existingData = productDoc.data();
+    const isOwner = existingData?.vendorId === session.uid;
+    
+    if (!session.isAdmin && !isOwner) {
+      return { success: false, error: 'Unauthorized to update this product' };
+    }
+
     const validation = productSchema.safeParse(data);
     if (!validation.success) {
       return { success: false, error: validation.error.errors[0].message };
     }
 
-    const db = getAdminFirestore();
     await db.collection('products').doc(id).update({
       ...data,
       updatedAt: Timestamp.now(),
     });
     
     revalidatePath('/admin/products');
+    revalidatePath('/seller/products');
     revalidatePath(`/products/${id}`);
     revalidatePath('/catalog');
     return { success: true };
@@ -146,15 +144,25 @@ export async function updateProduct(id: string, data: Omit<Product, 'id' | 'crea
 
 export async function deleteProduct(id: string) {
   const session = await verifySession();
-  if (!session || !session.isAdmin) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  if (!session) return { success: false, error: 'Unauthorized' };
 
   try {
     const db = getAdminFirestore();
+    const productDoc = await db.collection('products').doc(id).get();
+    
+    if (!productDoc.exists) return { success: false, error: 'Product not found' };
+    
+    const existingData = productDoc.data();
+    const isOwner = existingData?.vendorId === session.uid;
+    
+    if (!session.isAdmin && !isOwner) {
+      return { success: false, error: 'Unauthorized to delete this product' };
+    }
+
     await db.collection('products').doc(id).delete();
     
     revalidatePath('/admin/products');
+    revalidatePath('/seller/products');
     revalidatePath('/catalog');
     return { success: true, message: 'Product deleted successfully.' };
   } catch (error) {

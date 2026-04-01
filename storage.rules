@@ -1,8 +1,39 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ph293815@gmail.com' ||
+        request.auth.token.email == 'tyoras9686@gmail.com' ||
+        request.auth.token.email == 'dsmullam@gmail.com'
+      );
+    }
+
+    // Publicly readable product images
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn(); // Restrict to vendors/admins in firestore if needed
+    }
+
+    // User personal files
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth.uid == userId || isAdmin();
+    }
+
+    // Vendor specific files (logos, banners, etc)
+    match /vendors/{vendorId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth.uid == vendorId || isAdmin();
+    }
+
+    // Default catch-all (legacy or other)
     match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
   }
 }

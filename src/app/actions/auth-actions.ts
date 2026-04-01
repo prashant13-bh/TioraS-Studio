@@ -58,11 +58,17 @@ export async function verifySession() {
     const auth = getAdminAuth();
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
     
+    // Check if user is a vendor
+    const db = getAdminFirestore();
+    const vendorDoc = await db.collection('vendors').doc(decodedClaims.uid).get();
+    const isVendor = vendorDoc.exists && vendorDoc.data()?.status === 'Active';
+    
     return {
       uid: decodedClaims.uid,
       email: decodedClaims.email,
       picture: decodedClaims.picture,
-      isAdmin: decodedClaims.admin === true
+      isAdmin: decodedClaims.admin === true,
+      isVendor: isVendor
     };
   } catch (error) {
     // Session verification failed (expired, invalid, etc.)

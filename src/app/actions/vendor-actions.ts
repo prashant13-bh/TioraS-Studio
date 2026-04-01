@@ -220,8 +220,9 @@ export async function getVendorOrders() {
   const db = getAdminFirestore();
   
   try {
-      // For now, fetch all orders (in production, filter by vendorId assignment)
+      // Filter by vendorId (which is the session user's ID for vendors)
       const snapshot = await db.collection('orders')
+          .where('vendorId', '==', session.uid)
           .orderBy('createdAt', 'desc')
           .limit(50)
           .get();

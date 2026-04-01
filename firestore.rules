@@ -23,17 +23,32 @@ service cloud.firestore {
       );
     }
 
+    function isVendor() {
+      return isSignedIn() && exists(/databases/$(database)/documents/vendors/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/vendors/$(request.auth.uid)).data.status == 'Active';
+    }
+
     // -------------------------------------------------------------------------
     // User Profiles (/users)
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
-      // Admins can read/write all users
-      // Users can read/write their own profile
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin(); 
-      allow create: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn(); // Allow any signed in user to create their initial profile
       allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------------
+    // Vendors (/vendors)
+    // -------------------------------------------------------------------------
+
+    match /vendors/{vendorId} {
+      allow get: if isSignedIn(); // Allow customers to see vendor profiles
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == vendorId; // Allow users to apply
+      allow update: if isAdmin(); // Only admin can approve/suspend
       allow delete: if isAdmin();
     }
 
@@ -42,11 +57,10 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /products/{productId} {
-      // Public read access
       allow read: if true;
-      
-      // Only Admins can write
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdmin() || (isVendor() && request.resource.data.vendorId == request.auth.uid);
+      allow update: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow delete: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
     }
 
     // -------------------------------------------------------------------------
@@ -54,8 +68,9 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /stockMovements/{movementId} {
-      allow read: if isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if isAdmin() || isVendor(); // Vendors can see their own stock movements if we add vendorId filtering
+      allow create: if isAdmin() || isVendor();
+      allow update, delete: if isAdmin();
     }
 
     // -------------------------------------------------------------------------
@@ -63,7 +78,7 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /invoices/{invoiceId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
 
@@ -72,7 +87,6 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /addresses/{addressId} {
-      // Users can read/write their own addresses
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
       allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
@@ -83,13 +97,13 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /orders/{orderId} {
-      // Users can read their own orders, Admins can read all
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      // Users can create orders
-      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
-      // Only Admins can update status (e.g. to 'Shipped'), Users can't modify after creation usually
-      // But for now allow users to update if needed (e.g. cancel)
-      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin() || 
+        (isVendor() && resource.data.vendorId == request.auth.uid)
+      );
+      allow create: if isSignedIn();
+      allow update: if isAdmin() || (isVendor() && resource.data.vendorId == request.auth.uid);
       allow delete: if isAdmin();
     }
 
