@@ -51,7 +51,8 @@ export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
     // Mock sales chart data
     const salesByDay = Array.from({ length: 7 }, (_, i) => ({
         name: format(subDays(new Date(), i), 'MMM d'),
-        total: Math.floor(Math.random() * 5000) + 1000,
+        sales: Math.floor(Math.random() * 5000) + 1000,
+        orders: Math.floor(Math.random() * 20) + 1,
     })).reverse();
 
     return {
